@@ -23,16 +23,6 @@ jobs:
       - name: Check IP Address
         run: curl ifconfig.me
 
-      - name: Cache pnpm modules
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.pnpm-store
-            node_modules
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
-
       - name: Install pnpm
         run: npm install -g pnpm
 

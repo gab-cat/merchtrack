@@ -42,13 +42,15 @@ jobs:
       with:
         ref: main
         fetch-depth: 0
-
-    - uses: actions/setup-node@v4
-      with:
-        node-version: '20.11'
   
     - name: Install dependencies
       run: npm install -g pnpm && pnpm install --shamefully-hoist
+
+    - name: Create env file
+      env:
+        DATABASE_URL: ${{ env.DATABASE_URL }}
+      run: |
+        echo "DATABASE_URL=${DATABASE_URL}" > .env
 
     - name: Prisma Migration Deploy
       env:
