@@ -51,6 +51,8 @@ jobs:
       run: npm install -g pnpm && pnpm install --shamefully-hoist
 
     - name: Prisma Migration Deploy
+      env:
+        DATABASE_URL: ${{ env.DATABASE_URL }}
       run: pnpm migrate
 
     - name: Log in to Docker Hub

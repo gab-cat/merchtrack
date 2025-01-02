@@ -4,8 +4,7 @@ LABEL author=gab-cat
 WORKDIR /app
 COPY . .
 
-ARG DATABASE_URL
-ENV DATABASE_URL $DATABASE_URL
+ENV DATABASE_URL=$DATABASE_URL
 RUN npx prisma migrate deploy && pnpm run generate && pnpm run build
 
 
@@ -16,6 +15,8 @@ WORKDIR /app
 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
+
+
 
 RUN addgroup --system --gid 1001 nodejs && \
 	adduser --system --uid 1001 nextjs && \
