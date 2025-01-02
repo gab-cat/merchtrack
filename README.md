@@ -10,7 +10,7 @@ The **MerchTrack Repository** is a comprehensive solution designed for an e-comm
 ### Prerequisites
 Before setting up the project, ensure the following tools and versions are installed:
 
-- **Node.js**: Version `22.18.0` is strictly required. It is recommended to use `nvm` (Node Version Manager) for managing Node.js versions.
+- **Node.js**: Version `22.12.0` is strictly required. It is recommended to use `nvm` (Node Version Manager) for managing Node.js versions.
     - If you do not have `nvm` installed yet. Refer to this guide [Node Version Manager Installation](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/)
 - **Package Manager**: Use `pnpm` for faster and more efficient dependency management.
 
