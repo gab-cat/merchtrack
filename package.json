@@ -42,7 +42,7 @@
     "@commitlint/prompt-cli": "^19.6.1",
     "@eslint/eslintrc": "^3",
     "@tanstack/eslint-plugin-query": "^5.62.9",
-    "@types/node": "^20",
+    "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv": "^16.4.7",
