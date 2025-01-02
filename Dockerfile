@@ -6,7 +6,11 @@ COPY . .
 
 RUN npm i -g dotenv-cli@8.0.0
 ARG DATABASE_URL
-RUN DATABASE_URL="$DATABASE_URL" npx prisma migrate deploy && npm run build
+ARG CLERK_PUBLISHABLE_KEY
+RUN DATABASE_URL="$DATABASE_URL" \
+	NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY" \
+	npx prisma migrate deploy && \
+	npm run build
 
 # Stage: Runner
 FROM node:22.12.0-alpine3.21 AS runner
