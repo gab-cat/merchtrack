@@ -7,6 +7,10 @@ jobs:
   client-build-and-push:
     runs-on: ubuntu-latest
     environment: Cache
+    permissions:
+      contents: write
+      pull-requests: write
+      checks: write
     env:
       ENVIRONMENT: Cache
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -24,13 +28,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3
         with:
           username: ${{ env.DOCKER_USERNAME }} 
           password: ${{ env.DOCKER_PASSWORD }} 
 
       - name: Build cache image and push to Docker Hub
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@48aba3b46d1b1fec4febb7c5d0c644b249a11355 # v6.10.0
         with:
           context: .
           file: ./Dockerfile.cache
