@@ -2,6 +2,9 @@
   "name": "merchtrack",
   "version": "0.1.0",
   "private": true,
+  "author": "Gabriel Catimbang",
+  "license": "MIT",
+  "type": "module",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "dev": "next dev --turbopack",
@@ -9,6 +12,7 @@
     "start": "next start",
     "lint": "next lint --fix",
     "postinstall": "prisma generate",
+    "migrate": "prisma migrate deploy",
     "prepare": "husky install"
   },
   "dependencies": {
