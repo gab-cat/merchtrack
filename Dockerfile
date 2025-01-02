@@ -4,7 +4,9 @@ LABEL author=gab-cat
 WORKDIR /app
 COPY . .
 
-RUN pnpm run generate && pnpm run build
+ARG DATABASE_URL
+ENV DATABASE_URL $DATABASE_URL
+RUN npx prisma migrate deploy && pnpm run generate && pnpm run build
 
 
 FROM node:22.12.0-alpine3.21 AS runner

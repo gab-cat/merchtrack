@@ -1,0 +1,41 @@
+name: 2. CACHE - Build & Push
+
+on:
+  workflow_dispatch: 
+
+jobs:
+  client-build-and-push:
+    runs-on: ubuntu-latest
+    environment: Cache
+    env:
+      ENVIRONMENT: Cache
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+    steps:
+      - name: Check if actor is repository owner
+        run: |
+          if [ "${{ github.actor }}" != "${{ github.repository_owner }}" ]; then
+            echo "This workflow can only be run by the repository owner."
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ env.DOCKER_USERNAME }} 
+          password: ${{ env.DOCKER_PASSWORD }} 
+
+      - name: Build cache image and push to Docker Hub
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.cache
+          tags: gabcat/merchtrack:cache
+          cache-from: |
+            type=registry,ref=gabcat/merchtrack:cache
+          cache-to: type=inline
+          push: true
