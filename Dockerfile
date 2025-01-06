@@ -13,7 +13,7 @@ RUN DATABASE_URL="$DATABASE_URL" \
 	npm run build
 
 # Stage: Runner
-FROM node:22.12.0-alpine3.21 AS runner
+FROM node:23.5.0-alpine3.21 AS runner
 LABEL author=gab-cat
 
 WORKDIR /app
