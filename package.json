@@ -8,6 +8,7 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "dev": "next dev --turbopack",
+    "devt": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint --fix",
@@ -21,6 +22,8 @@
     "@clerk/shared": "^2.20.4",
     "@prisma/client": "6.1.0",
     "@radix-ui/react-slot": "^1.1.1",
+    "@sentry/nextjs": "8",
+    "@sentry/wizard": "^3.37.0",
     "@tanstack/react-query": "^5.62.11",
     "autoprefixer": "^10.4.20",
     "babel-plugin-react-compiler": "19.0.0-beta-55955c9-20241229",

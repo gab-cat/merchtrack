@@ -27,6 +27,7 @@ const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)', 
   '/sign-up(.*)',
   '/',
+  '/monitoring(.*)',
   '/main-video.webm',
   '/favicon.ico',
   '/contact-us',
@@ -41,5 +42,6 @@ export default clerkMiddleware(async (auth, request) => {
   if (!isPublicRoute(request)) {
     return (await auth()).redirectToSignIn();
   }
+  return null;
 });
 
