@@ -6,8 +6,8 @@ import * as Sentry from "@sentry/nextjs";
 
 if (process.env.NODE_ENV === 'production') {
   Sentry.init({
-    dsn: process.env.SENTRY_DSN,
-    tracesSampleRate: 1,
+    dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+    tracesSampleRate: parseFloat(process.env.SENTRY_TRACES_SAMPLE_RATE as string) ?? 0.1,
     debug: false,
   });
 }

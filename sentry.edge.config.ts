@@ -7,8 +7,8 @@ import * as Sentry from "@sentry/nextjs";
 
 if (process.env.NODE_ENV === 'production') {
   Sentry.init({
-    dsn: "https://bbb846cec8219d88a9e3965e48e987ba@o4508607314329600.ingest.us.sentry.io/4508607322324992",
-    tracesSampleRate: 1,
+    dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+    tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1,
     debug: false,
   });
 }
