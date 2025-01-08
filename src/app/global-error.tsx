@@ -6,6 +6,19 @@ import { useEffect } from "react";
 
 export default function GlobalError({ error }: Readonly<{ error: Error & { digest?: string } }>) {
   useEffect(() => {
+    // Log error details locally for development
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('Global error caught:', error);
+    }
+    
+    // Add additional context to the error
+    Sentry.configureScope((scope) => {
+      scope.setExtra('errorInfo', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      });
+    });
     // skipcq: JS-E1007
     Sentry.captureException(error);
   }, [error]);
