@@ -2,8 +2,12 @@ import type { Metadata } from 'next';
 import { Poppins } from 'next/font/google';
 import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
-import DatadogInit from '@/components/misc/datadog-init';
 import { SEO } from '@/constants';
+import dynamic from 'next/dynamic';
+
+const DatadogInit = dynamic(() => import('@/components/misc/datadog-init'), {
+  ssr: false
+});
 
 const poppinsSans = Poppins({
   variable: '--font-poppins-sans',

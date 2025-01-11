@@ -2,7 +2,7 @@
 
 import { datadogRum } from '@datadog/browser-rum';
 import { version } from '../../../package.json';
-import { DATADOG_APPLICATION_ID, DATADOG_CLIENT_TOKEN, NODE_ENV } from '@/config';
+import { DATADOG_APPLICATION_ID, DATADOG_CLIENT_TOKEN, DATADOG_SERVICE, DATADOG_SITE, NODE_ENV } from '@/config';
 
 let isDatadogInitialized = false;
 
@@ -11,10 +11,10 @@ function initializeDatadog() {
     datadogRum.init({
       applicationId: DATADOG_APPLICATION_ID,
       clientToken: DATADOG_CLIENT_TOKEN,
-      site: 'us5.datadoghq.com',
-      service: 'merch-track',
+      site: DATADOG_SITE,
+      service: DATADOG_SERVICE,
       env: NODE_ENV,
-      version: version,
+      version,
       sessionSampleRate: 20,
       sessionReplaySampleRate: 20,
       trackUserInteractions: true,
@@ -23,7 +23,6 @@ function initializeDatadog() {
       defaultPrivacyLevel: 'mask-user-input',
     });
     isDatadogInitialized = true;
-    console.log('Datadog RUM initialized');
   }
 }
 
