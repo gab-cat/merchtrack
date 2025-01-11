@@ -5,9 +5,7 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { SEO } from '@/constants';
 import dynamic from 'next/dynamic';
 
-const DatadogInit = dynamic(() => import('@/components/misc/datadog-init'), {
-  ssr: false
-});
+const DatadogInit = dynamic(() => import('@/components/misc/datadog-init'));
 
 const poppinsSans = Poppins({
   variable: '--font-poppins-sans',
