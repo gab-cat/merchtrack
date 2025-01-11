@@ -7,23 +7,34 @@ import { DATADOG_APPLICATION_ID, DATADOG_CLIENT_TOKEN, DATADOG_SERVICE, DATADOG_
 let isDatadogInitialized = false;
 
 function initializeDatadog() {
-  if (!isDatadogInitialized) {
-    datadogRum.init({
-      applicationId: DATADOG_APPLICATION_ID,
-      clientToken: DATADOG_CLIENT_TOKEN,
-      site: DATADOG_SITE,
-      service: DATADOG_SERVICE,
-      env: NODE_ENV,
-      version,
-      sessionSampleRate: 20,
-      sessionReplaySampleRate: 20,
-      trackUserInteractions: true,
-      trackResources: true,
-      trackLongTasks: true,
-      defaultPrivacyLevel: 'mask-user-input',
-    });
-    isDatadogInitialized = true;
+  if (shouldInitializeDatadog()) {
+    try {
+      datadogRum.init({
+        applicationId: DATADOG_APPLICATION_ID,
+        clientToken: DATADOG_CLIENT_TOKEN,
+        site: DATADOG_SITE,
+        service: DATADOG_SERVICE,
+        env: NODE_ENV,
+        version,
+        sessionSampleRate: 20,
+        sessionReplaySampleRate: 20,
+        trackUserInteractions: true,
+        trackResources: true,
+        trackLongTasks: true,
+        defaultPrivacyLevel: 'mask-user-input',
+      });
+      isDatadogInitialized = true;
+      console.log('Datadog RUM initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize Datadog RUM:', error);
+    }
+  } else if (!DATADOG_APPLICATION_ID || !DATADOG_CLIENT_TOKEN) {
+    console.warn('Datadog configuration is missing required values');
   }
+}
+
+function shouldInitializeDatadog() {
+  return !isDatadogInitialized && DATADOG_APPLICATION_ID && DATADOG_CLIENT_TOKEN;
 }
 
 export default function DatadogInit() {
