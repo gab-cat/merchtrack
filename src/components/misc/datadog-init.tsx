@@ -41,6 +41,10 @@ function initializeDatadog() {
   }
 }
 
+/**
+ * Determines if Datadog RUM should be initialized.
+ * @returns {boolean} True if Datadog hasn't been initialized and required configuration is present
+ */
 function shouldInitializeDatadog() {
   return !isDatadogInitialized && DATADOG_APPLICATION_ID && DATADOG_CLIENT_TOKEN;
 }
