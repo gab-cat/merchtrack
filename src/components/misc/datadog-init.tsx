@@ -2,9 +2,15 @@
 
 import { datadogRum } from '@datadog/browser-rum';
 import { version } from '../../../package.json';
-import { DATADOG_APPLICATION_ID, DATADOG_CLIENT_TOKEN, DATADOG_SERVICE, DATADOG_SITE, NODE_ENV } from '@/config';
+import { NODE_ENV } from '@/config';
 
 let isDatadogInitialized = false;
+
+// Datadog
+const DATADOG_APPLICATION_ID: string = process.env.NEXT_PUBLIC_DATADOG_APPLICATION_ID ?? '';
+const DATADOG_CLIENT_TOKEN: string = process.env.NEXT_PUBLIC_DATADOG_CLIENT_TOKEN ?? '';
+const DATADOG_SITE: string = process.env.NEXT_PUBLIC_DATADOG_SITE ?? '';
+const DATADOG_SERVICE: string = process.env.NEXT_PUBLIC_DATADOG_SERVICE_NAME ?? '';
 
 function initializeDatadog() {
   if (shouldInitializeDatadog()) {
@@ -45,8 +51,8 @@ function initializeDatadog() {
  * Determines if Datadog RUM should be initialized.
  * @returns {boolean} True if Datadog hasn't been initialized and required configuration is present
  */
-function shouldInitializeDatadog() {
-  return !isDatadogInitialized && DATADOG_APPLICATION_ID && DATADOG_CLIENT_TOKEN;
+function shouldInitializeDatadog(): boolean {
+  return (!isDatadogInitialized && DATADOG_APPLICATION_ID && DATADOG_CLIENT_TOKEN) as boolean;
 }
 
 export default function DatadogInit() {

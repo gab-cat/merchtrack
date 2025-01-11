@@ -9,8 +9,4 @@ export const SENTRY_AUTH_TOKEN: string = process.env.SENTRY_AUTH_TOKEN ??
   (process.env.APP_ENV === 'production' ? 
     (() => { throw new Error('SENTRY_TRACES_SAMPLE_RATE is required in production'); })() : '0.4');
 
-// Datadog
-export const DATADOG_APPLICATION_ID: string = process.env.NEXT_PUBLIC_DATADOG_APPLICATION_ID ?? '';
-export const DATADOG_CLIENT_TOKEN: string = process.env.NEXT_PUBLIC_DATADOG_CLIENT_TOKEN ?? '';
-export const DATADOG_SITE: string = process.env.NEXT_PUBLIC_DATADOG_SITE ?? '';
-export const DATADOG_SERVICE: string = process.env.NEXT_PUBLIC_DATADOG_SERVICE_NAME ?? '';
+
