@@ -64,5 +64,4 @@ jobs:
         cache-to: type=inline
         push: true
         build-args: |
-          DATABASE_URL=${{ secrets.DATABASE_URL }}
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}

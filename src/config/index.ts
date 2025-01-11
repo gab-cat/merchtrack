@@ -6,7 +6,8 @@ if (process.env.NODE_ENV !== 'production') {
 
 // Environment
 export const NODE_ENV: string = process.env.NEXT_PUBLIC_NODE_ENV ?? 'development',
-  NEXT_TELEMETRY_DISABLED: string = process.env.NEXT_TELEMETRY_DISABLED ?? '1';
+  NEXT_TELEMETRY_DISABLED: string = process.env.NEXT_TELEMETRY_DISABLED ?? '1',
+  APP_ENV: string = process.env.APP_ENV ?? 'development';
 
 // API
 export const API_PORT: string = process.env.API_PORT ?? '3000';
