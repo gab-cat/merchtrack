@@ -26,10 +26,18 @@ function initializeDatadog() {
       isDatadogInitialized = true;
       console.log('Datadog RUM initialized successfully');
     } catch (error) {
-      console.error('Failed to initialize Datadog RUM:', error);
+      console.error('Failed to initialize Datadog RUM:', {
+        error,
+        env: NODE_ENV,
+        hasAppId: Boolean(DATADOG_APPLICATION_ID),
+        hasClientToken: Boolean(DATADOG_CLIENT_TOKEN),
+      });
     }
   } else if (!DATADOG_APPLICATION_ID || !DATADOG_CLIENT_TOKEN) {
-    console.warn('Datadog configuration is missing required values');
+    console.warn('Datadog configuration is missing required values:', {
+      missingAppId: !DATADOG_APPLICATION_ID,
+      missingClientToken: !DATADOG_CLIENT_TOKEN,
+    });
   }
 }
 
