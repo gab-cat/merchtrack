@@ -1,7 +1,13 @@
+import HeaderLP from "../components/ui/header";
+
 export default async function Home() {
   return (
-    <div className="text-4xl font-bold text-center">
-      Hello Worlds!
+    <div>
+      <HeaderLP />
+      <div className="text-4xl font-bold text-center">
+        
+        Hello Worlds!
+      </div>
     </div>
   );
 }
