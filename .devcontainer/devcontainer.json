@@ -5,5 +5,12 @@
   "extensions": [
     "dbaeumer.vscode-eslint",
     "github.copilot"
-  ]
+  ],
+  "settings": {
+    "remote.containers.defaultExtensions": [
+      "dbaeumer.vscode-eslint",
+      "github.copilot"
+    ],
+    "remote.containers.machineType": "4-core"
+  }
 }
