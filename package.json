@@ -21,7 +21,7 @@
     "@clerk/nextjs": "^6.9.6",
     "@clerk/shared": "^2.20.4",
     "@datadog/browser-rum": "^5.35.0",
-    "@prisma/client": "6.1.0",
+    "@prisma/client": "6.2.1",
     "@radix-ui/react-slot": "^1.1.1",
     "@sentry/nextjs": "8",
     "@sentry/wizard": "^3.37.0",
