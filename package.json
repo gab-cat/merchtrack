@@ -46,7 +46,7 @@
     "@commitlint/config-conventional": "^19.6.0",
     "@commitlint/prompt-cli": "^19.7.0",
     "@eslint/eslintrc": "^3",
-    "@tanstack/eslint-plugin-query": "^5.62.15",
+    "@tanstack/eslint-plugin-query": "^5.62.16",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
