@@ -9,7 +9,8 @@
     "codescene.codescene-vscode",
     "deepsourcecorp.deepsource-vscode",
     "prisma.prisma",
-    "bradlc.vscode-tailwindcss"
+    "bradlc.vscode-tailwindcss",
+    "usernamehw.errorlens"
   ],
   "settings": {
     "terminal.integrated.shell.linux": "/bin/bash"
