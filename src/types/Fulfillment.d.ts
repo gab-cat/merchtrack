@@ -15,3 +15,11 @@ export type Fulfillment = {
   createdAt: Date
   updatedAt: Date
 }
+
+type StatusTransition = {
+  [FulfillmentStatus.PENDING]: FulfillmentStatus.PRODUCTION | FulfillmentStatus.CANCELLED;
+  [FulfillmentStatus.PRODUCTION]: FulfillmentStatus.READY | FulfillmentStatus.CANCELLED;
+  [FulfillmentStatus.READY]: FulfillmentStatus.COMPLETED | FulfillmentStatus.CANCELLED;
+  [FulfillmentStatus.COMPLETED]: never;
+  [FulfillmentStatus.CANCELLED]: never;
+};

@@ -37,9 +37,17 @@ export type Product = {
 }
 
 type Price = {
-  student: number
-  studentNonCocs: number
-  faculty: number
-  alumni: number
-  others: number
+  student: NonNegativeNumber;
+  studentNonCocs: NonNegativeNumber;
+  faculty: NonNegativeNumber;
+  alumni: NonNegativeNumber;
+  others: NonNegativeNumber;
+}
+
+type NonNegativeNumber = number & { __brand: 'NonNegativeNumber' };
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function createNonNegativeNumber(n: number): NonNegativeNumber {
+  if (n < 0) throw new Error('Price cannot be negative');
+  return n as NonNegativeNumber;
 }

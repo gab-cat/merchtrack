@@ -17,6 +17,10 @@ export enum PaymentType {
   REFUND = "REFUND"
 }
 
+/** 
+ * @warning This type may contain PCI-sensitive data.
+ * Ensure compliance with security requirements.
+ */
 export type Payment = {
   id: string
   orderId: string

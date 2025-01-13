@@ -11,8 +11,8 @@ datasource db {
 model User {
   id             String    @id @default(cuid())
   clerkId        String    @unique
-  firstName      String?   @default("nan")
-  lastName       String?   @default("nan")
+  firstName      String?   
+  lastName       String?   
   managerId      String?
   email          String    @unique
   phone          String    @unique @default("nan")
@@ -87,6 +87,7 @@ model Order {
   processedById     String?
   orderDate         DateTime    @default(now())
   status            OrderStatus @default(PENDING)
+  cancellationReason CancellationReason @default(OUT_OF_STOCK)
   totalAmount       Float       @default(0)
   discountAmount    Float       @default(0)
   estimatedDelivery DateTime
@@ -101,10 +102,9 @@ model Order {
   customer                   User          @relation("OrderToUser", fields: [customerId], references: [id])
   processedBy                User?        @relation("OrderToProcessor", fields: [processedById], references: [id])
   customerSatisfactionSurvey CustomerSatisfactionSurvey? @relation("OrderToSurvey", fields: [customerSatisfactionSurveyid], references: [id])
-  fulfillment                Fulfillment? @relation("OrderToFulfillment", fields: [fulfillmentid], references: [id])
+  CustomerSatisfactionSurvey CustomerSatisfactionSurvey[]
 
   Fulfillment Fulfillment[]
-  CustomerSatisfactionSurvey CustomerSatisfactionSurvey[]
 }
 
 model OrderItem {
@@ -114,7 +114,7 @@ model OrderItem {
   quantity     Int
   price        Decimal  @default(0)
   customerNote String?
-  size         String?
+  size         ProductSize?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -154,8 +154,6 @@ model Fulfillment {
   // Relationships
   order       Order @relation(fields: [orderId], references: [id])
   processedBy User? @relation(fields: [processedById], references: [id])
-
-  Order Order[] @relation("OrderToFulfillment")
 }
 
 model Log {
@@ -192,18 +190,30 @@ model CustomerSatisfactionSurvey {
 }
 
 model SurveyCategory {
-  id        String   @id @default(cuid())
-  name      String
-  question1 String
-  question2 String
-  question3 String
-  question4 String
-  surveys   CustomerSatisfactionSurvey[]
+  id              String   @id @default(cuid())
+  name            String
+  description     String?
+  question1       String
+  question2       String
+  question3       String
+  question4       String
+  surveys         CustomerSatisfactionSurvey[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 }
 
 enum InventoryType {
   PREORDER
   STOCK
+}
+
+enum ProductSize {
+  XS
+  S
+  M
+  L
+  XL
+  XXL
 }
 
 enum Role {
@@ -219,6 +229,13 @@ enum OrderStatus {
   SHIPPED
   DELIVERED
   CANCELLED
+}
+
+enum CancellationReason {
+  OUT_OF_STOCK
+  CUSTOMER_REQUEST
+  PAYMENT_FAILED
+  OTHERS
 }
 
 enum PaymentMethod {

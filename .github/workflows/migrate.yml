@@ -1,4 +1,4 @@
-name: 3. MIGRATE - Database Migration
+name: 5. MIGRATE - Database Migration
 
 on:
   workflow_dispatch:
@@ -42,6 +42,7 @@ jobs:
             echo "DATABASE_URL=${{ secrets.PRODUCTION }}" > .env
           else
             echo "DATABASE_URL=${{ secrets.STAGING }}" > .env
+          fi
 
       - name: Backup Database before migration
         run: |
@@ -50,9 +51,10 @@ jobs:
             pg_dump ${{ secrets.PRODUCTION }} > backup.sql
           else
             pg_dump ${{ secrets.STAGING }} > backup.sql
+          fi
 
       - name: Upload Database Backup
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: database-backup
           path: backup.sql
@@ -60,7 +62,3 @@ jobs:
       - name: Run Database Migration
         run: |
           pnpm prisma migrate deploy
-
-
-
-
