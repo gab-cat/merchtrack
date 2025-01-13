@@ -1,0 +1,66 @@
+name: 3. MIGRATE - Database Migration
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Select environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  migrate-database:
+    runs-on: ubuntu-latest
+    environment: Migration
+    permissions:
+      contents: write
+      pull-requests: write
+      checks: write
+
+    steps:
+      - name: Check if actor is repository owner
+        run: |
+          if [ "${{ github.actor }}" != "${{ github.repository_owner }}" ]; then
+            echo "This workflow can only be run by the repository owner."
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          npm install -g pnpm@9.15.3 && pnpm install
+
+      - name: Create .env file
+        run: |
+          if [ "${{ github.event.inputs.environment }}" == "production" ]; then
+            echo "DATABASE_URL=${{ secrets.PRODUCTION }}" > .env
+          else
+            echo "DATABASE_URL=${{ secrets.STAGING }}" > .env
+
+      - name: Backup Database before migration
+        run: |
+          sudo systemctl start postgresql.service
+          if [ "${{ github.event.inputs.environment }}" == "production" ]; then
+            pg_dump ${{ secrets.PRODUCTION }} > backup.sql
+          else
+            pg_dump ${{ secrets.STAGING }} > backup.sql
+
+      - name: Upload Database Backup
+        uses: actions/upload-artifact@v3
+        with:
+          name: database-backup
+          path: backup.sql
+
+      - name: Run Database Migration
+        run: |
+          pnpm prisma migrate deploy
+
+
+
+
