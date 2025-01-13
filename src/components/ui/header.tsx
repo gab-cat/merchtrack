@@ -6,7 +6,7 @@ const HeaderLP = () => {
   return (
     <nav className="flex flex-col md:flex-row items-center gap-4 md:gap-0 p-4 md:p-6">
       <Image
-        src="/assets/merch-track_4.png"
+        src="/img/merch-track-logo.png"
         width={83}
         height={83}
         alt="MerchTrack Logo"

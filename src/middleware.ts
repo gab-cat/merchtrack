@@ -24,18 +24,14 @@ export const config = {
  * Any routes matching these patterns will be identified as public routes.
  */
 const isPublicRoute = createRouteMatcher([
+  '/',
   '/sign-in(.*)', 
   '/sign-up(.*)',
-  '/',
+  '/img(.*)',
   '/monitoring(.*)',
-  '/main-video.webm',
   '/favicon.ico',
-  '/contact-us',
-  '/about-us',
   '/robots.txt',
   '/sitemap.xml',
-  '/privacy-policy',
-  '/terms-of-service',
 ]);
 
 export default clerkMiddleware(async (auth, request) => {
