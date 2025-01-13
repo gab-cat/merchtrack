@@ -59,19 +59,65 @@ To enhance productivity and ensure code quality, install the following VS Code e
 
 ---
 
-## Tech Stack
-The project is built using the following technologies:
+## Tech Stack & Tools
 
+### Core Technologies
 - **Frontend Framework**: Next.js
+  > React-based framework for building full-stack web applications with server-side rendering and API routes.
 - **ORM**: Prisma
+  > Type-safe database client with automatic migrations and intuitive data modeling.
 - **Containerization**: Docker
+  > Platform for developing, shipping, and running applications in isolated environments.
 - **Database**: Postgres
+  > Advanced open-source relational database with robust feature set and reliability.
 - **Authentication**: Clerk
+  > Complete user management and authentication solution with pre-built components.
 - **Styling**: Tailwind CSS
+  > Utility-first CSS framework for rapid UI development with minimal custom CSS.
 - **UI Components**: Shadcn
+  > High-quality, accessible React components built with Radix UI and Tailwind CSS.
 - **State Management**: Zustand
+  > Minimalist state management solution with a simple and flexible API.
 - **Validation**: Zod
+  > TypeScript-first schema validation with static type inference.
 - **Data Fetching**: Tanstack Query
+  > Powerful data synchronization library for managing, caching, and updating server state.
+
+### Static Code Analysis
+- **Datadog**
+  > Comprehensive monitoring and analytics platform that includes code profiling and performance analysis.
+- **DeepScan**
+  > JavaScript-specific static analysis tool for detecting runtime errors and quality issues.
+- **CodeRabbit AI**
+  > AI-powered code review assistant that provides automated code suggestions and improvements.
+- **CodeQL**
+  > Semantic code analysis engine that treats code as data for finding security vulnerabilities.
+- **DeepSource**
+  > Automated code review tool that identifies bug risks, anti-patterns, and security issues.
+- **CodeScene**
+  > Behavioral code analysis platform that detects technical debt and social patterns in codebases.
+
+### Monitoring and Error Tracking
+- **Sentry**
+  > Real-time error tracking and performance monitoring platform for applications.
+- **Datadog**
+  > Full-stack observability platform for metrics, traces, and logs monitoring.
+
+### Infrastructure
+- **AWS Lightsail VM Instance**
+  > Simplified virtual private server hosting solution from AWS.
+- **AWS Lightsail Database**
+  > Managed PostgreSQL database service optimized for Lightsail.
+- **Cloudflare**
+  > CDN, DDoS protection, and DNS management service.
+
+### System Applications
+- **Nginx Proxy Manager**
+  > Web interface for managing Nginx proxy hosts with SSL.
+- **Dozzle**
+  > Real-time log viewer for Docker containers with a clean web interface.
+- **Watchtower**
+  > Automated Docker container base image updates.
 
 ---
 

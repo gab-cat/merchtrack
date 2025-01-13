@@ -1,16 +1,16 @@
 "use client";
 
+import { NODE_ENV } from "@/config";
 import * as Sentry from "@sentry/nextjs";
 import { useCallback, useEffect } from 'react';
 
 export default function GlobalError({ error }: Readonly<{ error: Error & { digest?: string } }>) {
   useEffect(() => {
-    // Log error details locally for development
-    if (process.env.NODE_ENV !== 'production') {
+    if (NODE_ENV !== 'production') {
       console.error('Global error caught:', error);
     }
     
-    // Add additional context to the error
+    // @ts-expect-error - Sentry is not defined in the global scope
     Sentry.configureScope((scope) => {
       scope.setExtra('errorInfo', {
         name: error.name,
