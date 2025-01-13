@@ -2,9 +2,13 @@ import React from 'react';
 import Image from 'next/image';
 import { Button } from './button';
 
-const HeaderLP = () => {
+interface HeaderLPProps {
+  className?: string;
+}
+
+const HeaderLP: React.FC<HeaderLPProps> = ({ className }) => {
   return (
-    <nav className="flex flex-col md:flex-row items-center gap-4 md:gap-0 p-4 md:p-6">
+    <nav className={`flex flex-col md:flex-row items-center gap-4 md:gap-0 p-4 md:p-6 ${className ?? ''}`}>
       <Image
         src="/img/merch-track-logo.png"
         width={83}
