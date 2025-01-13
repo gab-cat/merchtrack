@@ -22,7 +22,7 @@ RUN NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY" \
     npm run build
 
 # Stage: Runner
-FROM node:22.12.0-alpine3.21 AS runner
+FROM node:23.6.0-alpine3.21 AS runner
 LABEL author=gab-cat
 
 WORKDIR /app
