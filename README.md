@@ -51,11 +51,16 @@ To enhance productivity and ensure code quality, install the following VS Code e
 - **ESLint**: For linting and enforcing code style.
 - **Prisma**: For Prisma ORM support and schema management.
 - **Tailwind Intellisense**: For Tailwind CSS autocompletion and suggestions.
+- **Prisma**: For enhanced Prisma schema editing and validation.
 
 #### Nice-to-Have Extensions:
 - **CodeScene**: For code quality and team performance insights.
 - **SonarQube**: For static code analysis and bug detection.
 - **Headwind**: For automatic Tailwind CSS class sorting.
+- **Error Lens**: For inline error messages and quick problem detection.
+- **Datadog**: For integrated monitoring and performance insights.
+- **DeepSource**: For automated code reviews and static analysis.
+- **Git Blame**: For viewing line-by-line Git authorship information.
 
 ---
 
