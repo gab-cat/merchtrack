@@ -1,16 +1,23 @@
 {
   "name": "MerchTrack Dev Container",
-  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:0-20",
   "postCreateCommand": "nvm install 22.12 && nvm use 22.12 && npm i -g pnpm && pnpm install && echo 'Please create an .env file with the necessary environment variables.'",
   "extensions": [
     "dbaeumer.vscode-eslint",
-    "github.copilot"
+    "github.copilot",
+    "waderyan.gitblame",
+    "codescene.codescene-vscode",
+    "deepsourcecorp.deepsource-vscode",
+    "prisma.prisma",
+    "bradlc.vscode-tailwindcss"
   ],
   "settings": {
-    "remote.containers.defaultExtensions": [
-      "dbaeumer.vscode-eslint",
-      "github.copilot"
-    ],
-    "remote.containers.machineType": "4-core"
+    "terminal.integrated.shell.linux": "/bin/bash"
+  },
+  "codespaces": {
+    "default": {
+      "machine": "standardLinux",
+      "region": "southeastasia"
+    }
   }
 }
