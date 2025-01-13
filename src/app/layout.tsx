@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Poppins } from 'next/font/google';
 import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
 import { SEO } from '@/constants';
@@ -8,6 +8,11 @@ import dynamic from 'next/dynamic';
 const interSans = Inter({
   variable: '--font-inter-sans',
   subsets: ['latin'],
+});
+
+const poppinsSans = Poppins({
+  subsets: ['latin'], 
+  weight: ['400', '700'], 
 });
 
 const DatadogInit = dynamic(() => import('@/components/misc/datadog-init'));
