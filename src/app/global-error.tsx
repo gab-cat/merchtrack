@@ -9,16 +9,6 @@ export default function GlobalError({ error }: Readonly<{ error: Error & { diges
     if (NODE_ENV !== 'production') {
       console.error('Global error caught:', error);
     }
-    
-    // @ts-expect-error - Sentry is not defined in the global scope
-    Sentry.configureScope((scope) => {
-      scope.setExtra('errorInfo', {
-        name: error.name,
-        message: error.message,
-        stack: error.stack,
-      });
-    });
-    // skipcq: JS-E1007
     Sentry.captureException(error);
   }, [error]);
 

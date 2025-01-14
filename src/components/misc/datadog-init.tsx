@@ -1,9 +1,9 @@
 'use client';
 
 import { datadogRum } from '@datadog/browser-rum';
-import { version } from '../../../package.json';
+import packageJson from '../../../package.json';
 import { NODE_ENV } from '@/config';
-import * as Sentry from '@sentry/browser';
+import * as Sentry from '@sentry/nextjs';
 
 let isDatadogInitialized = false;
 
@@ -22,7 +22,7 @@ function initializeDatadog() {
         site: DATADOG_SITE,
         service: DATADOG_SERVICE,
         env: NODE_ENV,
-        version,
+        version: packageJson.version,
         sessionSampleRate: 20,
         sessionReplaySampleRate: 20,
         trackUserInteractions: true,
