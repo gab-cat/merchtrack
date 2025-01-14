@@ -4,6 +4,7 @@ import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
 import { SEO } from '@/constants';
 import dynamic from 'next/dynamic';
+import { ErrorBoundary } from '@/components/error-boundary';
 import Scripts from '@/components/misc/scripts';
 
 const DatadogInit = dynamic(() => import('@/components/misc/datadog-init'));
@@ -44,11 +45,14 @@ export default function RootLayout({
         <body
           className={`${interSans.variable} antialiased`}
         >
-          {children}
-          <DatadogInit />
-          <Scripts />
+          <ErrorBoundary>
+            {children}
+            <DatadogInit />
+            <Scripts />
+          </ErrorBoundary>
         </body>
       </ClerkProvider>
     </html>
   );
+
 }
