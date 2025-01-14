@@ -28,6 +28,9 @@ jobs:
 
     - name: Create env file
       env:
+        APP_ENV: ${{ secrets.APP_ENV }}
+        NODE_ENV: ${{ secrets.NODE_ENV }}
+        NEXT_PUBLIC_NODE_ENV: ${{ secrets.NEXT_PUBLIC_NODE_ENV }}
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
         NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
         NEXT_PUBLIC_DATADOG_APPLICATION_ID: ${{ secrets.NEXT_PUBLIC_DATADOG_APPLICATION_ID }}
@@ -35,8 +38,15 @@ jobs:
         NEXT_PUBLIC_DATADOG_SITE: ${{ secrets.NEXT_PUBLIC_DATADOG_SITE }}
         NEXT_PUBLIC_DATADOG_SERVICE_NAME: ${{ secrets.NEXT_PUBLIC_DATADOG_SERVICE_NAME }}
         NEXT_PUBLIC_CF_BEACON_TOKEN: ${{ secrets.NEXT_PUBLIC_CF_BEACON_TOKEN }}
+        NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
+        SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        SENTRY_TRACES_SAMPLE_RATE: ${{ secrets.SENTRY_TRACES_SAMPLE_RATE }}
       run: |
           cat << EOF > .env
+          APP_ENV=${APP_ENV}
+          NODE_ENV=${NODE_ENV}
+          NEXT_PUBLIC_NODE_ENV=${NEXT_PUBLIC_NODE_ENV}
           DATABASE_URL=${DATABASE_URL}
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
           NEXT_PUBLIC_DATADOG_APPLICATION_ID=${NEXT_PUBLIC_DATADOG_APPLICATION_ID}
@@ -44,10 +54,11 @@ jobs:
           NEXT_PUBLIC_DATADOG_SITE=${NEXT_PUBLIC_DATADOG_SITE}
           NEXT_PUBLIC_DATADOG_SERVICE_NAME=${NEXT_PUBLIC_DATADOG_SERVICE_NAME}
           NEXT_PUBLIC_CF_BEACON_TOKEN=${NEXT_PUBLIC_CF_BEACON_TOKEN}
+          NEXT_PUBLIC_SENTRY_DSN=${NEXT_PUBLIC_SENTRY_DSN}
+          SENTRY_DSN=${SENTRY_DSN}
+          SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
+          SENTRY_TRACES_SAMPLE_RATE=${SENTRY_TRACES_SAMPLE_RATE}
           EOF
-
-    - name: Check IP
-      run: curl ifconfig.me
 
     - name: Log in to Docker Hub
       uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3
@@ -68,3 +79,6 @@ jobs:
           type=registry,ref=gabcat/merchtrack:staging
         cache-to: type=inline
         push: true
+
+    - name: Remove env file
+      run: rm .env
