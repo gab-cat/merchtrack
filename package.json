@@ -27,7 +27,6 @@
     "@sentry/wizard": "^3.38.0",
     "@tanstack/react-query": "^5.62.16",
     "autoprefixer": "^10.4.20",
-    "babel-plugin-react-compiler": "19.0.0-beta-55955c9-20241229",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "import-in-the-middle": "^1.12.0",
