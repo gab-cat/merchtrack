@@ -81,4 +81,8 @@ jobs:
         push: true
 
     - name: Remove env file
-      run: rm .env
+      if: always()
+      run: |
+        if [ -f .env ]; then
+          rm .env || echo "Warning: Failed to remove .env file"
+        fi
