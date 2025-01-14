@@ -10,3 +10,5 @@ export const SENTRY_AUTH_TOKEN: string = process.env.SENTRY_AUTH_TOKEN ??
     (() => { throw new Error('SENTRY_TRACES_SAMPLE_RATE is required in production'); })() : '0.4');
 
 
+// Cloudflare Web Analytics
+export const CF_BEACON_TOKEN: string = process.env.NEXT_PUBLIC_CF_BEACON_TOKEN ?? "";

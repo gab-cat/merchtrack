@@ -4,6 +4,7 @@ import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
 import { SEO } from '@/constants';
 import dynamic from 'next/dynamic';
+import Scripts from '@/components/misc/scripts';
 
 const interSans = Inter({
   variable: '--font-inter-sans',
@@ -44,6 +45,7 @@ export default function RootLayout({
         >
           {children}
           <DatadogInit />
+          <Scripts />
         </body>
       </ClerkProvider>
     </html>
