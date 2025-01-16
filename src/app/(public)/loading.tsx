@@ -9,7 +9,7 @@ const Loading = () => {
         <p className="mt-2 text-xl font-light tracking-tight text-gray-500">Please wait while we fetch things for you</p>
       </div>
     </div>
-  )
+  );
 };
 
 export default Loading;
