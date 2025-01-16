@@ -1,4 +1,5 @@
 import HeaderLP from "../components/ui/header";
+import Footer from "../components/ui/footer";
 
 export default async function Home() {
   return (
@@ -8,6 +9,8 @@ export default async function Home() {
         
         Hello Worlds!
       </div>
+      <div className="h-lvh"></div> {/* Temporary contents section */}
+      <Footer /> 
     </div>
   );
 }
