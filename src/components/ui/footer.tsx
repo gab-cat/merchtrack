@@ -26,7 +26,7 @@ const Footer = () => {
                 </div>
                 <div className='flex flex-col min-w-max max-w-2xl w-full'>
                     <h1 className='font-bold text-7xl 2xl:self-start self-center'>Get in Touch</h1>
-                    <h1 className='text-4xl py-8 2xl:self-start self-center'>tminusone@gmail.com</h1>
+                    <a href="mailto:tminusone@gmail.com" className='text-4xl py-8 2xl:self-start self-center hover:underline'>tminusone@gmail.com</a>
                 </div>
             </div>
             
