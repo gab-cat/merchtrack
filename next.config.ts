@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
     buildActivity: true, 
     buildActivityPosition: 'bottom-left', 
   },
+  serverExternalPackages: ['require-in-the-middle'],
 };
 
 export default withSentryConfig(nextConfig, {
