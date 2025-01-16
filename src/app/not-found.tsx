@@ -13,7 +13,7 @@ export default function NotFound() {
         <motion.div
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.5, willChange: "transform, opacity" }}
           className="mb-4 text-9xl font-bold text-blue-600"
         >
         404
@@ -57,7 +57,9 @@ export default function NotFound() {
             viewBox="0 0 24 24"
             stroke="white"
             strokeWidth={2}
+            aria-hidden="true"
           >
+            <title>Navigation arrow</title>
             <path
               strokeLinecap="round"
               strokeLinejoin="round"

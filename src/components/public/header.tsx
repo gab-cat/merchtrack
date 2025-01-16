@@ -12,7 +12,7 @@ const HeaderLP = React.memo(() => {
   const [showNav, setShowNav] = useState(false);
   const handleNavPress = useCallback(() => {
     setShowNav((prevShowNav) => !prevShowNav);
-  }, []);
+  }, [pathname]);
 
   return (
     <nav className='border-b'>
@@ -50,14 +50,14 @@ const HeaderLP = React.memo(() => {
           <ul className="mt-4 flex w-full flex-col rounded-lg border border-gray-100 bg-gray-50 p-4 text-center font-medium md:mt-0 md:flex-row md:space-x-8 md:border-0 md:bg-transparent md:p-0">
             <li className="md:hidden">
               <SignInButton mode="modal">
-                <button className="focus:ring-accent-7 my-1 w-1/2 rounded-lg bg-neutral-1 px-4 py-2 text-center text-sm font-medium text-primary outline outline-1 outline-primary hover:opacity-70 focus:outline-none focus:ring-4">
+                <button type='button' className="focus:ring-accent-7 my-1 w-1/2 rounded-lg bg-neutral-1 px-4 py-2 text-center text-sm font-medium text-primary outline outline-1 outline-primary hover:opacity-70 focus:outline-none focus:ring-4">
                   Sign In
                 </button>
               </SignInButton>
             </li>
             <li className="md:hidden">
               <SignUpButton mode="modal">
-                <button className="focus:ring-accent-7 w-1/2 rounded-lg bg-primary px-4 py-2 text-center text-sm font-medium text-neutral-1 hover:opacity-90 focus:outline-none focus:ring-4">
+                <button type='button' className="focus:ring-accent-7 w-1/2 rounded-lg bg-primary px-4 py-2 text-center text-sm font-medium text-neutral-1 hover:opacity-90 focus:outline-none focus:ring-4">
                   Sign Up
                 </button>
               </SignUpButton>

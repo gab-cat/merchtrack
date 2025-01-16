@@ -29,6 +29,19 @@ export default [
       'import/no-unresolved': 'off',
       'import/namespace': 'off',
       'tailwindcss/no-custom-classname': 'off',
-    },
-  },
+      // TypeScript naming conventions
+      '@typescript-eslint/naming-convention': [
+        'error',
+        {
+          selector: 'interface',
+          format: ['PascalCase'],
+          prefix: ['I']
+        },
+        {
+          selector: 'typeAlias',
+          format: ['PascalCase']
+        }
+      ]
+    }
+  }
 ];
