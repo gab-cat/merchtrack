@@ -3,7 +3,11 @@ import Image from 'next/image';
 
 const Footer = () => {
     return (
-        <footer className="bg-cover bg-center min-w-fit min-h-72 min-w-96 w-full text-white font-light" style={{ backgroundImage: 'url("/Footer-BG.png")' }}>   
+const FOOTER_BG_IMAGE = '/Footer-BG.png';
+
+const Footer = () => {
+    return (
+        <footer className="bg-cover bg-center min-w-fit min-h-72 min-w-96 w-full text-white font-light" style={{ backgroundImage: `url(${FOOTER_BG_IMAGE})` }}>
             <div className="flex flex-row flex-wrap 2xl:justify-between justify-center mx-12 mt-12 px-12 pt-12 min-w-fit  text-left">
                 <div className='min-w-min max-w-sm'>
                     <div className='flex flex-row'>
