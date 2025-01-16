@@ -8,55 +8,48 @@ export default {
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
-  	extend: {
-  		colors: {
-  			background: 'hsl(var(--background))',
-  			foreground: 'hsl(var(--foreground))',
-  			card: {
-  				DEFAULT: 'hsl(var(--card))',
-  				foreground: 'hsl(var(--card-foreground))',
-  			},
-  			popover: {
-  				DEFAULT: 'hsl(var(--popover))',
-  				foreground: 'hsl(var(--popover-foreground))',
-  			},
-  			primary: {
-  				DEFAULT: 'hsl(var(--primary))',
-  				foreground: 'hsl(var(--primary-foreground))',
-  			},
-  			secondary: {
-  				DEFAULT: 'hsl(var(--secondary))',
-  				foreground: 'hsl(var(--secondary-foreground))',
-  			},
-  			muted: {
-  				DEFAULT: 'hsl(var(--muted))',
-  				foreground: 'hsl(var(--muted-foreground))',
-  			},
-  			accent: {
-  				DEFAULT: 'hsl(var(--accent))',
-  				foreground: 'hsl(var(--accent-foreground))',
-  			},
-  			destructive: {
-  				DEFAULT: 'hsl(var(--destructive))',
-  				foreground: 'hsl(var(--destructive-foreground))',
-  			},
-  			border: 'hsl(var(--border))',
-  			input: 'hsl(var(--input))',
-  			ring: 'hsl(var(--ring))',
-  			chart: {
-  				'1': 'hsl(var(--chart-1))',
-  				'2': 'hsl(var(--chart-2))',
-  				'3': 'hsl(var(--chart-3))',
-  				'4': 'hsl(var(--chart-4))',
-  				'5': 'hsl(var(--chart-5))',
-  			},
-  		},
-  		borderRadius: {
-  			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)',
-  		},
-  	},
+    extend: {
+      colors: {
+        primary: {
+          100: '#E3E9FD',
+          200: '#BCC8FB',
+          300: '#8BA6F8',
+          400: '#5983F5',
+          500: '#2C59DB',
+          600: '#2449B0',
+          700: '#1D3A85',
+          800: '#142959',
+          900: '#0C1930',
+
+          DEFAULT: '#2C59DB',
+        },
+        secondary: {
+          DEFAULT: '#172554',
+        },
+        tertiary: {
+          DEFAULT: '#3742FA',
+        },
+        neutral: {
+          1: '#FFFFFF',
+          2: '#F8F9FA',
+          3: '#DEE2E6',
+          4: '#CED4DA',
+          5: '#ADB5BD',
+          6: '#7B7F83',
+          7: '#212529',
+          8: '#000000',
+        },
+        accent: {
+          emphasis: '#DB6B2C',
+          select: '#4DD6B2',
+          3: '#E2E6F0',
+          destructive: '#E74C3C',
+          5: '#F1C40F',
+          6: '#A3C9D6',
+          7: '#C2D7F8',
+        },
+      },
+    },
   },
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   plugins: [require('tailwindcss-animate')],
