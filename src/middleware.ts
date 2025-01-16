@@ -32,6 +32,11 @@ const isPublicRoute = createRouteMatcher([
   '/favicon.ico',
   '/robots.txt',
   '/sitemap.xml',
+  '/contact',
+  '/about',
+  '/faqs',
+  '/terms-of-service',
+  '/privacy-policy',
   '/test'
 ]);
 

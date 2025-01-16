@@ -37,31 +37,9 @@ export type Product = {
 }
 
 type Price = {
-  student: NonNegativeNumber;
-  studentNonCocs: NonNegativeNumber;
-  faculty: NonNegativeNumber;
-  alumni: NonNegativeNumber;
-  others: NonNegativeNumber;
-}
-
-type NonNegativeNumber = number & { __brand: 'NonNegativeNumber' };
-
-/**
- * Creates a non-negative number, ensuring price values are not negative.
- *
- * @param n - The number to validate as a non-negative value
- * @returns The input number as a NonNegativeNumber type
- * @throws {Error} If the input number is less than zero
- *
- * @remarks
- * This utility function helps enforce type safety for pricing by preventing negative values.
- *
- * @example
- * const price = createNonNegativeNumber(100); // Returns 100
- * const invalidPrice = createNonNegativeNumber(-50); // Throws an error
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function createNonNegativeNumber(n: number): NonNegativeNumber {
-  if (n < 0) throw new Error('Price cannot be negative');
-  return n as NonNegativeNumber;
+  student: number;
+  studentNonCocs: number;
+  faculty: number;
+  alumni: number;
+  others: number;
 }

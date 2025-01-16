@@ -1,12 +1,13 @@
 "use client";
 
-import { NODE_ENV } from "@/config";
 import * as Sentry from "@sentry/nextjs";
 import { useCallback, useEffect } from 'react';
+import { NODE_ENV } from "@/config";
 
 export default function GlobalError({ error }: Readonly<{ error: Error & { digest?: string } }>) {
   useEffect(() => {
     if (NODE_ENV !== 'production') {
+      // no-dd-sa:typescript-best-practices/no-console
       console.error('Global error caught:', error);
     }
     Sentry.captureException(error);
@@ -24,22 +25,22 @@ export default function GlobalError({ error }: Readonly<{ error: Error & { diges
     // skipcq: JS-0415
     <html lang="en">
       <body>
-        <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-          <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
-            <h1 className="text-2xl font-bold text-red-600 mb-4">Oops! Something went wrong</h1>
-            <p className="text-gray-600 mb-6">
+        <div className="flex min-h-screen items-center justify-center bg-gray-100">
+          <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
+            <h1 className="mb-4 text-2xl font-bold text-red-600">Oops! Something went wrong</h1>
+            <p className="mb-6 text-gray-600">
               We apologize for the inconvenience. Our team has been notified and is working to fix the issue.
             </p>
             <div className="space-y-4">
               <button
                 onClick={handleRetry}
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
+                className="w-full rounded bg-blue-500 px-4 py-2 font-semibold text-white hover:bg-blue-600"
               >
                 Try Again
               </button>
               <button
                 onClick={handleReport}
-                className="w-full bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded"
+                className="w-full rounded bg-gray-500 px-4 py-2 font-semibold text-white hover:bg-gray-600"
               >
                 Report This Issue
               </button>

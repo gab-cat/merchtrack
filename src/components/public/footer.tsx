@@ -1,17 +1,18 @@
-import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FiFacebook } from "react-icons/fi";
 import { FaInstagram, FaTwitter, FaPhoneAlt, FaChevronRight } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
 import { MdOutlineMail } from "react-icons/md";
+import { Input } from '../ui/input';
 import { FOOTER_DETAILS, FOOTER_LINKS } from '@/constants';
+import { Button } from '@/components/ui/button';
 
 const Footer = () => {
   return (
-    <footer className="bg-blue-800 text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+    <footer className="bg-primary-700 text-white">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-4">
             <div className="flex items-center space-x-4">
               <Image
@@ -19,22 +20,21 @@ const Footer = () => {
                 width={60}
                 height={60}
                 alt="MerchTrack-Footer-Logo"
-                className="rounded-full"
               />
               <div>
-                <h3 className="text-lg font-semibold">{FOOTER_DETAILS.companyName}</h3>
-                <h2 className="text-2xl font-bold">{FOOTER_DETAILS.sitename}</h2>
+                <h3 className="text-sm font-light">{FOOTER_DETAILS.companyName}</h3>
+                <h2 className="text-2xl font-bold tracking-tighter">MerchTrack</h2>
               </div>
             </div>
-            <p className="text-sm font-light">{FOOTER_DETAILS.footerText}</p>
+            <p className="text-sm font-light tracking-wide">{FOOTER_DETAILS.footerText}</p>
           </div>
           
           <div>
-            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+            <h3 className="mb-4 text-lg font-semibold">Quick Links</h3>
             <ul className="space-y-2">
               {FOOTER_LINKS.map((link: LinkType) => (
                 <li key={link.href}>
-                  <Link href={link.href} className="hover:text-blue-200 text-sm flex transition-colors font-normal items-center duration-300">
+                  <Link href={link.href} className="flex items-center text-sm font-normal underline transition-colors duration-300 hover:text-blue-200">
                     <FaChevronRight className='mr-2' />{link.displayName}
                   </Link>
                 </li>
@@ -43,12 +43,12 @@ const Footer = () => {
           </div>
           
           <div >
-            <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
+            <h3 className="mb-4 text-lg font-semibold">Contact Us</h3>
             <ul className="space-y-2">
               <li className='text-sm font-light'>
-                <a href={`mailto:${FOOTER_DETAILS.email}`} className="hover:text-blue-200 flex transition-colors duration-300">
+                <Link href={`mailto:${FOOTER_DETAILS.email}`} className="flex underline transition-colors duration-300 hover:text-blue-200">
                   <MdOutlineMail className='mr-2' />{FOOTER_DETAILS.email}
-                </a>
+                </Link>
               </li>
               <li className='flex text-sm font-light'><FaPhoneAlt className='mr-2' />{FOOTER_DETAILS.phone}</li>
               <li className='flex text-sm font-light'><FaLocationDot className='mr-2'/>{FOOTER_DETAILS.address}</li>
@@ -56,37 +56,34 @@ const Footer = () => {
           </div>
           
           <div>
-            <h3 className="text-lg font-semibold mb-4">Newsletter</h3>
-            <p className="text-sm mb-4">Stay updated with our latest offers and products.</p>
-            <form className="flex text-sm">
-              <input
+            <h3 className="mb-4 text-lg font-semibold">Newsletter</h3>
+            <p className="mb-4 text-sm">Stay updated with our latest offers and products.</p>
+            <form className="flex w-full gap-2">
+              <Input
                 type="email"
                 placeholder="Enter your email"
-                className="px-4 py-2 w-full text-gray-900 rounded-l-md focus:outline-none"
+                className="rounded-r-none"
               />
-              <button
-                type="submit"
-                className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-r-md transition-colors duration-300"
-              >
-                Subscribe
-              </button>
+              <Button type="submit" className="rounded-l-none">
+        Subscribe
+              </Button>
             </form>
           </div>
         </div>
         
-        <div className="mt-12 pt-8 border-t border-white">
-          <div className="flex flex-col md:flex-row justify-between items-center">
+        <div className="mt-12 border-t border-white pt-8">
+          <div className="flex flex-col items-center justify-between md:flex-row">
             <p className="text-sm">
               © {new Date().getFullYear()} {FOOTER_DETAILS.sitename}. All Rights Reserved.
             </p>
-            <div className="flex space-x-4 mt-4 md:mt-0">
-              <Link href="#" className="hover:text-blue-200 transition-colors duration-300">
+            <div className="mt-4 flex space-x-4 md:mt-0">
+              <Link href="#" className="transition-colors duration-300 hover:text-blue-200">
                 <FiFacebook size={24} />
               </Link>
-              <Link href="#" className="hover:text-blue-200 transition-colors duration-300">
+              <Link href="#" className="transition-colors duration-300 hover:text-blue-200">
                 <FaInstagram size={24} />
               </Link>
-              <Link href="#" className="hover:text-blue-200 transition-colors duration-300">
+              <Link href="#" className="transition-colors duration-300 hover:text-blue-200">
                 <FaTwitter size={24} />
               </Link>
             </div>

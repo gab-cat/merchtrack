@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { Inter, Poppins } from 'next/font/google';
 import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
-import { SEO } from '@/constants';
 import dynamic from 'next/dynamic';
+import { SEO } from '@/constants';
 import Scripts from '@/components/misc/scripts';
 
 const DatadogInit = dynamic(() => import('@/components/misc/datadog-init'));

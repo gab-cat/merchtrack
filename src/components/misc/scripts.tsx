@@ -1,6 +1,6 @@
-import { CF_BEACON_TOKEN } from "@/config";
 import Script from "next/script";
 import { memo } from "react";
+import { CF_BEACON_TOKEN } from "@/config";
 
 const Scripts = memo(() => {
   return (

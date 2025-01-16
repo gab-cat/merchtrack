@@ -1,9 +1,9 @@
 'use client';
 
 import { datadogRum } from '@datadog/browser-rum';
+import * as Sentry from '@sentry/nextjs';
 import packageJson from '../../../package.json';
 import { NODE_ENV } from '@/config';
-import * as Sentry from '@sentry/nextjs';
 
 let isDatadogInitialized = false;
 
