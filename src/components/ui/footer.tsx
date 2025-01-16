@@ -1,60 +1,101 @@
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
+import { FiFacebook } from "react-icons/fi";
+import { FaInstagram, FaTwitter, FaPhoneAlt, FaChevronRight } from "react-icons/fa";
+import { FaLocationDot } from "react-icons/fa6";
+import { MdOutlineMail } from "react-icons/md";
+import { FOOTER_DETAILS, FOOTER_LINKS } from '@/constants';
 
 const Footer = () => {
-    return (
-const FOOTER_BG_IMAGE = '/Footer-BG.png';
-
-const Footer = () => {
-    return (
-        <footer className="bg-cover bg-center min-w-fit min-h-72 min-w-96 w-full text-white font-light" style={{ backgroundImage: `url(${FOOTER_BG_IMAGE})` }}>
-            <div className="flex flex-row flex-wrap 2xl:justify-between justify-center mx-12 mt-12 px-12 pt-12 min-w-fit  text-left">
-                <div className='min-w-min max-w-sm'>
-                    <div className='flex flex-row'>
-                        <Image
-                            src="/android-chrome-192x192.png"
-                            width={100}
-                            height={100}
-                            alt="MerchTrack-Footer-Logo"
-                        />
-                        <div className='flex flex-col pl-8'>
-                            <h1 className='text-xl'>T Minus One</h1>
-                            <h1 className='text-4xl font-medium pt-2'>MerchTrack</h1>
-                        </div>
-                    </div>
-                    <p className='text-sm text-justify pt-8 mb-8'>Our platform brings you the latest merchandise from the College of Computer Studies. Whether you're looking for shirts, hoodies, or accessories, easily browse, order, and rep your college spirit in style!</p>
-                </div>
-                <div className='flex flex-col min-w-max max-w-2xl w-full'>
-                    <h1 className='font-bold text-7xl 2xl:self-start self-center'>Get in Touch</h1>
-                    <a href="mailto:tminusone@gmail.com" className='text-4xl py-8 2xl:self-start self-center hover:underline'>tminusone@gmail.com</a>
-                </div>
+  return (
+    <footer className="bg-blue-800 text-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="space-y-4">
+            <div className="flex items-center space-x-4">
+              <Image
+                src="/img/logo-white.png"
+                width={60}
+                height={60}
+                alt="MerchTrack-Footer-Logo"
+                className="rounded-full"
+              />
+              <div>
+                <h3 className="text-lg font-semibold">{FOOTER_DETAILS.companyName}</h3>
+                <h2 className="text-2xl font-bold">{FOOTER_DETAILS.sitename}</h2>
+              </div>
             </div>
-            
-            <div className='flex flex-col md:flex-row flex-wrap justify-between mx-12 pb-4 px-12'>
-                <hr className='place-self-center w-full mt-4 pb-4'/>
-                <div className='flex flex-col xl:flex-row justify-between w-full items-center text-center xl:text-left'>
-                    <span className="block text-base font-bold sm:text-center pb-2">© 2023 <a href="#" className="hover:underline">MerchTrack™</a>. All Rights Reserved.</span>
-                    <ul className="flex flex-row justify-between items-center mb-6 text-sm md:text-base font-medium sm:mb-0 dark:text-gray-400 max-w-2xl w-full">
-                        <li>
-                            <a href="#" className="hover:underline me-4 md:me-6">About</a>
-                        </li>
-                        <li>
-                            <a href="#" className="hover:underline me-4 md:me-6">Contact</a>
-                        </li>
-                        <li>
-                            <a href="#" className="hover:underline me-4 md:me-6">FAQs</a>
-                        </li>
-                        <li>
-                            <a href="#" className="hover:underline me-4 md:me-6">Privacy Policy</a>
-                        </li>
-                        <li>
-                            <a href="#" className="hover:underline">Terms of Service</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>           
-        </footer>
-    )
-}
+            <p className="text-sm font-light">{FOOTER_DETAILS.footerText}</p>
+          </div>
+          
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+            <ul className="space-y-2">
+              {FOOTER_LINKS.map((link: LinkType) => (
+                <li key={link.href}>
+                  <Link href={link.href} className="hover:text-blue-200 text-sm flex transition-colors font-normal items-center duration-300">
+                    <FaChevronRight className='mr-2' />{link.displayName}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          <div >
+            <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
+            <ul className="space-y-2">
+              <li className='text-sm font-light'>
+                <a href={`mailto:${FOOTER_DETAILS.email}`} className="hover:text-blue-200 flex transition-colors duration-300">
+                  <MdOutlineMail className='mr-2' />{FOOTER_DETAILS.email}
+                </a>
+              </li>
+              <li className='flex text-sm font-light'><FaPhoneAlt className='mr-2' />{FOOTER_DETAILS.phone}</li>
+              <li className='flex text-sm font-light'><FaLocationDot className='mr-2'/>{FOOTER_DETAILS.address}</li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Newsletter</h3>
+            <p className="text-sm mb-4">Stay updated with our latest offers and products.</p>
+            <form className="flex text-sm">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                className="px-4 py-2 w-full text-gray-900 rounded-l-md focus:outline-none"
+              />
+              <button
+                type="submit"
+                className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-r-md transition-colors duration-300"
+              >
+                Subscribe
+              </button>
+            </form>
+          </div>
+        </div>
+        
+        <div className="mt-12 pt-8 border-t border-white">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <p className="text-sm">
+              © {new Date().getFullYear()} {FOOTER_DETAILS.sitename}. All Rights Reserved.
+            </p>
+            <div className="flex space-x-4 mt-4 md:mt-0">
+              <Link href="#" className="hover:text-blue-200 transition-colors duration-300">
+                <FiFacebook size={24} />
+              </Link>
+              <Link href="#" className="hover:text-blue-200 transition-colors duration-300">
+                <FaInstagram size={24} />
+              </Link>
+              <Link href="#" className="hover:text-blue-200 transition-colors duration-300">
+                <FaTwitter size={24} />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+};
 
 export default Footer;
+
