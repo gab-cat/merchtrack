@@ -3,6 +3,7 @@ import { Inter, Poppins } from 'next/font/google';
 import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
 import dynamic from 'next/dynamic';
+import tailwindConfig from '../../tailwind.config';
 import { SEO } from '@/constants';
 import Scripts from '@/components/misc/scripts';
 
@@ -30,6 +31,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const colors = tailwindConfig.theme.extend.colors;
   return (
     <html lang="en">
       <head>
@@ -41,17 +43,30 @@ export default function RootLayout({
         `}
         </style>
       </head>
-      <ClerkProvider appearance={{
-        elements: {
-          formButtonPrimary:
-                  "bg-inprogress hover:bg-inprogress hover:brightness-95 text-sm normal-case",
-
-          formButtonSecondary: "bg-inprogress text-sm normal-case",
-          footerActionText: " text-md",
-          footerActionLink:
-                  "text-inprogress hover:text-inprogress hover:brightness-95 font-semibold text-md",
-        },
-      }}>
+      <ClerkProvider 
+        signUpUrl='/sign-up'
+        signUpFallbackRedirectUrl='/'
+        signUpForceRedirectUrl='/faqs'
+        appearance={{
+          layout: {
+            logoImageUrl: '/img/merch-track-logo.png',
+            logoLinkUrl: '/',
+            termsPageUrl: '/terms-and-service',
+            privacyPageUrl: '/privacy-policy'
+          },
+          variables: {
+            colorPrimary: colors.primary,
+            colorBackground: colors.neutral[1],
+            borderRadius: '5px',
+          },
+          elements: {
+            formButtonPrimary: "bg-primary-500 text-white border-0 shadow-0 relative transition-all text-sm",
+            formButtonSecondary: "bg-white relative border-0 text-sm",
+            footerActionText: " text-md",
+            footerActionLink: "text-primary hover:text-primary hover:brightness-95 font-semibold text-md",
+            buttonPrimary: "bg-primary-500 border-0 shadow-0 relative hover:bg-primary-400 transition-all text-sm",
+          },
+        }}>
         <body
           className={`${interSans.variable} antialiased`}
         >

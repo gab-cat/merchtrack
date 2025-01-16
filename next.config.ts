@@ -8,6 +8,14 @@ const nextConfig: NextConfig = {
     buildActivity: true, 
     buildActivityPosition: 'bottom-left', 
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'img.clerk.com',
+      }
+    ],
+  },
   serverExternalPackages: ['require-in-the-middle'],
 };
 
