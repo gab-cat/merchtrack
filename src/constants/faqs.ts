@@ -1,6 +1,6 @@
 export const FAQS_CONTENT = {
-    title: "FAQs",
-    description: "Find quick answers to your questions about your orders and shopping experience with MerchTrack!",
+  title: "FAQs",
+  description: "Find quick answers to your questions about your orders and shopping experience with MerchTrack!",
 };
 
 export const FAQS_DETAILS = [
