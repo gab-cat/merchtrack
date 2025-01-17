@@ -10,7 +10,7 @@ import { FAQS_CONTENT, FAQS_DETAILS } from '@/constants';
 const Page = () => {
   return (
     <div className="min-h-[75vh] flex justify-center" style={{ fontFamily: 'var(--font-inter-sans)' }}>
-      <div className="w-[75vh]">
+      <div className="w-full max-w-4xl px-4 md:px-6">
         <div className="place-self-center text-5xl py-4">
           {FAQS_CONTENT.title}
         </div>
