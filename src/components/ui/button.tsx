@@ -1,4 +1,6 @@
-import { forwardRef } from 'react';
+'use client';
+
+import { forwardRef, useState } from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 
@@ -43,15 +45,32 @@ export interface ButtonProps
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
+    const [isClicked, setIsClicked] = useState(false); // Track whether the button is clicked
     const Comp = asChild ? Slot : 'button';
+
+    // Handle button click to toggle the "clicked" state
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+      setIsClicked(!isClicked); // Toggle the clicked state
+      if (props.onClick) {
+        props.onClick(e); // Call the passed onClick function (if any)
+      }
+    };
+
+    // Define the classes for the button background when clicked
+    const outlineClickedClass = isClicked ? 'bg-blue-500' : ''; // Change to desired color when clicked
+
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(
+          buttonVariants({ variant, size, className }),
+          variant === 'outline' && outlineClickedClass // Apply the background color change when clicked
+        )}
         ref={ref}
         {...props}
+        onClick={handleClick} // Attach the click handler
       />
     );
-  },
+  }
 );
 Button.displayName = 'Button';
 
