@@ -25,7 +25,12 @@ const Page = () => {
           <Button variant="outline" color="blue" className="rounded-full">Contact & Support</Button>
         </div>
         {/* Rendering a dynamic list of FAQs and their corresponding answers */}
-        <Accordion type="single" collapsible className="py-4">
+        <Accordion 
+          type="single" 
+          collapsible 
+          className="py-4"
+          aria-label="Frequently Asked Questions"
+        >
           {FAQS_DETAILS.map((faq, index) => (
             <AccordionItem key={index} value={`item-${index}`}>
               <AccordionTrigger>{faq.question}</AccordionTrigger>
