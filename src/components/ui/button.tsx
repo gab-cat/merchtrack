@@ -56,14 +56,16 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       }
     };
 
-    // Define the classes for the button background when clicked
-    const outlineClickedClass = isClicked ? 'bg-blue-500' : ''; // Change to desired color when clicked
+    // Use the cn function to conditionally apply the classes for clicked state
+    const outlineClickedClass = cn(
+      isClicked && 'bg-blue-500 text-white', // Apply blue background and white text when clicked
+    );
 
     return (
       <Comp
         className={cn(
           buttonVariants({ variant, size, className }),
-          variant === 'outline' && outlineClickedClass // Apply the background color change when clicked
+          variant === 'outline' && outlineClickedClass // Apply the background and text color change when clicked
         )}
         ref={ref}
         {...props}
