@@ -1,0 +1,61 @@
+// Updated User model
+model User {
+  id             String           @id @default(ulid())
+  isDeleted      Boolean          @default(false)
+  clerkId        String           @unique
+  isOnboarded    Boolean          @default(false)
+  firstName      String?
+  lastName       String?
+  managerId      String?
+  email          String           @unique
+  phone          String           @unique @default("nan")
+  courses        String           @default("nan")
+  isStaff        Boolean          @default(false)
+  isAdmin        Boolean          @default(false)
+  isSetupDone    Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  role           Role             @default(STUDENT)
+  college        College          @default(NOT_APPLICABLE)
+
+  // Relations
+  listedProducts    Product[]
+  User              User[]         @relation("ManagerToStaff")
+  manager           User?          @relation("ManagerToStaff", fields: [managerId], references: [id])
+
+  orders            Order[]        @relation("OrderToUser")
+  processedOrders   Order[]        @relation("OrderToProcessor")
+
+  payments          Payment[]      @relation("PaymentToUser")
+  processedPayments Payment[]      @relation("PaymentToProcessor")
+
+  logs              Log[]          @relation("LogToUser")
+  createdLogs       Log[]          @relation("LogToCreator")
+
+  fulfillment       Fulfillment[]
+  userPermissions   UserPermission[]
+
+  @@index([email], name: "idx_user_email")
+  @@index([clerkId], name: "idx_user_clerkId")
+  @@index([isDeleted], name: "idx_user_isDeleted")
+}
+
+enum Role {
+  PLAYER
+  STUDENT
+  STAFF_FACULTY
+  ALUMNI
+  OTHERS
+}
+
+enum College {
+  NOT_APPLICABLE
+  COCS
+  STEP
+  ABBS
+  JPIA
+  ACHSS
+  ANSA
+  COL
+  AXI
+}

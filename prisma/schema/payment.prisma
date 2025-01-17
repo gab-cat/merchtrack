@@ -1,0 +1,46 @@
+model Payment {
+  id            String         @id @default(ulid())
+  isDeleted     Boolean        @default(false)
+  orderId       String
+  userId        String
+  processedById String?
+  paymentDate   DateTime       @default(now())
+  amount        Decimal        @default(0)
+  paymentMethod PaymentMethod  @default(CASH)
+  paymentStatus PaymentStatus  @default(PENDING)
+  referenceNo   String         @default("")
+  memo          String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  // Relations
+  order       Order @relation("PaymentToOrder", fields: [orderId], references: [id])
+  user        User  @relation("PaymentToUser", fields: [userId], references: [id])
+  processedBy User? @relation("PaymentToProcessor", fields: [processedById], references: [id])
+
+  @@index([orderId], name: "idx_payment_orderId")
+  @@index([userId], name: "idx_payment_userId")
+  @@index([processedById], name: "idx_payment_processedById")
+  @@index([isDeleted], name: "idx_payment_isDeleted")
+}
+
+enum PaymentStatus {
+  VERIFIED
+  PENDING
+  DECLINED
+}
+
+enum PaymentType {
+  PAYMENT
+  REFUND
+}
+
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  GCASH
+  MAYA
+  OTHERS
+}
+

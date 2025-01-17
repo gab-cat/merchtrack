@@ -1,0 +1,16 @@
+model Log {
+  id          String   @id @default(ulid())
+  userId      String?
+  createdDate DateTime @default(now())
+  createdById String?
+  reason      String
+  systemText  String
+  userText    String
+
+  // Relations
+  user      User? @relation("LogToUser", fields: [userId], references: [id])
+  createdBy User? @relation("LogToCreator", fields: [createdById], references: [id])
+
+  @@index([userId], name: "idx_log_userId")
+  @@index([createdById], name: "idx_log_createdById")
+}

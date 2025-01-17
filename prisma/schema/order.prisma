@@ -1,0 +1,73 @@
+model Order {
+  id                String      @id @default(ulid())
+  isDeleted         Boolean     @default(false)
+  customerId        String
+  processedById     String?
+  orderDate         DateTime    @default(now())
+  status            OrderStatus @default(PENDING)
+  paymentStatus     OrderPaymentStatus @default(PENDING)
+  cancellationReason CancellationReason @default(OUT_OF_STOCK)
+  totalAmount       Float       @default(0)
+  discountAmount    Float       @default(0)
+  estimatedDelivery DateTime
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  fulfillmentid     String?
+  customerSatisfactionSurveyid String?
+
+  // Relations
+  orderItems                 OrderItem[]   @relation("OrderItemToOrder")
+  payments                   Payment[]     @relation("PaymentToOrder")
+  customer                   User          @relation("OrderToUser", fields: [customerId], references: [id])
+  processedBy                User?         @relation("OrderToProcessor", fields: [processedById], references: [id])
+  customerSatisfactionSurvey CustomerSatisfactionSurvey? @relation("OrderToSurvey", fields: [customerSatisfactionSurveyid], references: [id])
+  CustomerSatisfactionSurvey CustomerSatisfactionSurvey[]
+
+  Fulfillment Fulfillment[]
+
+  @@index([customerId], name: "idx_order_customerId")
+  @@index([processedById], name: "idx_order_processedById")
+  @@index([status], name: "idx_order_status")
+  @@index([isDeleted], name: "idx_order_isDeleted")
+}
+
+model OrderItem {
+  id           String     @id @default(ulid())
+  orderId      String
+  productId    String
+  quantity     Int
+  price        Decimal    @default(0)
+  customerNote String?
+  size         ProductSize?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  // Relations
+  order   Order   @relation("OrderItemToOrder", fields: [orderId], references: [id])
+  product Product @relation("OrderItemToProduct", fields: [productId], references: [id])
+
+  @@index([orderId], name: "idx_orderitem_orderId")
+  @@index([productId], name: "idx_orderitem_productId")
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  READY
+  DELIVERED
+  CANCELLED
+}
+
+enum CancellationReason {
+  OUT_OF_STOCK
+  CUSTOMER_REQUEST
+  PAYMENT_FAILED
+  OTHERS
+}
+
+enum OrderPaymentStatus {
+  PENDING
+  DOWNPAYMENT
+  PAID
+  REFUNDED
+}

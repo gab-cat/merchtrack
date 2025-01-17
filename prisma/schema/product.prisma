@@ -1,0 +1,60 @@
+// Product model with a separate model for variant-level pricing
+model Product {
+  id            String          @id @default(ulid())
+  isDeleted     Boolean         @default(false)
+  categoryId    String?
+  postedById    String
+  slug          String          @unique
+  title         String
+  description   String?
+  discountLabel String?
+  supposedPrice Json?
+  rating        Float           @default(0.0)
+  reviewsCount  Int             @default(0)
+  imageUrl      String
+  imageUrlDark  String?
+  isBestPrice   Boolean         @default(false)
+  inventory     Int             @default(0)
+  inventoryType InventoryType   @default(PREORDER)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  // Relations
+  category     Category?        @relation(fields: [categoryId], references: [id])
+  postedBy     User             @relation(fields: [postedById], references: [id])
+  orderItems   OrderItem[]      @relation("OrderItemToProduct")
+  variants     ProductVariant[] 
+
+  @@index([slug], name: "idx_product_slug")
+  @@index([isDeleted], name: "idx_product_isDeleted")
+}
+
+// ProductVariant model for per-variant pricing and attributes
+model ProductVariant {
+  id           String     @id @default(ulid())
+  productId    String
+  variantName  String
+  price        Decimal     @default(0)
+  rolePricing  Json       // Optional: store pricing adjustments based on role
+
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  product      Product     @relation(fields: [productId], references: [id])
+  // Index if you often query by sku:
+  @@index([productId], name: "idx_variant_product-id")
+}
+
+enum InventoryType {
+  PREORDER
+  STOCK
+}
+
+enum ProductSize {
+  XS
+  S
+  M
+  L
+  XL
+  XXL
+}

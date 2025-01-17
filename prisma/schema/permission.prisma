@@ -1,0 +1,19 @@
+// Permission entity with a code that can be attached to users (e.g., 'collect_payments')
+model Permission {
+  id               String           @id @default(ulid())
+  code             String           @unique
+  description      String?
+  userPermissions  UserPermission[]
+}
+
+// Pivot table for many-to-many relationship between User and Permission
+model UserPermission {
+  userId       String
+  permissionId String
+
+  user        User        @relation(fields: [userId], references: [id])
+  permission  Permission  @relation(fields: [permissionId], references: [id])
+
+  // Composite primary key for the pivot
+  @@id([userId, permissionId])
+}

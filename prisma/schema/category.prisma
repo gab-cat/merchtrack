@@ -1,0 +1,11 @@
+model Category {
+  id          String    @id @default(ulid())
+  isDeleted   Boolean   @default(false)
+  name        String
+  description String?
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([name], name: "idx_category_name")
+}
