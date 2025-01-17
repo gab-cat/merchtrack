@@ -1,17 +1,17 @@
 'use client';
 
-import React, { useState, useCallback, Suspense } from 'react';
+import React, { useState, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { SignInButton, SignUpButton, UserButton, useUser } from '@clerk/nextjs';
+import { SignInButton, SignUpButton, useUser } from '@clerk/nextjs';
 import { usePathname } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
 import HeaderLinks from './header-links';
 
 const HeaderLP = React.memo(() => {
-  const { isSignedIn, user } = useUser();
+  const { isSignedIn } = useUser();
   const pathname = usePathname();
   const [showNav, setShowNav] = useState(false);
+
   const handleNavPress = useCallback(() => {
     setShowNav((prevShowNav) => !prevShowNav);
   }, [pathname]);
@@ -35,21 +35,22 @@ const HeaderLP = React.memo(() => {
           </span>
         </Link>
         <div className="flex space-x-3 md:order-2">
-          <Suspense fallback={null} >
-            { !isSignedIn ? (<>
-              <SignInButton mode='modal' >
-                <button type='button' className="focus:ring-accent-7 hidden  w-max rounded-lg bg-neutral-1 px-4 py-2 text-center text-sm font-medium text-primary outline outline-1 outline-primary hover:opacity-70 focus:outline-none focus:ring-4 md:flex">Sign In</button>
-              </SignInButton>
-              <SignUpButton mode='modal'>
-                <button type="button" className="focus:ring-accent-7 hidden rounded-lg bg-primary px-4 py-2 text-center text-sm font-medium text-neutral-1 hover:opacity-90 focus:outline-none focus:ring-4 md:flex">Sign Up</button>
-              </SignUpButton>
-            </>) : (
-              <div className='flex items-center space-x-3'>
-                <span className='font-bold'>Hi, {user.firstName}</span>
-                <UserButton />
-              </div>
-            )}
-          </Suspense>
+          <SignInButton mode={ isSignedIn ? 'redirect' : 'modal'}>
+            <button
+              type='button'
+              className="focus:ring-accent-7 hidden rounded-lg bg-neutral-1 px-6 py-2 text-sm font-medium text-primary outline outline-1 outline-primary transition-all duration-300 ease-in-out hover:scale-105 hover:bg-primary-400 hover:text-neutral-1 hover:shadow-lg focus:outline-none focus:ring-4 md:inline-block"
+            >
+                      Sign In
+            </button>
+          </SignInButton>
+          <SignUpButton mode={ isSignedIn ? 'redirect' : 'modal'}>
+            <button
+              type="button"
+              className="hover:bg-accent-7 focus:ring-accent-7 hidden rounded-lg bg-primary px-6 py-2 text-sm font-medium text-neutral-1 transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-4 md:inline-block"
+            >
+                      Sign Up
+            </button>
+          </SignUpButton>
           <button 
             data-collapse-toggle="navbar-cta" 
             onClick={handleNavPress} 
@@ -65,37 +66,31 @@ const HeaderLP = React.memo(() => {
             </svg>
           </button>
         </div>
-        <AnimatePresence>
-            <motion.div 
-              className="w-full items-center justify-between md:order-1 md:flex md:w-auto"
-              id="navbar-cta"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.5, ease: "easeInOut" }}
-            >
-              <ul className="mt-4 flex w-full flex-col rounded-lg border border-gray-100 bg-gray-50 p-4 text-center font-medium md:mt-0 md:flex-row md:space-x-8 md:border-0 md:bg-transparent md:p-0">
-                {!isSignedIn && (<>
-                  <li className="md:hidden">
-                    <SignInButton>
-                      <button type='button' className="focus:ring-accent-7 my-1 w-1/2 rounded-lg bg-neutral-1 px-4 py-2 text-center text-sm font-medium text-primary outline outline-1 outline-primary hover:opacity-70 focus:outline-none focus:ring-4">
+        <div 
+          className="mx-auto w-full items-center justify-between md:order-1 md:flex md:w-auto md:justify-center"
+          id="navbar-cta"
+        >
+          <ul className="mx-auto mt-4 flex w-full flex-col rounded-lg bg-gray-50 p-4 text-center font-medium md:mt-0 md:flex-row md:space-x-8 md:border-0 md:bg-transparent md:p-0">
+            {!isSignedIn && (<>
+              <li className="md:hidden">
+                <SignInButton>
+                  <button type='button' className="focus:ring-accent-7 my-1 w-1/2 rounded-lg bg-neutral-1 px-4 py-2 text-center text-sm font-medium text-primary outline outline-1 outline-primary hover:opacity-70 focus:outline-none focus:ring-4">
                         Sign In
-                      </button>
-                    </SignInButton>
-                  </li>
-                  <li className="md:hidden">
-                    <SignUpButton>
-                      <button type='button' className="focus:ring-accent-7 w-1/2 rounded-lg bg-primary px-4 py-2 text-center text-sm font-medium text-neutral-1 hover:opacity-90 focus:outline-none focus:ring-4">
+                  </button>
+                </SignInButton>
+              </li>
+              <li className="md:hidden">
+                <SignUpButton>
+                  <button type='button' className="focus:ring-accent-7 w-1/2 rounded-lg bg-primary px-4 py-2 text-center text-sm font-medium text-neutral-1 hover:opacity-90 focus:outline-none focus:ring-4">
                         Sign Up
-                      </button>
-                    </SignUpButton>
-                  </li>
-                </>)}
-                <hr className='m-2' />
-                <HeaderLinks pathname={pathname}/>
-              </ul>
-            </motion.div>
-        </AnimatePresence>
+                  </button>
+                </SignUpButton>
+              </li>
+            </>)}
+            <hr className='m-2' />
+            <HeaderLinks pathname={pathname}/>
+          </ul>
+        </div>
       </div>
     </nav>
   );
