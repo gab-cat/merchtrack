@@ -1,5 +1,6 @@
 import HeaderLP from "../components/ui/header";
 
+
 export default async function Home() {
   return (
     <div>
