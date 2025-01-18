@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ChevronDown } from 'lucide-react';
+import { MdKeyboardArrowDown } from 'react-icons/md';
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -10,19 +10,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { OrderStatus, PaymentStatus, PaymentMethod, CustomerType, StatusOption } from "@/types/Misc";
 
-interface StatusOption {
-  label: string
-  value: string
-  variant?: "default" | "outline"
-  className?: string
-}
+type StatusType = OrderStatus | PaymentStatus | PaymentMethod | CustomerType;
 
 interface StatusDropdownProps {
-  options: StatusOption[]
-  value: string
-  onChange: (value: string) => void
-  align?: "start" | "center" | "end"
+  options: StatusOption[];
+  value: StatusType;
+  onChange: (value: StatusType) => void;
+  align?: "start" | "center" | "end";
 }
 
 export function StatusDropdown({ options, value, onChange, align = "center" }: StatusDropdownProps) {
@@ -38,7 +34,7 @@ export function StatusDropdown({ options, value, onChange, align = "center" }: S
           >
             {selectedOption?.label || value}
           </Badge>
-          <ChevronDown className="h-3 w-3 opacity-50" />
+          <MdKeyboardArrowDown className="h-3 w-3 opacity-50" />
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent align={align} className="min-w-[120px]">

@@ -7,3 +7,7 @@ export { Payment, PaymentMethod, PaymentStatus, PaymentType } from "./Payment";
 export { Fulfillment, FulfillmentStatus } from "./Fulfillment";
 export { Log } from "./Log";
 export { CustomerSatisfactionSurvey } from "./CustomerSatisfactionSurvey";
+export { Order, OrderStatus, PaymentStatus, PaymentMethod, CustomerType } from "./Misc";
+
+  
+  
