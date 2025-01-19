@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useState, useEffect } from 'react';
 import {
   Table,
   TableBody,
@@ -20,13 +21,21 @@ import {
 } from "@/constants/status-options";
 
 interface OrdersTableProps {
-  orders: Order[]
+  orders: Order[];
 }
 
 export function OrdersTable({ orders: initialOrders }: OrdersTableProps) {
-  const [orders, setOrders] = React.useState(initialOrders);
+  const [orders, setOrders] = useState(initialOrders);
+  const [isClient, setIsClient] = useState(false); // State to track client-side rendering
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) return null; // Render nothing during server-side rendering
 
   const updateOrder = (id: string, field: keyof Order, value: OrderStatus | PaymentStatus | PaymentMethod | CustomerType) => {
+
     setOrders(orders.map(order => 
       order.id === id ? { ...order, [field]: value } : order
     ));
@@ -34,7 +43,7 @@ export function OrdersTable({ orders: initialOrders }: OrdersTableProps) {
 
   return (
     <Table>
-      <TableHeader>
+      <TableHeader> 
         <TableRow>
           <TableHead className="w-12">
             <Checkbox />

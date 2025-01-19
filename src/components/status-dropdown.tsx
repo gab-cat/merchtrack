@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useState, useEffect } from "react";  // Import useState and useEffect
 import { MdKeyboardArrowDown } from 'react-icons/md';
 import { cn } from "@/lib/utils";
 import {
@@ -22,6 +23,14 @@ interface StatusDropdownProps {
 }
 
 export function StatusDropdown({ options, value, onChange, align = "center" }: StatusDropdownProps) {
+  const [isClient, setIsClient] = useState(false);  // Manage client-side render state
+
+  useEffect(() => {
+    setIsClient(true);  // Set to true once the component is mounted on the client
+  }, []);
+
+  if (!isClient) return null;  // Prevent rendering on the server side
+
   const selectedOption = options.find(option => option.value === value);
 
   return (
@@ -56,4 +65,3 @@ export function StatusDropdown({ options, value, onChange, align = "center" }: S
     </DropdownMenu>
   );
 }
-

@@ -4,4 +4,3 @@ export const SEO = {
   KEYWORDS: "e-commerce platform, online store management, retail automation, inventory tracking system, order fulfillment software, e-commerce analytics, SMB e-commerce solution",
   AUTHOR: "MerchTrack Team"
 };
-

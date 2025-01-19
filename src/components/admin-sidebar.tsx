@@ -3,7 +3,6 @@
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { FiLogOut } from "react-icons/fi";
 import Link from "next/link";
 import Image from "next/image";
@@ -57,11 +56,14 @@ export function AdminSidebar() {
 
       {/* User Info and Logout */}
       <div className="mt-auto px-10 py-8">
-        <div className="flex items-center gap-4 py-4">
-          <Avatar>
-            <AvatarImage src="/placeholder.svg" alt="User" />
-            <AvatarFallback>KR</AvatarFallback>
-          </Avatar>
+        <div className="flex items-center gap-2 py-4">
+          <Image 
+            src="/img/sample_pfp.jpg" 
+            alt="User" 
+            className="h-16 w-16 rounded-full" 
+            width={64} // Match the actual dimensions (h-16 = 64px)
+            height={64} 
+          />
           <div className="flex flex-col">
             <span className="text-sm font-medium">Kyla Ronquillo</span>
             <span className="text-xs text-muted-foreground">Admin</span>
