@@ -21,7 +21,6 @@ model Order {
   customer                   User          @relation("OrderToUser", fields: [customerId], references: [id])
   processedBy                User?         @relation("OrderToProcessor", fields: [processedById], references: [id])
   customerSatisfactionSurvey CustomerSatisfactionSurvey? @relation("OrderToSurvey", fields: [customerSatisfactionSurveyid], references: [id])
-  CustomerSatisfactionSurvey CustomerSatisfactionSurvey[]
 
   Fulfillment Fulfillment[]
 
