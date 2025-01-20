@@ -10,6 +10,10 @@ export default {
   ],
   theme: {
   	extend: {
+      fontFamily: {
+        inter: ['Inter', 'sans-serif'],
+        poppins: ['Poppins', 'sans-serif'],
+      },
   		colors: {
   			primary: {
   				'100': '#E3E9FD',

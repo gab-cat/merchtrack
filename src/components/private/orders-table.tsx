@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useState, useEffect } from 'react';
 import { FaRegEdit } from "react-icons/fa";
+import { DialogClose } from "@radix-ui/react-dialog";
 import { StatusDropdown } from "./status-dropdown";
 import {
   Table,
@@ -20,10 +21,12 @@ import {
   paymentMethodOptions, 
   customerTypeOptions 
 } from "@/constants";
+import { Dialog, DialogHeader, DialogTrigger, DialogContent, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
  
 interface OrdersTableProps {
-  orders: Order[];
+  readonly orders: Order[];
 }
 
 export function OrdersTable({ orders: initialOrders }: OrdersTableProps) {
@@ -47,7 +50,7 @@ export function OrdersTable({ orders: initialOrders }: OrdersTableProps) {
       <TableHeader> 
         <TableRow>
           <TableHead className="w-12">
-            <Checkbox />
+            <Checkbox className="text-white" />
           </TableHead>
           <TableHead>Order No.</TableHead>
           <TableHead>Date</TableHead>
@@ -63,9 +66,35 @@ export function OrdersTable({ orders: initialOrders }: OrdersTableProps) {
         {orders.map((order) => (
           <TableRow key={order.id}>
             <TableCell>
-              <Checkbox />
+              <Checkbox className="text-white" />
             </TableCell>
-            <TableCell className="flex cursor-pointer flex-row items-center font-bold text-primary-700 underline">{order.orderNo} <FaRegEdit className="ml-2"/></TableCell>
+            <TableCell className="flex cursor-pointer flex-row items-center font-bold text-primary-700 underline">
+              <Dialog>
+                <DialogTrigger>
+                  <div className="flex items-center">
+                    {order.orderNo}
+                    <FaRegEdit className="ml-2"/>
+                  </div>
+                </DialogTrigger> 
+                <DialogContent className="bg-neutral-2">
+                  <DialogHeader>
+                    <DialogTitle>Are you absolutely sure?</DialogTitle>
+                    <DialogDescription className="py-4 text-neutral-6">
+                    This action cannot be undone. This will permanently delete your account
+                    and remove your data from our servers.
+                    </DialogDescription>
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button className="cursor-pointer" variant="outline" asChild>
+                          <div>Cancel</div>
+                        </Button>
+                      </DialogClose>
+                      <Button className="bg-accent-destructive text-neutral-2">Delete</Button>
+                    </DialogFooter>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
+            </TableCell>
             <TableCell>{order.date}</TableCell>
             <TableCell>{order.customerName}</TableCell>
             <TableCell>

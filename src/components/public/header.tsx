@@ -70,7 +70,8 @@ const HeaderLP = React.memo(() => {
         <div 
           className={cn(
             'mx-auto w-full items-center justify-between md:order-1 md:flex md:w-auto md:justify-center transition-all duration-300 ease-in-out',
-            showNav ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
+            showNav ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0',
+            'md:max-h-screen md:opacity-100' // Ensure visibility on large screens
           )}
           id="navbar-cta"
         >

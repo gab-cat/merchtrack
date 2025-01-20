@@ -7,6 +7,7 @@ model Payment {
   paymentDate   DateTime       @default(now())
   amount        Decimal        @default(0)
   paymentMethod PaymentMethod  @default(CASH)
+  paymentSite   PaymentSite    @default(ONSITE)
   paymentStatus PaymentStatus  @default(PENDING)
   referenceNo   String         @default("")
   memo          String?
@@ -44,7 +45,6 @@ enum PaymentType {
   REFUND
 }
 
-
 enum PaymentMethod {
   CASH
   BANK_TRANSFER
@@ -53,3 +53,7 @@ enum PaymentMethod {
   OTHERS
 }
 
+enum PaymentSite {
+  ONSITE
+  OFFSITE
+}

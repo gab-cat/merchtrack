@@ -17,13 +17,15 @@ export function AdminSidebar() {
       {/* Logo Section */}
       <div className="flex items-center justify-center p-6">
         <Link href="/admin" className="flex flex-col items-center gap-2">
-          <Image
-            src="/img/logo.png"
-            alt="MerchTrack Logo"
-            width={64}
-            height={64}
-            className="w-auto"
-          />
+          <div className="relative size-16">
+            <Image
+              src="/img/logo.png"
+              alt="MerchTrack Logo"
+              layout="fill"
+              objectFit="contain"
+              className="w-auto"
+            />
+          </div>
           <span className="text-2xl font-bold tracking-tighter text-neutral-7">MerchTrack</span>
         </Link>
       </div>
@@ -70,7 +72,7 @@ export function AdminSidebar() {
         </div>
         <Button variant="ghost" className="w-full justify-start gap-2">
           <FiLogOut className="size-4" />
-          Log out
+          Back to Customer View
         </Button>
       </div>
     </div>
