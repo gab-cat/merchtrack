@@ -1,7 +1,7 @@
 model Fulfillment {
   id              String            @id @default(ulid())
   isDeleted       Boolean           @default(false)
-  orderId         String            @unique
+  orderId         String
   fulfillmentDate DateTime          @default(now())
   processedById   String?
   status          FulfillmentStatus @default(PENDING)
@@ -14,6 +14,9 @@ model Fulfillment {
 
   @@index([processedById], name: "idx_fulfillment_processedById")
   @@index([isDeleted], name: "idx_fulfillment_isDeleted")
+  @@index([status], name: "idx_fulfillment_status")
+  @@index([fulfillmentDate], name: "idx_fulfillment_date")
+  @@index([orderId], name: "idx_fulfillment_orderId")
 }
 
 enum FulfillmentStatus {
