@@ -3,10 +3,8 @@ model CustomerSatisfactionSurvey {
   orderId    String   @unique
   categoryId String
   submitDate DateTime @default(now())
-  question1  Int
-  question2  Int
-  question3  Int
-  question4  Int
+  answers    Json     // Store answers as {questionId: score}
+  metadata   Json?    // For future extensibility
   comments   String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -14,8 +12,6 @@ model CustomerSatisfactionSurvey {
   // Relationships
   order    Order           @relation(fields: [orderId], references: [id])
   category SurveyCategory  @relation(fields: [categoryId], references: [id])
-
-  Order    Order[]         @relation("OrderToSurvey")
 
   @@index([categoryId], name: "idx_survey_categoryId")
 }
