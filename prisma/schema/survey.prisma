@@ -25,14 +25,14 @@ model SurveyCategory {
   isDeleted   Boolean   @default(false)
   name        String
   description String?
-  question1   String
-  question2   String
-  question3   String
-  question4   String
+  question1   String    @db.VarChar(200)
+  question2   String    @db.VarChar(200)
+  question3   String    @db.VarChar(200)
+  question4   String    @db.VarChar(200)
   surveys     CustomerSatisfactionSurvey[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   @@index([name], name: "idx_surveycategory_name")
-  @@index([isDeleted], name: "idx_survey-category_isDeleted")
+  @@index([isDeleted], name: "idx_surveycategory_isDeleted")
 }
