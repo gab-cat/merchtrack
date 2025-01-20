@@ -28,6 +28,11 @@ enum PaymentStatus {
   VERIFIED
   PENDING
   DECLINED
+  PROCESSING
+  FAILED
+  REFUND_PENDING
+  REFUNDED
+  CANCELLED
 }
 
 enum PaymentType {
