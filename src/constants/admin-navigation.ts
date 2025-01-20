@@ -6,9 +6,9 @@ import {
   MdEmail, 
   MdBarChart
 } from 'react-icons/md';
-import { IconType } from 'react-icons';
+import type { IconType } from 'react-icons';
   
-export interface AdminNavigation {
+export type AdminNavigation = {
   name: string
   href: string
   icon: IconType

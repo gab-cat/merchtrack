@@ -34,7 +34,7 @@ const buttonVariants = cva(
   }
 );
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
+ 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {

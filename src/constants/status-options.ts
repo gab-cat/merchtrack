@@ -16,8 +16,8 @@ export const orderStatusOptions: StatusOption[] = [
 ];
 
 export const paymentMethodOptions: StatusOption[] = [
-  { label: "Onsite", value: "onsite", className: "bg-green-600" },
-  { label: "Offsite", value: "offsite", className: "bg-blue-600" },
+  { label: "Onsite", value: "onsite", className: "bg-green-600 text-white" },
+  { label: "Offsite", value: "offsite", className: "bg-blue-600 text-white" },
 ];
 
 export const customerTypeOptions: StatusOption[] = [

@@ -15,7 +15,7 @@ import { OrderStatus, PaymentStatus, PaymentMethod, CustomerType, StatusOption }
 
 type StatusType = OrderStatus | PaymentStatus | PaymentMethod | CustomerType;
 
-interface StatusDropdownProps {
+type StatusDropdownProps = {
   options: StatusOption[];
   value: StatusType;
   onChange: (value: StatusType) => void;
@@ -43,7 +43,7 @@ export function StatusDropdown({ options, value, onChange, align = "center" }: S
           >
             {selectedOption?.label || value}
           </Badge>
-          <MdKeyboardArrowDown className="h-3 w-3 opacity-50" />
+          <MdKeyboardArrowDown className="size-3 opacity-50" />
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent align={align} className="min-w-[120px]">

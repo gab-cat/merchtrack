@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import { useState, useEffect } from 'react';
+import { FaRegEdit } from "react-icons/fa";
+import { StatusDropdown } from "./status-dropdown";
 import {
   Table,
   TableBody,
@@ -11,7 +13,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { StatusDropdown } from "./status-dropdown";
 import { Order, OrderStatus, PaymentStatus, PaymentMethod, CustomerType } from "@/types/Misc";
 import { 
   paymentStatusOptions, 
@@ -20,6 +21,7 @@ import {
   customerTypeOptions 
 } from "@/constants/status-options";
 
+ 
 interface OrdersTableProps {
   orders: Order[];
 }
@@ -64,7 +66,7 @@ export function OrdersTable({ orders: initialOrders }: OrdersTableProps) {
             <TableCell>
               <Checkbox />
             </TableCell>
-            <TableCell>{order.orderNo}</TableCell>
+            <TableCell className="flex cursor-pointer flex-row items-center font-bold text-primary-700 underline">{order.orderNo} <FaRegEdit className="ml-2"/></TableCell>
             <TableCell>{order.date}</TableCell>
             <TableCell>{order.customerName}</TableCell>
             <TableCell>
