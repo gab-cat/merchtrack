@@ -1,0 +1,21 @@
+model Message {
+  id        String   @id @default(ulid())
+  isArchived Boolean  @default(false)
+  isRead    Boolean  @default(false)
+  isResolved Boolean @default(false)
+  isSentByCustomer Boolean @default(false)
+  isSentByAdmin Boolean @default(false)
+  sentBy    String?
+  email     String
+  subject   String
+  message   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  user      User? @relation("MessageToUser", fields: [sentBy], references: [id])
+  @@index([isArchived], name: "idx_message_isArchived")
+  @@index([isRead], name: "idx_message_isRead")
+  @@index([isResolved], name: "idx_message_isResolved")
+  @@index([isRead, isResolved, isSentByCustomer, isArchived], name: "idx_message_initial")
+}

@@ -38,6 +38,7 @@ model User {
   @@index([email], name: "idx_user_email")
   @@index([clerkId], name: "idx_user_clerkId")
   @@index([isDeleted], name: "idx_user_isDeleted")
+  Message Message[] @relation("MessageToUser")
 }
 
 enum Role {
