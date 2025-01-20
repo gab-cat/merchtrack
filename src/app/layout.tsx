@@ -45,8 +45,11 @@ export default function RootLayout({
       </head>
       <ClerkProvider 
         signUpUrl='/sign-up'
-        signUpFallbackRedirectUrl='/'
-        signUpForceRedirectUrl='/faqs'
+        signUpFallbackRedirectUrl='/contact'
+        signUpForceRedirectUrl='/admin/orders'
+        signInUrl='/sign-in'
+        signInFallbackRedirectUrl='/admin/orders'
+        signInForceRedirectUrl='/admin/orders'
         appearance={{
           layout: {
             logoImageUrl: '/img/merch-track-logo.png',
