@@ -4,6 +4,10 @@ model Permission {
   code             String           @unique
   description      String?
   userPermissions  UserPermission[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@index([code], name: "idx_permission_code")
 }
 
 // Pivot table for many-to-many relationship between User and Permission
