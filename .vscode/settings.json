@@ -1,0 +1,15 @@
+// VSCode workspace settings for MerchTrack project
+// Configures automatic ESLint fixes on file save and
+// specifies which file types should be validated by ESLint:
+// - JavaScript (.js)
+// - React JavaScript (.jsx) 
+// - TypeScript (.ts)
+// - React TypeScript (.tsx)
+{
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "always"
+  },
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "javascript.preferences.importModuleSpecifier": "non-relative"
+}

@@ -1,0 +1,29 @@
+model Fulfillment {
+  id              String            @id @default(ulid())
+  isDeleted       Boolean           @default(false)
+  orderId         String
+  fulfillmentDate DateTime          @default(now())
+  processedById   String?
+  status          FulfillmentStatus @default(PENDING)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  // Relations
+  order       Order @relation(fields: [orderId], references: [id])
+  processedBy User? @relation(fields: [processedById], references: [id])
+
+  @@index([processedById], name: "idx_fulfillment_processedById")
+  @@index([isDeleted], name: "idx_fulfillment_isDeleted")
+  @@index([status], name: "idx_fulfillment_status")
+  @@index([fulfillmentDate], name: "idx_fulfillment_date")
+  @@index([orderId], name: "idx_fulfillment_orderId")
+}
+
+enum FulfillmentStatus {
+  PENDING
+  PRODUCTION
+  READY
+  COMPLETED
+  CANCELLED
+}
+

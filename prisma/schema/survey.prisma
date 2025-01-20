@@ -1,0 +1,35 @@
+model CustomerSatisfactionSurvey {
+  id         String   @id @default(ulid())
+  orderId    String   @unique
+  categoryId String
+  submitDate DateTime @default(now())
+  answers    Json     // Store answers as {questionId: score}
+  metadata   Json?    // For future extensibility
+  comments   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relationships
+  order    Order           @relation(fields: [orderId], references: [id])
+  category SurveyCategory  @relation(fields: [categoryId], references: [id])
+
+  @@index([categoryId], name: "idx_survey_categoryId")
+  Order Order[] @relation("OrderToSurvey")
+}
+
+model SurveyCategory {
+  id          String    @id @default(ulid())
+  isDeleted   Boolean   @default(false)
+  name        String
+  description String?
+  question1   String    @db.VarChar(200)
+  question2   String    @db.VarChar(200)
+  question3   String    @db.VarChar(200)
+  question4   String    @db.VarChar(200)
+  surveys     CustomerSatisfactionSurvey[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([name], name: "idx_surveycategory_name")
+  @@index([isDeleted], name: "idx_surveycategory_isDeleted")
+}

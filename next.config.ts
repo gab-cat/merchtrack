@@ -8,6 +8,18 @@ const nextConfig: NextConfig = {
     buildActivity: true, 
     buildActivityPosition: 'bottom-left', 
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'img.clerk.com',
+      }
+    ],
+  },
+  serverExternalPackages: ['require-in-the-middle'],
+  eslint: {
+    ignoreDuringBuilds: true
+  }
 };
 
 export default withSentryConfig(nextConfig, {
@@ -16,6 +28,9 @@ export default withSentryConfig(nextConfig, {
 
   org: "ateneo-de-naga-university",
   project: "merchtrack",
+  sourcemaps: {
+    deleteSourcemapsAfterUpload: true,
+  },
 
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,
