@@ -19,7 +19,7 @@ import {
   orderStatusOptions, 
   paymentMethodOptions, 
   customerTypeOptions 
-} from "@/constants/status-options";
+} from "@/constants";
 
  
 interface OrdersTableProps {
@@ -28,14 +28,13 @@ interface OrdersTableProps {
 
 export function OrdersTable({ orders: initialOrders }: OrdersTableProps) {
   const [orders, setOrders] = useState(initialOrders);
-  const [isClient, setIsClient] = useState(false); // State to track client-side rendering
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  if (!isClient) return null; // Render nothing during server-side rendering
-
+  if (!isClient) return <div>Loading orders...</div>;
   const updateOrder = (id: string, field: keyof Order, value: OrderStatus | PaymentStatus | PaymentMethod | CustomerType) => {
 
     setOrders(orders.map(order => 
@@ -101,7 +100,12 @@ export function OrdersTable({ orders: initialOrders }: OrdersTableProps) {
                 align="start"
               />
             </TableCell>
-            <TableCell className="text-right">₱{order.amount.toFixed(2)}</TableCell>
+            <TableCell className="text-right">
+              ₱{typeof order.amount === 'number' && !isNaN(order.amount) 
+                ? order.amount.toFixed(2) 
+                : '0.00'
+              }
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>

@@ -7,6 +7,7 @@ import {
   MdBarChart
 } from 'react-icons/md';
 import type { IconType } from 'react-icons';
+import { OrderStatus } from '@prisma/client';
   
 export type AdminNavigation = {
   name: string
@@ -47,3 +48,11 @@ export const AdminLinks: AdminNavigation[] = [
   },
 ];
 
+export const ADMIN_TABS = [
+  { value: null, label: 'All' },
+  { value: OrderStatus.PENDING, label: 'Pending' },
+  { value: OrderStatus.PROCESSING, label: 'Processing' },
+  { value: OrderStatus.READY, label: 'Ready To Pickup' },
+  { value: OrderStatus.CANCELLED, label: 'Canceled' },
+  { value: OrderStatus.DELIVERED, label: 'Unpaid' },
+];

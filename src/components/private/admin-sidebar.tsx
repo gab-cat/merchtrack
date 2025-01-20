@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { AdminLinks } from "@/constants/admin-navigation";
+import { AdminLinks } from "@/constants";
 
 export function AdminSidebar() {
   const pathname = usePathname();

@@ -32,6 +32,9 @@ export function StatusDropdown({ options, value, onChange, align = "center" }: S
   if (!isClient) return null;  // Prevent rendering on the server side
 
   const selectedOption = options.find(option => option.value === value);
+  if (!selectedOption) {
+    console.warn(`No option found for value: ${value}`);
+  }
 
   return (
     <DropdownMenu>
