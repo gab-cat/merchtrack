@@ -38,7 +38,7 @@ const ContactPage = () => {
           <label htmlFor="message" className="block font-medium ">
               Message
           </label>
-          <TextArea id="message" placeholder="Write your message here..."></TextArea>
+          <TextArea id="message" placeholder="Write your message here..." />
         </div>
         <Button className="ml-auto w-full text-neutral-1 sm:w-auto">Send message</Button>
       </form>

@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Dialog } from "@radix-ui/react-dialog";
 import { AdminSidebar } from "@/components/private/admin-sidebar";
 
 class AdminErrorBoundary extends React.Component<
@@ -30,11 +29,9 @@ export default function AdminLayout({ children }: Readonly<{ children: React.Rea
     <div className="flex min-h-screen text-neutral-7">
       <AdminSidebar />
       <AdminErrorBoundary>
-        <Dialog>
-          <div className="flex-1">
-            {children}
-          </div>
-        </Dialog>
+        <div className="flex-1">
+          {children}
+        </div>
       </AdminErrorBoundary>
     </div>
   );
