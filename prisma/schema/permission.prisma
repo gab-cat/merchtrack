@@ -11,8 +11,8 @@ model UserPermission {
   userId       String
   permissionId String
 
-  user        User        @relation(fields: [userId], references: [id])
-  permission  Permission  @relation(fields: [permissionId], references: [id])
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission  Permission  @relation(fields: [permissionId], references: [id], onDelete: Cascade)
 
   // Composite primary key for the pivot
   @@id([userId, permissionId])
