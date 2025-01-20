@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { SignInButton, SignUpButton, useUser } from '@clerk/nextjs';
 import { usePathname } from 'next/navigation';
 import HeaderLinks from './header-links';
+import { cn } from '@/lib/utils';
 
 const HeaderLP = React.memo(() => {
   const { isSignedIn } = useUser();
@@ -67,26 +68,27 @@ const HeaderLP = React.memo(() => {
           </button>
         </div>
         <div 
-          className="mx-auto w-full items-center justify-between md:order-1 md:flex md:w-auto md:justify-center"
+          className={cn(
+            'mx-auto w-full items-center justify-between md:order-1 md:flex md:w-auto md:justify-center transition-all duration-300 ease-in-out',
+            showNav ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
+          )}
           id="navbar-cta"
         >
           <ul className="mx-auto mt-4 flex w-full flex-col rounded-lg bg-gray-50 p-4 text-center font-medium md:mt-0 md:flex-row md:space-x-8 md:border-0 md:bg-transparent md:p-0">
-            {!isSignedIn && (<>
-              <li className="md:hidden">
-                <SignInButton>
-                  <button type='button' className="focus:ring-accent-7 my-1 w-1/2 rounded-lg bg-neutral-1 px-4 py-2 text-center text-sm font-medium text-primary outline outline-1 outline-primary hover:opacity-70 focus:outline-none focus:ring-4">
+            <li className="md:hidden">
+              <SignInButton>
+                <button type='button' className="focus:ring-accent-7 my-1 w-1/2 rounded-lg bg-neutral-1 px-4 py-2 text-center text-sm font-medium text-primary outline outline-1 outline-primary hover:opacity-70 focus:outline-none focus:ring-4">
                         Sign In
-                  </button>
-                </SignInButton>
-              </li>
-              <li className="md:hidden">
-                <SignUpButton>
-                  <button type='button' className="focus:ring-accent-7 w-1/2 rounded-lg bg-primary px-4 py-2 text-center text-sm font-medium text-neutral-1 hover:opacity-90 focus:outline-none focus:ring-4">
+                </button>
+              </SignInButton>
+            </li>
+            <li className="md:hidden">
+              <SignUpButton>
+                <button type='button' className="focus:ring-accent-7 w-1/2 rounded-lg bg-primary px-4 py-2 text-center text-sm font-medium text-neutral-1 hover:opacity-90 focus:outline-none focus:ring-4">
                         Sign Up
-                  </button>
-                </SignUpButton>
-              </li>
-            </>)}
+                </button>
+              </SignUpButton>
+            </li>
             <hr className='m-2' />
             <HeaderLinks pathname={pathname}/>
           </ul>
