@@ -20,7 +20,7 @@ model Order {
   payments                   Payment[]     @relation("PaymentToOrder")
   customer                   User          @relation("OrderToUser", fields: [customerId], references: [id])
   processedBy                User?         @relation("OrderToProcessor", fields: [processedById], references: [id])
-  customerSatisfactionSurvey CustomerSatisfactionSurvey? @relation("OrderToSurvey", fields: [customerSatisfactionSurveyid], references: [id])
+  customerSatisfactionSurvey CustomerSatisfactionSurvey? @relation("OrderToSurvey", fields: [customerSatisfactionSurveyId], references: [id])
 
   Fulfillment Fulfillment[]
 
@@ -28,6 +28,7 @@ model Order {
   @@index([processedById], name: "idx_order_processedById")
   @@index([status], name: "idx_order_status")
   @@index([isDeleted], name: "idx_order_isDeleted")
+  CustomerSatisfactionSurvey CustomerSatisfactionSurvey[]
 }
 
 model OrderItem {

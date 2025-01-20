@@ -14,6 +14,7 @@ model CustomerSatisfactionSurvey {
   category SurveyCategory  @relation(fields: [categoryId], references: [id])
 
   @@index([categoryId], name: "idx_survey_categoryId")
+  Order Order[] @relation("OrderToSurvey")
 }
 
 model SurveyCategory {
