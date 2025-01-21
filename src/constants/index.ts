@@ -4,4 +4,4 @@ export { HEADER_LINKS } from './header';
 export { FAQS_CONTENT, FAQS_DETAILS } from './faqs';
 export { AdminLinks, type AdminNavigation, ADMIN_TABS } from './admin-navigation';
 export { paymentStatusOptions, orderStatusOptions, paymentMethodOptions, customerTypeOptions } from './status-options';
-
+export { ABOUT_US_CONTENT } from './about-us';
