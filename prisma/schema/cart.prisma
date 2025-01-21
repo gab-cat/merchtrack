@@ -1,0 +1,31 @@
+model Cart {
+  id          String          @id @default(ulid())
+  userId      String
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  // Relations
+  user        User            @relation(fields: [userId], references: [id])
+  cartItems   CartItem[]
+
+  @@index([userId], name: "idx_cart_userId")
+}
+
+model CartItem {
+  id            String          @id @default(ulid())
+  cartId        String
+  productId     String
+  variantId     String?
+  quantity      Int             @default(1)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  // Relations
+  cart          Cart            @relation(fields: [cartId], references: [id])
+  product       Product         @relation(fields: [productId], references: [id])
+  variant       ProductVariant? @relation(fields: [variantId], references: [id])
+
+  @@index([cartId], name: "idx_cartItem_cartId")
+  @@index([productId], name: "idx_cartItem_productId")
+  @@index([variantId], name: "idx_cartItem_variantId")
+}

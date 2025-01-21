@@ -17,6 +17,7 @@ model User {
   updatedAt      DateTime         @updatedAt
   role           Role             @default(STUDENT)
   college        College          @default(NOT_APPLICABLE)
+  isMerchant     Boolean          @default(false)
 
   // Relations
   listedProducts    Product[]
@@ -39,6 +40,10 @@ model User {
   @@index([clerkId], name: "idx_user_clerkId")
   @@index([isDeleted], name: "idx_user_isDeleted")
   Message Message[] @relation("MessageToUser")
+  Cart Cart[]
+  createdTickets Ticket[] @relation("CreatedTickets")
+  assignedTickets Ticket[] @relation("AssignedTickets")
+  Review Review[]
 }
 
 enum Role {

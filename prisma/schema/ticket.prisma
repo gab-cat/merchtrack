@@ -1,0 +1,32 @@
+model Ticket {
+  id             String          @id @default(ulid())
+  title          String
+  description    String
+  status         TicketStatus    @default(OPEN)
+  priority       TicketPriority  @default(MEDIUM)
+  createdById    String
+  assignedToId   String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  updates        Json            @default("[]")
+
+  // Relations
+  createdBy      User            @relation("CreatedTickets", fields: [createdById], references: [id])
+  assignedTo     User?           @relation("AssignedTickets", fields: [assignedToId], references: [id])
+
+  @@index([createdById], name: "idx_ticket_createdById")
+  @@index([assignedToId], name: "idx_ticket_assignedToId")
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+}

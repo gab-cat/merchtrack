@@ -1,8 +1,11 @@
 // Permission entity with a code that can be attached to users (e.g., 'collect_payments')
 model Permission {
-  id               String           @id @default(ulid())
-  code             String           @unique
+  code             String           @id @unique
   description      String?
+  canCreate        Boolean          @default(false)
+  canRead          Boolean          @default(false)
+  canUpdate        Boolean          @default(false)
+  canDelete        Boolean          @default(false)
   userPermissions  UserPermission[]
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
@@ -16,7 +19,7 @@ model UserPermission {
   permissionId String
 
   user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  permission  Permission  @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  permission  Permission  @relation(fields: [permissionId], references: [code], onDelete: Cascade)
 
   // Composite primary key for the pivot
   @@id([userId, permissionId])

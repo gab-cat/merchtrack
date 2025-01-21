@@ -14,7 +14,7 @@ async function main() {
   // Create the admin user
   const adminUser = await prisma.user.create({
     data: {
-      clerkId: 'clerk_id_here',
+      clerkId: process.env.CLERK_TEST_ADMIN_USER ?? 'clerk_id_here',
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
       email: faker.internet.email(),
@@ -29,7 +29,7 @@ async function main() {
   // Create the staff user reporting to admin
   const staffUser = await prisma.user.create({
     data: {
-      clerkId: 'clerk_id_here',
+      clerkId: process.env.CLERK_TEST_STAFF_USER ?? 'clerk_id_here',
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
       email: faker.internet.email(),
@@ -131,6 +131,25 @@ async function main() {
     )
   );
   
+  // Create carts for users
+  await Promise.all(
+    [adminUser, staffUser].map(user =>
+      prisma.cart.create({
+        data: {
+          userId: user.id,
+          cartItems: {
+            create: Array(faker.number.int({ min: 1, max: 5 })).fill(null).map(() => ({
+              productId: products[faker.number.int({ min: 0, max: 9 })].id,
+              variantId: faker.helpers.arrayElement(products[faker.number.int({ min: 0, max: 9 })].variants).id,
+              quantity: faker.number.int({ min: 1, max: 5 })
+            }))
+          }
+        },
+        include: { cartItems: true }
+      })
+    )
+  );
+
   // Create 10 payments
   await Promise.all(
     orders.map(order =>
@@ -215,6 +234,36 @@ async function main() {
           userText: faker.lorem.sentence(),
           createdById: staffUser.id,
           reason: faker.lorem.sentence()
+        }
+      })
+    )
+  );
+
+  // Create 10 tickets
+  await Promise.all(
+    Array(10).fill(null).map(() =>
+      prisma.ticket.create({
+        data: {
+          title: faker.lorem.sentence(),
+          description: faker.lorem.paragraph(),
+          createdById: adminUser.id,
+          assignedToId: staffUser.id,
+          status: 'OPEN',
+          priority: 'MEDIUM'
+        }
+      })
+    )
+  );
+
+  // Create 10 reviews
+  await Promise.all(
+    Array(10).fill(null).map(() =>
+      prisma.review.create({
+        data: {
+          productId: products[faker.number.int({ min: 0, max: 9 })].id,
+          userId: adminUser.id,
+          rating: faker.number.int({ min: 1, max: 5 }),
+          comment: faker.lorem.sentence()
         }
       })
     )
