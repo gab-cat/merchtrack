@@ -100,7 +100,7 @@ declare enum PaymentMethod {
 declare type PriceMap = {
   [Role.PLAYER]: number;
   [Role.STUDENT]: number;
-  [Role.STUDENT_NON_COCS]: number;
+  [Role.STUDENT_NON_COLLEGE]: number;
   [Role.STAFF_FACULTY]: number;
   [Role.ALUMNI]: number;
   [Role.OTHERS]: number;
@@ -117,6 +117,8 @@ declare enum Role {
   ALUMNI = "ALUMNI",
   OTHERS = "OTHERS"
 }
+
+declare type RoleType = "PLAYER" | "STUDENT" | "STAFF_FACULTY" | "ALUMNI" | "OTHERS";
 
 /**
  * Represents the different colleges.

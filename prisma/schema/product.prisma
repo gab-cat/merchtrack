@@ -28,7 +28,6 @@ model Product {
 
   @@index([slug], name: "idx_product_slug")
   @@index([isDeleted], name: "idx_product_isDeleted")
-  CartItem CartItem[]
 }
 
 // ProductVariant model for per-variant pricing and attributes

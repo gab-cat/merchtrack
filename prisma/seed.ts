@@ -139,7 +139,6 @@ async function main() {
           userId: user.id,
           cartItems: {
             create: Array(faker.number.int({ min: 1, max: 5 })).fill(null).map(() => ({
-              productId: products[faker.number.int({ min: 0, max: 9 })].id,
               variantId: faker.helpers.arrayElement(products[faker.number.int({ min: 0, max: 9 })].variants).id,
               quantity: faker.number.int({ min: 1, max: 5 })
             }))

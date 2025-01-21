@@ -14,7 +14,6 @@ model Cart {
 model CartItem {
   id            String          @id @default(ulid())
   cartId        String
-  productId     String
   variantId     String?
   quantity      Int             @default(1)
   createdAt     DateTime        @default(now())
@@ -22,10 +21,8 @@ model CartItem {
 
   // Relations
   cart          Cart            @relation(fields: [cartId], references: [id])
-  product       Product         @relation(fields: [productId], references: [id])
   variant       ProductVariant? @relation(fields: [variantId], references: [id])
 
   @@index([cartId], name: "idx_cartItem_cartId")
-  @@index([productId], name: "idx_cartItem_productId")
   @@index([variantId], name: "idx_cartItem_variantId")
 }
