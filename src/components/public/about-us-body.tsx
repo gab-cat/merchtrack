@@ -1,4 +1,5 @@
 import React from 'react';
+import { ABOUT_DEVELOPERS } from '@/constants';
 
 function AboutUsBody() {
   return (
@@ -83,50 +84,19 @@ function AboutUsBody() {
                     Meet Our Developers
               </h2>
               <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
-                <div className="group text-center">
-                  <div className="mb-4 overflow-hidden rounded-xl transition-all duration-300 group-hover:ring-4 group-hover:ring-blue-200">
-                    <img 
-                      src="https://i.pravatar.cc/300?img=1" 
-                      alt="Developer 1"
-                      className="aspect-square w-full object-cover transition-transform duration-300 group-hover:scale-110"
-                    />
+                {ABOUT_DEVELOPERS.map((developer, index) => (
+                  <div key={index} className="group text-center">
+                    <div className="mb-4 overflow-hidden rounded-xl transition-all duration-300 group-hover:ring-4 group-hover:ring-indigo-200">
+                      <img
+                        src={`https://i.pravatar.cc/300?img=${index + 1}`} // Dynamic image source
+                        alt={`Developer ${index + 1}`}
+                        className="aspect-square w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-800">{developer.first_name}<br/>{developer.surname}</h3>
+                    <p className="text-sm text-gray-600">{developer.role}</p>
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-800">Sarah Chen</h3>
-                  <p className="text-sm text-gray-600">Lead Developer</p>
-                </div>
-                <div className="group text-center">
-                  <div className="mb-4 overflow-hidden rounded-xl transition-all duration-300 group-hover:ring-4 group-hover:ring-green-200">
-                    <img 
-                      src="https://i.pravatar.cc/300?img=2" 
-                      alt="Developer 2"
-                      className="aspect-square w-full object-cover transition-transform duration-300 group-hover:scale-110"
-                    />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-800">Mike Johnson</h3>
-                  <p className="text-sm text-gray-600">Frontend Expert</p>
-                </div>
-                <div className="group text-center">
-                  <div className="mb-4 overflow-hidden rounded-xl transition-all duration-300 group-hover:ring-4 group-hover:ring-purple-200">
-                    <img 
-                      src="https://i.pravatar.cc/300?img=3" 
-                      alt="Developer 3"
-                      className="aspect-square w-full object-cover transition-transform duration-300 group-hover:scale-110"
-                    />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-800">Emma Wilson</h3>
-                  <p className="text-sm text-gray-600">Backend Engineer</p>
-                </div>
-                <div className="group text-center">
-                  <div className="mb-4 overflow-hidden rounded-xl transition-all duration-300 group-hover:ring-4 group-hover:ring-indigo-200">
-                    <img 
-                      src="https://i.pravatar.cc/300?img=4" 
-                      alt="Developer 4"
-                      className="aspect-square w-full object-cover transition-transform duration-300 group-hover:scale-110"
-                    />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-800">Alex Patel</h3>
-                  <p className="text-sm text-gray-600">UI/UX Designer</p>
-                </div>
+                ))}
               </div>
             </div>
           </div>

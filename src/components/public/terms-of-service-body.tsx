@@ -1,7 +1,7 @@
 import React from 'react';
 import { FOOTER_DETAILS } from '@/constants';
 
-function PrivacyPolicyBody() {
+function TermsOfServiceBody() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 px-4 py-16 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-4xl">   
@@ -11,102 +11,101 @@ function PrivacyPolicyBody() {
               <h2 className="mb-6 flex items-center text-2xl font-bold text-gray-800">
                 <span className="mr-4 rounded-lg bg-blue-100 p-2 text-blue-600">
                   <svg xmlns="http://www.w3.org/2000/svg" className="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </span>
-                Privacy Policy
+                Terms of Service
               </h2>
               <p className="mb-4 text-base leading-relaxed text-gray-600">
                 Last updated: January 1, 2024
               </p>
               <p className="text-base leading-relaxed text-gray-600">
-                We take your privacy seriously and are committed to protecting your personal information. 
-                This privacy policy explains how we collect, use, and safeguard your data.
+                Please read these Terms of Service carefully before using our services. 
+                These terms govern your use of our platform and services.
               </p>
             </div>
 
             <div className="mb-12">
-              <h2 className="mb-6 flex items-center text-2xl font-bold text-gray-800">
+              <h2 className="mb-8 flex items-center text-2xl font-bold text-gray-800">
                 <span className="mr-4 rounded-lg bg-green-100 p-2 text-green-600">
                   <svg xmlns="http://www.w3.org/2000/svg" className="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" />
                   </svg>
                 </span>
-                Information We Collect
+                Account Terms
               </h2>
               <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                 <div className="group rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 p-6 transition-all duration-300 hover:-translate-y-2 hover:bg-gradient-to-br hover:from-blue-50 hover:to-blue-100">
-                  <h3 className="mb-3 text-lg font-semibold text-gray-800 group-hover:text-blue-700">Personal Information</h3>
-                  <p className="text-sm text-gray-600 group-hover:text-blue-600">Name, email address, contact information, and any other information you provide to us directly.</p>
+                  <h3 className="mb-3 text-lg font-semibold text-gray-800 group-hover:text-blue-700">Account Creation</h3>
+                  <p className="text-sm text-gray-600 group-hover:text-blue-600">You must be at least 18 years old and provide accurate information during registration.</p>
                 </div>
                 <div className="group rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 p-6 transition-all duration-300 hover:-translate-y-2 hover:bg-gradient-to-br hover:from-green-50 hover:to-green-100">
-                  <h3 className="mb-3 text-lg font-semibold text-gray-800 group-hover:text-green-700">Usage Data</h3>
-                  <p className="text-sm text-gray-600 group-hover:text-green-600">Browser type, IP address, device information, and cookies data.</p>
+                  <h3 className="mb-3 text-lg font-semibold text-gray-800 group-hover:text-green-700">Account Security</h3>
+                  <p className="text-sm text-gray-600 group-hover:text-green-600">You are responsible for maintaining the security of your account credentials.</p>
                 </div>
               </div>
             </div>
 
             <div className="mb-12">
-              <h2 className="mb-6 flex items-center text-2xl font-bold text-gray-800">
+              <h2 className="mb-8 flex items-center text-2xl font-bold text-gray-800">
                 <span className="mr-4 rounded-lg bg-purple-100 p-2 text-purple-600">
                   <svg xmlns="http://www.w3.org/2000/svg" className="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </span>
-                How We Use Your Information
+                Service Usage
               </h2>
               <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
                 <div className="group rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 p-6 transition-all duration-300 hover:-translate-y-2 hover:bg-gradient-to-br hover:from-indigo-50 hover:to-indigo-100">
-                  <h3 className="mb-3 text-lg font-semibold text-gray-800 group-hover:text-indigo-700">Service Provision</h3>
-                  <p className="text-sm text-gray-600 group-hover:text-indigo-600">To provide and maintain our services</p>
+                  <h3 className="mb-3 text-lg font-semibold text-gray-800 group-hover:text-indigo-700">Fair Use</h3>
+                  <p className="text-sm text-gray-600 group-hover:text-indigo-600">Use services responsibly and within reasonable limits</p>
                 </div>
                 <div className="group rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 p-6 transition-all duration-300 hover:-translate-y-2 hover:bg-gradient-to-br hover:from-pink-50 hover:to-pink-100">
-                  <h3 className="mb-3 text-lg font-semibold text-gray-800 group-hover:text-pink-700">Communication</h3>
-                  <p className="text-sm text-gray-600 group-hover:text-pink-600">To contact you and send updates</p>
+                  <h3 className="mb-3 text-lg font-semibold text-gray-800 group-hover:text-pink-700">Prohibited Actions</h3>
+                  <p className="text-sm text-gray-600 group-hover:text-pink-600">No illegal or unauthorized use of services</p>
                 </div>
                 <div className="group rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 p-6 transition-all duration-300 hover:-translate-y-2 hover:bg-gradient-to-br hover:from-yellow-50 hover:to-yellow-100">
-                  <h3 className="mb-3 text-lg font-semibold text-gray-800 group-hover:text-yellow-700">Improvement</h3>
-                  <p className="text-sm text-gray-600 group-hover:text-yellow-600">To analyze and improve our services</p>
+                  <h3 className="mb-3 text-lg font-semibold text-gray-800 group-hover:text-yellow-700">Content Rules</h3>
+                  <p className="text-sm text-gray-600 group-hover:text-yellow-600">Respect intellectual property and community guidelines</p>
                 </div>
               </div>
             </div>
 
             <div className="mb-12">
-              <h2 className="mb-6 flex items-center text-2xl font-bold text-gray-800">
+              <h2 className="mb-8 flex items-center text-2xl font-bold text-gray-800">
                 <span className="mr-4 rounded-lg bg-red-100 p-2 text-red-600">
                   <svg xmlns="http://www.w3.org/2000/svg" className="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
                 </span>
-                Data Security
+                Liability & Disclaimers
               </h2>
-              <p className="mb-6 text-base leading-relaxed text-gray-600">
-                We implement appropriate security measures to protect your personal information against unauthorized access, 
-                alteration, disclosure, or destruction. These measures include:
+              <p className="mb-8 text-base leading-relaxed text-gray-600">
+                Our service limitations and disclaimers regarding service availability, warranties, and liability:
               </p>
               <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                 <div className="group rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 p-6 transition-all duration-300 hover:-translate-y-2 hover:bg-gradient-to-br hover:from-red-50 hover:to-red-100">
-                  <h3 className="mb-3 text-lg font-semibold text-gray-800 group-hover:text-red-700">Encryption</h3>
-                  <p className="text-sm text-gray-600 group-hover:text-red-600">All data transmission is encrypted using SSL technology</p>
+                  <h3 className="mb-3 text-lg font-semibold text-gray-800 group-hover:text-red-700">Service Availability</h3>
+                  <p className="text-sm text-gray-600 group-hover:text-red-600">We strive for 99.9% uptime but cannot guarantee uninterrupted service</p>
                 </div>
                 <div className="group rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 p-6 transition-all duration-300 hover:-translate-y-2 hover:bg-gradient-to-br hover:from-orange-50 hover:to-orange-100">
-                  <h3 className="mb-3 text-lg font-semibold text-gray-800 group-hover:text-orange-700">Access Controls</h3>
-                  <p className="text-sm text-gray-600 group-hover:text-orange-600">Strict access controls and authentication measures</p>
+                  <h3 className="mb-3 text-lg font-semibold text-gray-800 group-hover:text-orange-700">Warranty Disclaimer</h3>
+                  <p className="text-sm text-gray-600 group-hover:text-orange-600">Services provided &quot;as is&quot; without warranties of any kind</p>
                 </div>
               </div>
             </div>
 
             <div>
-              <h2 className="mb-6 flex items-center text-2xl font-bold text-gray-800">
+              <h2 className="mb-8 flex items-center text-2xl font-bold text-gray-800">
                 <span className="mr-4 rounded-lg bg-indigo-100 p-2 text-indigo-600">
                   <svg xmlns="http://www.w3.org/2000/svg" className="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </span>
-                Contact Us
+                Contact Information
               </h2>
               <p className="mb-4 text-base leading-relaxed text-gray-600">
-                If you have any questions about this Privacy Policy, please contact us at:
+                For questions about these Terms of Service, please contact us at:
               </p>
               <div className="rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 p-6">
                 <p className="text-base text-gray-800">
@@ -123,4 +122,4 @@ function PrivacyPolicyBody() {
   );
 }
 
-export default PrivacyPolicyBody;
+export default TermsOfServiceBody;
