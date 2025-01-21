@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 import tailwindConfig from '../../tailwind.config';
 import { SEO } from '@/constants';
 import Scripts from '@/components/misc/scripts';
+import { Toaster } from '@/components/ui/sonner';
 
 const DatadogInit = dynamic(() => import('@/components/misc/datadog-init'));
 
@@ -44,12 +45,6 @@ export default function RootLayout({
         </style>
       </head>
       <ClerkProvider 
-        signUpUrl='/sign-up'
-        signUpFallbackRedirectUrl='/contact'
-        signUpForceRedirectUrl='/admin/orders'
-        signInUrl='/sign-in'
-        signInFallbackRedirectUrl='/admin/orders'
-        signInForceRedirectUrl='/admin/orders'
         appearance={{
           layout: {
             logoImageUrl: '/img/merch-track-logo.png',
@@ -74,8 +69,13 @@ export default function RootLayout({
           className={`${interSans.variable} antialiased`}
         >
           {children}
-          <DatadogInit />
-          <Scripts />
+          {process.env.NODE_ENV === 'production' && (
+            <>
+              <DatadogInit />
+              <Scripts />
+            </>)
+          }
+          <Toaster />
         </body>
       </ClerkProvider>
     </html>

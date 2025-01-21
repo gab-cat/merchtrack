@@ -10,6 +10,26 @@ export type CustomerType =
   | 'alumni_cocs' 
   | 'other';
 
+export enum Role {
+    PLAYER = "PLAYER",
+    STUDENT = "STUDENT",
+    STAFF_FACULTY = "STAFF_FACULTY",
+    ALUMNI = "ALUMNI",
+    OTHERS = "OTHERS"
+  }
+
+export enum College {
+    NOT_APPLICABLE = "NOT_APPLICABLE",
+    COCS = "COCS",
+    STEP = "STEP",
+    ABBS = "ABBS",
+    JPIA = "JPIA",
+    ACHSS = "ACHSS",
+    ANSA = "ANSA",
+    COL = "COL",
+    AXI = "AXI"
+  }
+
 export interface Order {
   id: string;
   orderNo: string;

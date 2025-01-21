@@ -1,0 +1,1 @@
+export { checkRole } from './roles';

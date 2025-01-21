@@ -1,14 +1,20 @@
-"use client";
-
 import { type FC } from "react";
 import { BiDownload, BiTrash, BiUpload } from "react-icons/bi";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { OrdersTable } from "@/components/private/orders-table";
 import { AdminTopbar } from "@/components/private/admin-topbar";
 import { orders } from "@/types/Misc";
 import PageAnimation from "@/components/public/page-animation";
+import { checkRole } from "@/utils";
 
-const AdminOrdersPage: FC = () => {
+
+const PermissionDenied = dynamic(() => import("@/components/private/permission-denied"));
+
+const AdminOrdersPage: FC = async () => {
+  if (!await checkRole(["view_dashboard"])) {
+    return <PermissionDenied />;
+  }
   return (
     <PageAnimation>
       <div className="p-6">

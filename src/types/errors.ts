@@ -1,54 +1,48 @@
-export class ValidationError extends Error {
-  constructor(message: string) {
+class CustomError extends Error {
+  code: string;
+
+  constructor(message: string, name: string) {
     super(message);
-    this.name = 'ValidationError';
-    console.error(this.message);
-    console.error(this.stack);
+    this.name = name;
+    this.code = name;
+    Object.setPrototypeOf(this, new.target.prototype);
   }
 }
 
-export class PrismaError extends Error {
+export class ValidationError extends CustomError {
   constructor(message: string) {
-    super(message);
-    this.name = 'PrismaError';
-    console.error(this.message);
-    console.error(this.stack);
+    super(message, 'ValidationError');
   }
 }
 
-export class AuthenticationError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'AuthenticationError';
-    console.error(this.message);
-    console.error(this.stack);
+export class PrismaError extends CustomError {
+  constructor(message: string, stack?: string) {
+    super(message, 'PrismaError');
+    this.stack = stack;
   }
 }
 
-export class AuthorizationError extends Error {
+export class AuthenticationError extends CustomError {
   constructor(message: string) {
-    super(message);
-    this.name = 'AuthorizationError';
-    console.error(this.message);
-    console.error(this.stack);
+    super(message, 'AuthenticationError');
   }
 }
 
-export class NotFoundError extends Error {
+export class AuthorizationError extends CustomError {
   constructor(message: string) {
-    super(message);
-    this.name = 'NotFoundError';
-    console.error(this.message);
-    console.error(this.stack);
+    super(message, 'AuthorizationError');
   }
 }
 
-export class DatabaseError extends Error {
+export class NotFoundError extends CustomError {
   constructor(message: string) {
-    super(message);
-    this.name = 'DatabaseError';
-    console.error(this.message);
-    console.error(this.stack);
+    super(message, 'NotFoundError');
+  }
+}
+
+export class DatabaseError extends CustomError {
+  constructor(message: string) {
+    super(message, 'DatabaseError');
   }
 }
 
