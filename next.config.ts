@@ -17,6 +17,16 @@ const nextConfig: NextConfig = {
     ],
   },
   serverExternalPackages: ['require-in-the-middle'],
+  experimental: {
+    serverActions: {
+      allowedOrigins: [
+        'https://merchtrack.tech',
+        'https://staging.merchtrack.tech',
+        process.env.NEXT_PUBLIC_APP_URL as string,
+      ]
+    },
+    useLightningcss: true,
+  },
   eslint: {
     ignoreDuringBuilds: true
   }
