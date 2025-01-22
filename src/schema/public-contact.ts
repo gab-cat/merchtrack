@@ -1,4 +1,4 @@
-gimport { z } from "zod";
+import { z } from "zod";
 
 export const formContactSchema = z.object({
   email: z.string().email("Invalid email format").nonempty("Email is required"),
