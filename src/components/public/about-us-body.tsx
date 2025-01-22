@@ -1,22 +1,23 @@
 import React from 'react';
+import Image from 'next/image';
 import { ABOUT_DEVELOPERS } from '@/constants';
 
 function AboutUsBody() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 px-4 py-16 sm:px-6 lg:px-8">
+    <div className="min-h-screen px-4 py-16 font-inter sm:px-6 lg:px-8">
       <div className="mx-auto max-w-4xl">   
         <div className="overflow-hidden rounded-2xl bg-white transition-all">
           <div className="p-8 sm:p-12">
             <div className="mb-12">
               <h2 className="mb-6 flex items-center text-2xl font-bold text-gray-800">
                 <span className="mr-4 rounded-lg bg-blue-100 p-2 text-blue-600">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" role='img' aria-label='Mission Icon'>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </span>
                     Our Mission
               </h2>
-              <p className="text-base leading-relaxed text-gray-600">
+              <p className="text-sm leading-relaxed text-gray-600">
                     We are dedicated to creating innovative solutions that empower businesses 
                     and individuals to achieve their goals. Through cutting-edge technology 
                     and exceptional service, we strive to make a positive impact in the world.
@@ -34,15 +35,15 @@ function AboutUsBody() {
               </h2>
               <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
                 <div className="group rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 p-6 transition-all duration-300 hover:-translate-y-2 hover:bg-gradient-to-br hover:from-blue-50 hover:to-blue-100">
-                  <h3 className="mb-3 text-lg font-semibold text-gray-800 group-hover:text-blue-700">Innovation</h3>
+                  <h3 className="mb-3 text-lg font-semibold tracking-tight text-gray-800 group-hover:text-blue-700">Innovation</h3>
                   <p className="text-sm text-gray-600 group-hover:text-blue-600">Pushing boundaries and exploring new possibilities</p>
                 </div>
                 <div className="group rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 p-6 transition-all duration-300 hover:-translate-y-2 hover:bg-gradient-to-br hover:from-green-50 hover:to-green-100">
-                  <h3 className="mb-3 text-lg font-semibold text-gray-800 group-hover:text-green-700">Excellence</h3>
+                  <h3 className="mb-3 text-lg font-semibold tracking-tight text-gray-800 group-hover:text-green-700">Excellence</h3>
                   <p className="text-sm text-gray-600 group-hover:text-green-600">Delivering quality in everything we do</p>
                 </div>
                 <div className="group rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 p-6 transition-all duration-300 hover:-translate-y-2 hover:bg-gradient-to-br hover:from-purple-50 hover:to-purple-100">
-                  <h3 className="mb-3 text-lg font-semibold text-gray-800 group-hover:text-purple-700">Integrity</h3>
+                  <h3 className="mb-3 text-lg font-semibold tracking-tight text-gray-800 group-hover:text-purple-700">Integrity</h3>
                   <p className="text-sm text-gray-600 group-hover:text-purple-600">Building trust through honest practices</p>
                 </div>
               </div>
@@ -57,7 +58,7 @@ function AboutUsBody() {
                 </span>
                     Our Team
               </h2>
-              <p className="mb-8 text-base leading-relaxed text-gray-600">
+              <p className="mb-8 text-sm leading-relaxed text-gray-600">
                     Our diverse team of experts brings together years of experience in 
                     software development, design, and customer service. We&apos;re passionate 
                     about creating solutions that make a difference.
@@ -87,9 +88,11 @@ function AboutUsBody() {
                 {ABOUT_DEVELOPERS.map((developer, index) => (
                   <div key={index} className="group text-center">
                     <div className="mb-4 overflow-hidden rounded-xl transition-all duration-300 group-hover:ring-4 group-hover:ring-indigo-200">
-                      <img
-                        src={`https://i.pravatar.cc/300?img=${index + 1}`} // Dynamic image source
+                      <Image
+                        src='/img/sample_pfp.jpg' // Dynamic image source
                         alt={`Developer ${index + 1}`}
+                        height={300}
+                        width={300}
                         className="aspect-square w-full object-cover transition-transform duration-300 group-hover:scale-110"
                       />
                     </div>

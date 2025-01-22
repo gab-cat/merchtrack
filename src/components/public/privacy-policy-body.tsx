@@ -3,7 +3,7 @@ import { FOOTER_DETAILS } from '@/constants';
 
 function PrivacyPolicyBody() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 px-4 py-16 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b px-4 py-16 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-4xl">   
         <div className="overflow-hidden rounded-2xl bg-white transition-all">
           <div className="p-8 sm:p-12">
@@ -19,7 +19,7 @@ function PrivacyPolicyBody() {
               <p className="mb-4 text-base leading-relaxed text-gray-600">
                 Last updated: January 1, 2024
               </p>
-              <p className="text-base leading-relaxed text-gray-600">
+              <p className="text-sm leading-relaxed text-gray-600">
                 We take your privacy seriously and are committed to protecting your personal information. 
                 This privacy policy explains how we collect, use, and safeguard your data.
               </p>
@@ -80,14 +80,14 @@ function PrivacyPolicyBody() {
                 </span>
                 Data Security
               </h2>
-              <p className="mb-6 text-base leading-relaxed text-gray-600">
+              <p className="mb-6 text-sm leading-relaxed text-gray-600">
                 We implement appropriate security measures to protect your personal information against unauthorized access, 
                 alteration, disclosure, or destruction. These measures include:
               </p>
               <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                 <div className="group rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 p-6 transition-all duration-300 hover:-translate-y-2 hover:bg-gradient-to-br hover:from-red-50 hover:to-red-100">
                   <h3 className="mb-3 text-lg font-semibold text-gray-800 group-hover:text-red-700">Encryption</h3>
-                  <p className="text-sm text-gray-600 group-hover:text-red-600">All data transmission is encrypted using SSL technology</p>
+                  <p className="text-sm text-gray-600 group-hover:text-red-600">All data transmission is encrypted using industry-standard protocols</p>
                 </div>
                 <div className="group rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 p-6 transition-all duration-300 hover:-translate-y-2 hover:bg-gradient-to-br hover:from-orange-50 hover:to-orange-100">
                   <h3 className="mb-3 text-lg font-semibold text-gray-800 group-hover:text-orange-700">Access Controls</h3>
@@ -105,7 +105,7 @@ function PrivacyPolicyBody() {
                 </span>
                 Contact Us
               </h2>
-              <p className="mb-4 text-base leading-relaxed text-gray-600">
+              <p className="mb-4 text-sm leading-relaxed text-gray-600">
                 If you have any questions about this Privacy Policy, please contact us at:
               </p>
               <div className="rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 p-6">

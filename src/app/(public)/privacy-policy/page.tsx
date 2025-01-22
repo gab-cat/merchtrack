@@ -3,7 +3,7 @@ import { PRIVACY_POLICY_CONTENT } from '@/constants';
 import PageTitle from '@/components/public/page-title';
 import PageAnimation from '@/components/public/page-animation';
 
-const Page = () => {
+const Page: React.FC = () => {
   return (
     <PageAnimation className='max-w-4xl'>
       <PageTitle title={PRIVACY_POLICY_CONTENT.title} description={PRIVACY_POLICY_CONTENT.description} />
