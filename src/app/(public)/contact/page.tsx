@@ -3,18 +3,13 @@ import PageAnimation from "@/components/public/page-animation";
 import PageTitle from "@/components/public/page-title";
 
 const ContactPage = () => {
-  const contactMessage = {
-    email: '',
-    subject: '',
-    message: '',
-  };
   return (
     <PageAnimation className="max-w-4xl">
       <PageTitle
         title="Contact Us"
         description="Got a technical issue? Want to send feedback about a beta feature? Need details about our Business plan? Let us know."
       />
-      <ContactForm contactMessage={contactMessage} />
+      <ContactForm />
     </PageAnimation>
   );
 };

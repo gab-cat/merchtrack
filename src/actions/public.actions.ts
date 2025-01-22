@@ -12,8 +12,6 @@ export async function submitMessage(formData: FormContactType): Promise<ActionsR
       return acc;
     }, {});
 
-    console.log("Errors in the form: ", errors);
-
     return {
       success: false,
       message: "There are errors in the form.",

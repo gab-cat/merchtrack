@@ -11,8 +11,13 @@ import { submitMessage } from "@/actions/public.actions";
 import { Form } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
 
+const contactMessage = {
+  email: '',
+  subject: '',
+  message: '',
+};
 
-const ContactForm = ({ contactMessage }: {contactMessage: FormContactType}) => {
+const ContactForm = () => {
   const [loading, setLoading] = useState(false);
 
   const form = useForm<FormContactType>({
@@ -28,10 +33,8 @@ const ContactForm = ({ contactMessage }: {contactMessage: FormContactType}) => {
   async function onSubmit(data: FormContactType) {
     setLoading(true);
     try {
-      
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const result = await submitMessage(data);
-      form.reset(data);
+      await submitMessage(data);
+      form.reset({ email: '', subject: '', message: '' });
     }
     catch (error) {
       console.log(error);
@@ -51,7 +54,7 @@ const ContactForm = ({ contactMessage }: {contactMessage: FormContactType}) => {
           </label>
           <Input
             id="email"
-            placeholder="name@merchtrack.com"
+            placeholder="name@merchtrack.tech"
             {...form.register("email")}
           />
           {form.formState.errors.email && <p className="text-sm text-red-500">{form.formState.errors.email.message}</p>}
