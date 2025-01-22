@@ -17,6 +17,12 @@ const nextConfig: NextConfig = {
     ],
   },
   serverExternalPackages: ['require-in-the-middle'],
+  experimental: {
+    serverActions: {
+      allowedOrigins: ['*']
+    },
+    useLightningcss: true,
+  },
   eslint: {
     ignoreDuringBuilds: true
   }

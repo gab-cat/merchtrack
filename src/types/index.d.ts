@@ -133,3 +133,9 @@ declare enum College {
   AXI = "AXI"
 }
 
+declare type ActionsReturnType<T> = {
+  success: boolean
+  message?: string
+  data?: T
+  errors?: Record<string, unknown>
+}
