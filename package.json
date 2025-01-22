@@ -17,7 +17,7 @@
     "prepare": "husky install"
   },
   "dependencies": {
-    "@clerk/elements": "^0.22.12",
+    "@clerk/elements": "^0.22.13",
     "@clerk/nextjs": "^6.10.0",
     "@clerk/shared": "^2.20.11",
     "@datadog/browser-rum": "^5.35.0",

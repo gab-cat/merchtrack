@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@clerk/elements':
-        specifier: ^0.22.12
-        version: 0.22.12(@types/react-dom@19.0.3(@types/react@19.0.7))(@types/react@19.0.7)(next@15.1.4(@babel/core@7.26.0)(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+        specifier: ^0.22.13
+        version: 0.22.13(@types/react-dom@19.0.3(@types/react@19.0.7))(@types/react@19.0.7)(next@15.1.4(@babel/core@7.26.0)(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@clerk/nextjs':
         specifier: ^6.10.0
         version: 6.10.0(next@15.1.4(@babel/core@7.26.0)(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -290,13 +290,6 @@ packages:
     resolution: {integrity: sha512-3HVYa1qiOIny+45V5UBwVfMRZDXl4deVfjFMPvmAYbAiNqY39TgtHdMnDsGZF09eOUnnpTu/6jV4doPLdmWHWg==}
     engines: {node: '>=18.17.0'}
 
-  '@clerk/clerk-react@5.22.3':
-    resolution: {integrity: sha512-1RHH5W6UOMfmRq2sC1n1lVa12kHbmE6T2FfyHbSWOwcaUPJAxGDj3nakl4VJuDLHej9hXfsNjjUVCN5D2ybBBw==}
-    engines: {node: '>=18.17.0'}
-    peerDependencies:
-      react: ^18.0.0 || ^19.0.0 || ^19.0.0-0
-      react-dom: ^18.0.0 || ^19.0.0 || ^19.0.0-0
-
   '@clerk/clerk-react@5.22.4':
     resolution: {integrity: sha512-uDUczpvP4PgTp3mDEd+ITka4yVdQUrU3pVxWBb4Q81XGHDF9GCPb5XbDjV0iR8gB0txI9xopXwUez5/T4VZRVA==}
     engines: {node: '>=18.17.0'}
@@ -304,8 +297,8 @@ packages:
       react: ^18.0.0 || ^19.0.0 || ^19.0.0-0
       react-dom: ^18.0.0 || ^19.0.0 || ^19.0.0-0
 
-  '@clerk/elements@0.22.12':
-    resolution: {integrity: sha512-asiIJHysQV+0Mn85y46/SwF1F6odtFfzaRhJiPFDSa5ZF43KJ/JdznKr7jLFODdekxuuRhYzNqGkSTf7qlCpWA==}
+  '@clerk/elements@0.22.13':
+    resolution: {integrity: sha512-NVqDvho87MUYIpR0xp1jPkmOgBMllOniQqliAPJmEs90r409qSCqodI26nwC9129WKTcGjooUVC9BwPTSLQCrA==}
     engines: {node: '>=18.17.0'}
     peerDependencies:
       next: ^13.5.4 || ^14.0.3 || ^15
@@ -4519,14 +4512,6 @@ snapshots:
       - react
       - react-dom
 
-  '@clerk/clerk-react@5.22.3(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
-    dependencies:
-      '@clerk/shared': 2.20.11(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      '@clerk/types': 4.41.2
-      react: 19.0.0
-      react-dom: 19.0.0(react@19.0.0)
-      tslib: 2.4.1
-
   '@clerk/clerk-react@5.22.4(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
     dependencies:
       '@clerk/shared': 2.20.12(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -4535,11 +4520,11 @@ snapshots:
       react-dom: 19.0.0(react@19.0.0)
       tslib: 2.4.1
 
-  '@clerk/elements@0.22.12(@types/react-dom@19.0.3(@types/react@19.0.7))(@types/react@19.0.7)(next@15.1.4(@babel/core@7.26.0)(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
+  '@clerk/elements@0.22.13(@types/react-dom@19.0.3(@types/react@19.0.7))(@types/react@19.0.7)(next@15.1.4(@babel/core@7.26.0)(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
     dependencies:
-      '@clerk/clerk-react': 5.22.3(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      '@clerk/shared': 2.20.11(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      '@clerk/types': 4.41.2
+      '@clerk/clerk-react': 5.22.4(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@clerk/shared': 2.20.12(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@clerk/types': 4.42.0
       '@radix-ui/primitive': 1.1.1
       '@radix-ui/react-form': 0.1.1(@types/react-dom@19.0.3(@types/react@19.0.7))(@types/react@19.0.7)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@radix-ui/react-slot': 1.1.1(@types/react@19.0.7)(react@19.0.0)
