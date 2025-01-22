@@ -7,11 +7,13 @@ import {
   NotFoundError,
   DatabaseError,
 } from "@/types/errors";
+import useToast from "@/hooks/use-toast";
 
 type WrapperOptions = {
   // no-dd-sa:typescript-best-practices/boolean-prop-naming
   showSuccessToast?: boolean;
   successMessage?: string;
+  sucessTitle?: string;
 };
 
 export const clientWrapper = <T>(fn: () => Promise<T>, options: WrapperOptions = {}) => {
@@ -19,7 +21,11 @@ export const clientWrapper = <T>(fn: () => Promise<T>, options: WrapperOptions =
     try {
       const result = await fn();
       if (options.showSuccessToast) {
-        toast.success(options.successMessage ?? "Operation successful");
+        useToast({
+          type: "success",
+          title: options.sucessTitle ?? "Success",
+          message: options.successMessage ?? "Operation completed successfully",
+        });
       }
       
       return result;

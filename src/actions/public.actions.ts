@@ -57,18 +57,12 @@ export async function submitMessage(formData: FormContactType): Promise<ActionsR
       data: contactSubmit 
     };
   } catch (error) {
-    // no-dd-sa:typescript-best-practices/no-console
-    console.error('Failed to submit contact message:', {
-      timestamp: new Date().toISOString(),
-      error: error instanceof Error ? error.message : 'Unknown error',
-      email: sanitizedData.email 
-    });
     return {
       success: false, 
       errors: { 
         general: "An error occurred while submitting the message.",
         error
       }, 
-      data: formData };
+      data: sanitizedData };
   }
 }
