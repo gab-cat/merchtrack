@@ -27,7 +27,13 @@ const ContactForm = () => {
   });
 
   useEffect(() => {
-    localStorage.setItem('contactMessage', form.formState.isDirty.toString());
+    if (form.formState.isDirty) {
+      localStorage.setItem('contactMessage', JSON.stringify({
+        email: form.getValues('email'),
+        subject: form.getValues('subject'),
+        message: form.getValues('message'),
+      }));
+    }
   }, [form.formState.isDirty]);
 
   async function onSubmit(data: FormContactType) {
@@ -81,7 +87,12 @@ const ContactForm = () => {
           />
           {form.formState.errors.message && <p className="text-sm text-red-500">{form.formState.errors.message.message}</p>}
         </div>
-        <Button disabled={loading} className={cn("ml-auto w-full text-neutral-1 sm:w-auto", loading ? 'bg-primary-700' : 'bg-primary-500')} type="submit">
+        <Button 
+          disabled={loading} 
+          className={cn("ml-auto w-full text-neutral-1 sm:w-auto", loading ? 'bg-primary-700' : 'bg-primary-500')} 
+          type="submit"
+          aria-label="Send contact form message"
+        >
           {loading ? "Sending..." : "Send Message"}
         </Button>
       </form>
