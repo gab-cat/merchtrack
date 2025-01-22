@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 import tailwindConfig from '../../tailwind.config';
 import { SEO } from '@/constants';
 import Scripts from '@/components/misc/scripts';
+import { Toaster } from '@/components/ui/toaster';
 
 const DatadogInit = dynamic(() => import('@/components/misc/datadog-init'));
 
@@ -73,6 +74,7 @@ export default function RootLayout({
           {children}
           <DatadogInit />
           <Scripts />
+          <Toaster />
         </body>
       </ClerkProvider>
     </html>

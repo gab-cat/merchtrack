@@ -3,7 +3,6 @@
 import * as React from "react";
 import { useState, useEffect } from 'react';
 import { FaRegEdit } from "react-icons/fa";
-import { DialogClose } from "@radix-ui/react-dialog";
 import { StatusDropdown } from "./status-dropdown";
 import {
   Table,
@@ -21,7 +20,7 @@ import {
   paymentMethodOptions, 
   customerTypeOptions 
 } from "@/constants";
-import { Dialog, DialogHeader, DialogTrigger, DialogContent, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogHeader, DialogTrigger, DialogContent, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
  
