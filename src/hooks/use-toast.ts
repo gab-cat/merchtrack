@@ -142,6 +142,7 @@ const listeners: Array<(state: State) => void> = [];
 
 let memoryState: State = { toasts: [] };
 
+
 /**
  * Dispatches an action to update the toast notification state.
  * 
@@ -159,6 +160,7 @@ function dispatch(action: Action) {
 }
 
 type Toast = Omit<ToasterToast, "id">
+
 
 /**
  * Creates and manages a new toast notification.
@@ -208,6 +210,7 @@ function toast({ ...props }: Toast) {
     update,
   };
 }
+
 
 /**
  * Provides access to the toast notification system and its state.

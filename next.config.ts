@@ -19,7 +19,11 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['require-in-the-middle'],
   experimental: {
     serverActions: {
-      allowedOrigins: ['*']
+      allowedOrigins: [
+        'https://merchtrack.tech',
+        'https://staging.merchtrack.tech',
+        process.env.NEXT_PUBLIC_APP_URL as string,
+      ]
     },
     useLightningcss: true,
   },
