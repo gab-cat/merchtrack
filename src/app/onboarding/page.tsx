@@ -62,21 +62,20 @@ export default function OnboardingPage() {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    try {
-      await clientWrapper(async () => {
-        const { success, data } = OnboardingFormSchema.safeParse(formData);
-        if (!success) {
-          throw new ValidationError("Invalid form data");
-        }
-        await completeOnboarding(data);
-        return router.push("/admin");
-      }, {
-        showSuccessToast: true,
-        successMessage: "Onboarding completed successfully"
-      })();
-    } finally {
-      setIsSubmitting(false);
-    }
+
+    await clientWrapper(async () => {
+      const { success, data } = OnboardingFormSchema.safeParse(formData);
+      if (!success) {
+        throw new ValidationError("Invalid form data");
+      }
+      await completeOnboarding(data);
+      return router.push("/admin");
+    }, {
+      showSuccessToast: true,
+      successMessage: "Onboarding completed successfully"
+    })();
+    
+    setIsSubmitting(false);
   };
 
   return (

@@ -10,12 +10,34 @@ import { formContactSchema, FormContactType } from "@/schema/public-contact";
 import { submitMessage } from "@/actions/public.actions";
 import { Form } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
+import useToast from "@/hooks/use-toast";
 
 const contactMessage = {
   email: '',
   subject: '',
   message: '',
 };
+
+const formFields = [
+  {
+    id: 'email',
+    label: 'Your email',
+    placeholder: 'name@merchtrack.tech',
+    type: 'input'
+  },
+  {
+    id: 'subject',
+    label: 'Subject',
+    placeholder: 'Let us know how we can help you',
+    type: 'input'
+  },
+  {
+    id: 'message',
+    label: 'Message',
+    placeholder: 'Write your message here...',
+    type: 'textarea'
+  }
+] as const;
 
 const ContactForm = () => {
   const [loading, setLoading] = useState(false);
@@ -39,11 +61,21 @@ const ContactForm = () => {
   async function onSubmit(data: FormContactType) {
     setLoading(true);
     try {
-      await submitMessage(data);
+      const result = await submitMessage(data);
       form.reset({ email: '', subject: '', message: '' });
+      localStorage.removeItem('contactMessage');
+      useToast({
+        title: result.success ? "Success" : "Error",
+        message: result.message as string,
+        type: result.success ? "success" : "error",
+      });
     }
     catch (error) {
-      console.log(error);
+      useToast({
+        title: "Your message could not be sent",
+        message: (error as Error).message,
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }
@@ -54,39 +86,31 @@ const ContactForm = () => {
         className="mb-4 flex w-full flex-col space-y-4 pt-8 font-inter"
         onSubmit={form.handleSubmit(onSubmit)}
       >
-        <div className="space-y-2">
-          <label htmlFor="email" className="block font-medium">
-            Your email
-          </label>
-          <Input
-            id="email"
-            placeholder="name@merchtrack.tech"
-            {...form.register("email")}
-          />
-          {form.formState.errors.email && <p className="text-sm text-red-500">{form.formState.errors.email.message}</p>}
-        </div>
-        <div className="space-y-2">
-          <label htmlFor="subject" className="block font-medium">
-            Subject
-          </label>
-          <Input
-            id="subject"
-            placeholder="Let us know how we can help you"
-            {...form.register("subject")}
-          />
-          {form.formState.errors.subject && <div className="text-sm text-red-500 ">{form.formState.errors.subject.message}</div>}
-        </div>
-        <div className="space-y-2">
-          <label htmlFor="message" className="block font-medium">
-            Message
-          </label>
-          <TextArea
-            id="message"
-            placeholder="Write your message here..."
-            {...form.register("message")}
-          />
-          {form.formState.errors.message && <p className="text-sm text-red-500">{form.formState.errors.message.message}</p>}
-        </div>
+        {formFields.map((field) => (
+          <div key={field.id} className="space-y-2">
+            <label htmlFor={field.id} className="block font-medium">
+              {field.label}
+            </label>
+            {field.type === 'textarea' ? (
+              <TextArea
+                id={field.id}
+                placeholder={field.placeholder}
+                {...form.register(field.id as keyof FormContactType)}
+              />
+            ) : (
+              <Input
+                id={field.id}
+                placeholder={field.placeholder}
+                {...form.register(field.id as keyof FormContactType)}
+              />
+            )}
+            {form.formState.errors[field.id as keyof FormContactType] && (
+              <p className="text-sm text-red-500">
+                {form.formState.errors[field.id as keyof FormContactType]?.message}
+              </p>
+            )}
+          </div>
+        ))}
         <Button 
           disabled={loading} 
           className={cn("ml-auto w-full text-neutral-1 sm:w-auto", loading ? 'bg-primary-700' : 'bg-primary-500')} 
