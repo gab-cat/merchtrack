@@ -3,6 +3,19 @@
 import prisma from "@/lib/db";
 import { formContactSchema, FormContactType } from "@/schema/public-contact";
 
+/**
+ * Submits a contact form message after validation and database storage.
+ *
+ * @remarks
+ * This function validates the contact form data, creates a database record, and returns a result indicating success or failure.
+ *
+ * @param formData - The contact form submission data to be processed
+ * @returns An object indicating the submission status, with either a success message and created data or validation/submission errors
+ *
+ * @throws {Error} Handles potential database or validation errors gracefully
+ *
+ * @beta
+ */
 export async function submitMessage(formData: FormContactType): Promise<ActionsReturnType<FormContactType>> {
   const result = formContactSchema.safeParse(formData);
 
