@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { formContactSchema, FormContactType } from "@/schema/public-contact";
 import { submitMessage } from "@/actions/public.actions";
 import { Form } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
-import useToast from "@/hooks/use-toast";
+import { clientWrapper } from "@/actions";
 
 const contactMessage = {
   email: '',
@@ -40,8 +40,8 @@ const formFields = [
 ] as const;
 
 const ContactForm = () => {
-  const [loading, setLoading] = useState(false);
-
+  const [isPending, startTransition] = useTransition();
+  
   const form = useForm<FormContactType>({
     mode: "onBlur",
     resolver: zodResolver(formContactSchema),
@@ -58,32 +58,30 @@ const ContactForm = () => {
     }
   }, [form.formState.isDirty]);
 
-  async function onSubmit(data: FormContactType) {
-    setLoading(true);
-    try {
-      const result = await submitMessage(data);
-      form.reset({ email: '', subject: '', message: '' });
-      localStorage.removeItem('contactMessage');
-      useToast({
-        title: result.success ? "Success" : "Error",
-        message: result.message as string,
-        type: result.success ? "success" : "error",
-      });
-    }
-    catch (error) {
-      useToast({
-        title: "Your message could not be sent",
-        message: (error as Error).message,
-        type: "error",
-      });
-    } finally {
-      setLoading(false);
-    }
+
+  async function onSubmit(formData: FormContactType) {
+    startTransition(async () => {
+      clientWrapper(
+        async () => {
+          const result = await submitMessage(formData);
+          if (result.success) {
+            form.reset({ email: '', subject: '', message: '' });
+            localStorage.removeItem('contactMessage');
+          }
+        },
+        {
+          showSuccessToast: true,
+          successMessage: "Your message has been sent successfully!",
+          successTitle: "Message Sent"
+        }
+      );
+    });
   }
+
   return (
     <Form {...form}>
       <form
-        className="mb-4 flex w-full flex-col space-y-4 pt-8 font-inter"
+        className="font-inter mb-4 flex w-full flex-col space-y-4 pt-8"
         onSubmit={form.handleSubmit(onSubmit)}
       >
         {formFields.map((field) => (
@@ -112,12 +110,12 @@ const ContactForm = () => {
           </div>
         ))}
         <Button 
-          disabled={loading} 
-          className={cn("ml-auto w-full text-neutral-1 sm:w-auto", loading ? 'bg-primary-700' : 'bg-primary-500')} 
+          disabled={isPending} 
+          className={cn("ml-auto w-full text-neutral-1 sm:w-auto", isPending ? 'bg-primary-700' : 'bg-primary-500')} 
           type="submit"
           aria-label="Send contact form message"
         >
-          {loading ? "Sending..." : "Send Message"}
+          {isPending ? "Sending..." : "Send Message"}
         </Button>
       </form>
     </Form>

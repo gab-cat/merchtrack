@@ -13,21 +13,24 @@ type WrapperOptions = {
   // no-dd-sa:typescript-best-practices/boolean-prop-naming
   showSuccessToast?: boolean;
   successMessage?: string;
-  sucessTitle?: string;
+  successTitle?: string;
 };
 
-export const clientWrapper = <T>(fn: () => Promise<T>, options: WrapperOptions = {}) => {
-  return async () => {
+export const clientWrapper = async <T, D>(
+  fn: (data: D) => Promise<T>,
+  options: WrapperOptions = {}
+) => {
+  return async (data: D) => {
     try {
-      const result = await fn();
+      const result = await fn(data);
       if (options.showSuccessToast) {
         useToast({
           type: "success",
-          title: options.sucessTitle ?? "Success",
+          title: options.successTitle ?? "Success",
           message: options.successMessage ?? "Operation completed successfully",
         });
       }
-      
+
       return result;
     } catch (error: unknown) {
       let statusCode = 500;

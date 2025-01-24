@@ -1,59 +1,50 @@
-import { FormField } from "@/components/form-field";
+import type { UseFormReturn } from "react-hook-form";
+import { Input } from "@/components/ui/input";
+import { OnboardingForm } from "@/schema/user";
 
 type PersonalInfoFormProps = {
-  formData: {
-    firstName: string
-    lastName: string
-    phone: string
-    email: string
-  }
-  updateFormData: (data: Partial<PersonalInfoFormProps["formData"]>) => void
+  form: UseFormReturn<OnboardingForm>;
 }
 
-export default function PersonalInfoForm({ formData, updateFormData }: Readonly<PersonalInfoFormProps>) {
+export default function PersonalInfoForm({ form }: Readonly<PersonalInfoFormProps>) {
   const fields = [
     {
-      id: "email",
+      id: "email" as const,
       label: "Email Address",
-      value: formData.email,
-      onChange: (value: string) => updateFormData({ email: value }),
-      required: true,
       disabled: true
     },
     {
-      id: "firstName",
+      id: "firstName" as const,
       label: "First Name",
-      value: formData.firstName,
-      onChange: (value: string) => updateFormData({ firstName: value }),
-      required: true
     },
     {
-      id: "lastName",
+      id: "lastName" as const,
       label: "Last Name",
-      value: formData.lastName,
-      onChange: (value: string) => updateFormData({ lastName: value }),
-      required: true
     },
     {
-      id: "phone",
+      id: "phone" as const,
       label: "Phone Number",
-      value: formData.phone,
-      onChange: (value: string) => updateFormData({ phone: value }),
-      required: true,
     },
   ];
+
   return (
     <div className="space-y-4">
       {fields.map((field) => (
-        <FormField
-          key={field.id}
-          id={field.id}
-          label={field.label}
-          value={field.value}
-          onChange={field.onChange}
-          required
-          disabled={field.disabled}
-        />
+        <div key={field.id} className="space-y-2">
+          <label htmlFor={field.id} className="block text-sm font-medium text-gray-800">
+            {field.label}
+          </label>
+          <Input
+            id={field.id}
+            disabled={field.disabled}
+            {...form.register(field.id)}
+          />
+          {form.formState.errors[field.id] && (
+            <p className="text-sm text-red-500">
+              {form.formState.errors[field.id]?.message as string}
+            </p>
+          )}
+        </div>
       ))}
     </div>
   );
