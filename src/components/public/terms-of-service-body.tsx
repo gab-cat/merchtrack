@@ -1,4 +1,5 @@
 import React from 'react';
+import { Mail, Phone, MapPin } from "lucide-react";
 import { FOOTER_DETAILS } from '@/constants';
 
 function TermsOfServiceBody() {
@@ -104,15 +105,24 @@ function TermsOfServiceBody() {
                 </span>
                 Contact Information
               </h2>
+
               <p className="mb-4 text-base leading-relaxed text-gray-600">
                 For questions about these Terms of Service, please contact us at:
               </p>
-              <div className="rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 p-6">
-                <p className="text-base text-gray-800">
-                  {FOOTER_DETAILS.email}<br />
-                  {FOOTER_DETAILS.phone}<br />
-                  {FOOTER_DETAILS.address}
-                </p>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3">
+                  <Mail className="size-5 text-primary" />
+                  <span className="text-foreground text-sm font-medium">{FOOTER_DETAILS.email}</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Phone className="size-5 text-primary" />
+                  <span className="text-foreground text-sm font-medium">{FOOTER_DETAILS.phone}</span>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <MapPin className="mt-0.5 size-5 text-primary" />
+                  <span className="text-foreground text-sm font-medium">{FOOTER_DETAILS.address}</span>
+                </div>
+                
               </div>
             </div>
           </div>

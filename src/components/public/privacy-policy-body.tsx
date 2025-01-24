@@ -1,9 +1,10 @@
 import React from 'react';
+import { Mail, Phone, MapPin } from "lucide-react";
 import { FOOTER_DETAILS } from '@/constants';
 
 function PrivacyPolicyBody() {
   return (
-    <div className="min-h-screen bg-gradient-to-b px-4 py-16 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 px-4 py-16 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-4xl">   
         <div className="overflow-hidden rounded-2xl bg-white transition-all">
           <div className="p-8 sm:p-12">
@@ -105,15 +106,22 @@ function PrivacyPolicyBody() {
                 </span>
                 Contact Us
               </h2>
-              <p className="mb-4 text-sm leading-relaxed text-gray-600">
-                If you have any questions about this Privacy Policy, please contact us at:
+              <p className="text-muted-foreground mb-6 text-sm leading-relaxed">
+                If you have any questions about this Privacy Policy, please contact us using the information below:
               </p>
-              <div className="rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 p-6">
-                <p className="text-base text-gray-800">
-                  {FOOTER_DETAILS.email}<br />
-                  {FOOTER_DETAILS.phone}<br />
-                  {FOOTER_DETAILS.address}
-                </p>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3">
+                  <Mail className="size-5 text-primary" />
+                  <span className="text-foreground text-sm font-medium">{FOOTER_DETAILS.email}</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Phone className="size-5 text-primary" />
+                  <span className="text-foreground text-sm font-medium">{FOOTER_DETAILS.phone}</span>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <MapPin className="mt-0.5 size-5 text-primary" />
+                  <span className="text-foreground text-sm font-medium">{FOOTER_DETAILS.address}</span>
+                </div>
               </div>
             </div>
           </div>
