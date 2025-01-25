@@ -1,11 +1,12 @@
 // Permission entity with a code that can be attached to users (e.g., 'collect_payments')
 model Permission {
-  code             String           @id @unique
+  code             String           @id @unique @db.VarChar(50)
   description      String?
   canCreate        Boolean          @default(false)
   canRead          Boolean          @default(false)
   canUpdate        Boolean          @default(false)
   canDelete        Boolean          @default(false)
+
   userPermissions  UserPermission[]
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt

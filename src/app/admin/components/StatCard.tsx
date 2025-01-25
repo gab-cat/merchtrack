@@ -14,7 +14,7 @@ export function StatCard({ title, value, subtext, Icon }: Readonly<StatCardProps
     <Card className="bg-white shadow-none transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-gray-600">{title}</CardTitle>
-        <Icon className="text-primary-500 size-6" />
+        <Icon className="size-6 text-primary-500" />
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold text-gray-900">{value}</div>

@@ -21,8 +21,7 @@ model Product {
 
   // Relations
   category     Category?        @relation(fields: [categoryId], references: [id])
-  postedBy     User             @relation(fields: [postedById], references: [id])
-  orderItems   OrderItem[]      @relation("OrderItemToProduct")
+  postedBy     User             @relation(fields: [postedById], references: [id], onDelete: Cascade)
   variants     ProductVariant[] 
   reviews      Review[]
 
@@ -41,10 +40,12 @@ model ProductVariant {
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 
-  product      Product     @relation(fields: [productId], references: [id])
+  product      Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
   // Index if you often query by sku:
   @@index([productId], name: "idx_variant_product-id")
+  // Cart items that reference this product variant
   CartItem CartItem[]
+  OrderItem OrderItem[] @relation("OrderItemToVariant")
 }
 
 model Review {
@@ -57,7 +58,7 @@ model Review {
   updatedAt   DateTime    @updatedAt
 
   // Relations
-  product     Product     @relation(fields: [productId], references: [id])
+  product     Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
   user        User        @relation(fields: [userId], references: [id])
 
   @@index([productId], name: "idx_review_productId")

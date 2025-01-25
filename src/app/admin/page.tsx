@@ -33,7 +33,7 @@ export default async function AdminWelcome() {
 
   return (
     <PageAnimation>
-      <div className="font-inter min-h-screen p-8 pt-16">
+      <div className="min-h-screen p-8 pt-16 font-inter">
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold tracking-tight text-gray-900">

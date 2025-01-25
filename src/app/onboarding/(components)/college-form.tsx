@@ -8,8 +8,10 @@ type CollegeAndCourseFormProps = {
   form: UseFormReturn<OnboardingForm>;
 }
 
+import { College } from "@/types/Misc";
+
 export default function CollegeAndCourseForm({ form }: Readonly<CollegeAndCourseFormProps>) {
-  const colleges = ["NOT_APPLICABLE", "COCS", "STEP", "ABBS", "JPIA", "ACHSS", "ANSA", "COL", "AXI"];
+  const colleges = Object.values(College);
 
   return (
     <div className="space-y-4">

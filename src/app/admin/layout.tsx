@@ -10,7 +10,7 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
   }
 
   return (
-    <div className="text-neutral-7 flex min-h-screen">
+    <div className="flex min-h-screen text-neutral-7">
       <AdminSidebar />
       <div className="flex-1">
         {children}

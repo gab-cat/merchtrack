@@ -5,7 +5,7 @@ model Cart {
   updatedAt   DateTime        @updatedAt
 
   // Relations
-  user        User            @relation(fields: [userId], references: [id])
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   cartItems   CartItem[]
 
   @@index([userId], name: "idx_cart_userId")
@@ -15,7 +15,9 @@ model CartItem {
   id            String          @id @default(ulid())
   cartId        String
   variantId     String?
-  quantity      Int             @default(1)
+  quantity      Int             @default(0) 
+
+
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 

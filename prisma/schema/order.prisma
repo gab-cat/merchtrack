@@ -34,7 +34,7 @@ model Order {
 model OrderItem {
   id           String     @id @default(ulid())
   orderId      String
-  productId    String
+  variantId    String
   quantity     Int
   price        Decimal    @default(0)
   customerNote String?
@@ -44,10 +44,10 @@ model OrderItem {
 
   // Relations
   order   Order   @relation("OrderItemToOrder", fields: [orderId], references: [id])
-  product Product @relation("OrderItemToProduct", fields: [productId], references: [id])
+  variant ProductVariant @relation("OrderItemToVariant", fields: [variantId], references: [id])
 
   @@index([orderId], name: "idx_orderitem_orderId")
-  @@index([productId], name: "idx_orderitem_productId")
+  @@index([variantId], name: "idx_orderitem_variantId")
 }
 
 enum OrderStatus {

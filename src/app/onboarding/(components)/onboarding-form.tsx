@@ -88,8 +88,8 @@ export default function OnboardingForm() {
     <>
       <Dialog open={showRedirect}>
         <DialogContent className="bg-neutral-2 text-center sm:max-w-[425px]">
-          <DialogTitle className="text-primary hidden">Onboarding</DialogTitle>
-          <Loader2 className="text-primary mx-auto mb-4 size-8 animate-spin" />
+          <DialogTitle className="hidden text-primary">Onboarding</DialogTitle>
+          <Loader2 className="mx-auto mb-4 size-8 animate-spin text-primary" />
           <h2 className="text-lg font-semibold">Setting up your account...</h2>
           <p className="text-sm text-gray-500">You will be redirected to the dashboard in a few seconds.</p>
         </DialogContent>
@@ -112,14 +112,14 @@ export default function OnboardingForm() {
         </div>
         <div className="mt-2 h-1 w-full bg-gray-200">
           <div
-            className="bg-primary h-1 transition-all duration-300 ease-in-out"
+            className="h-1 bg-primary transition-all duration-300 ease-in-out"
             style={{ width: `${((step - 1) / 2) * 100}%` }}
-          ></div>
+          />
         </div>
       </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="font-inter mb-4 flex w-full flex-col space-y-4 pt-8">
+          <div className="mb-4 flex w-full flex-col space-y-4 pt-8 font-inter">
             {step === 1 && <PersonalInfoForm form={form} />}
             {step === 2 && <RoleSelectionForm form={form} />}
             {step === 3 && <CollegeAndCourseForm form={form} />}

@@ -46,12 +46,12 @@ const Footer = () => {
             <h3 className="mb-4 text-lg font-semibold">Contact Us</h3>
             <ul className="space-y-2">
               <li className='text-sm font-light'>
-                <Link href={`mailto:${FOOTER_DETAILS.email}`} className="flex underline transition-colors duration-300 hover:text-blue-200">
+                <Link href={`mailto:${FOOTER_DETAILS.email}`} className="flex items-center underline transition-colors duration-300 hover:text-blue-200">
                   <MdOutlineMail className='mr-2' />{FOOTER_DETAILS.email}
                 </Link>
               </li>
-              <li className='flex text-sm font-light'><FaPhoneAlt className='mr-2' />{FOOTER_DETAILS.phone}</li>
-              <li className='flex text-sm font-light'><FaLocationDot className='mr-2'/>{FOOTER_DETAILS.address}</li>
+              <li className='flex items-center text-sm font-light'><FaPhoneAlt className='mr-2' />{FOOTER_DETAILS.phone}</li>
+              <li className='flex items-start text-sm font-light'><FaLocationDot className='mr-2 pt-1'/>{FOOTER_DETAILS.address}</li>
             </ul>
           </div>
           

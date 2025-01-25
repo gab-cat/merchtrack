@@ -12,12 +12,6 @@ import { Form } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
 import { clientWrapper } from "@/actions";
 
-const contactMessage = {
-  email: '',
-  subject: '',
-  message: '',
-};
-
 const formFields = [
   {
     id: 'email',
@@ -45,7 +39,11 @@ const ContactForm = () => {
   const form = useForm<FormContactType>({
     mode: "onBlur",
     resolver: zodResolver(formContactSchema),
-    defaultValues: {...contactMessage}
+    defaultValues: {
+      email: '',
+      subject: '',
+      message: '',
+    }
   });
 
   useEffect(() => {
@@ -81,7 +79,7 @@ const ContactForm = () => {
   return (
     <Form {...form}>
       <form
-        className="font-inter mb-4 flex w-full flex-col space-y-4 pt-8"
+        className="mb-4 flex w-full flex-col space-y-4 pt-8 font-inter"
         onSubmit={form.handleSubmit(onSubmit)}
       >
         {formFields.map((field) => (

@@ -8,22 +8,22 @@ export function QuickActions() {
       <h2 className="mb-4 text-2xl font-semibold text-gray-900">Quick Actions</h2>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Link href="/admin/users" className="w-full">
-          <Button className="bg-primary-500 hover:bg-primary-600 w-full text-white transition-colors duration-300">
+          <Button className="w-full bg-primary-500 text-white transition-colors duration-300 hover:bg-primary-600">
             <Users className="mr-2 size-4" /> Manage Users
           </Button>
         </Link>
         <Link href="/admin/products" className="w-full">
-          <Button className="bg-primary-500 hover:bg-primary-600 w-full text-white transition-colors duration-300">
+          <Button className="w-full bg-primary-500 text-white transition-colors duration-300 hover:bg-primary-600">
             <ShoppingCart className="mr-2 size-4" /> Manage Products
           </Button>
         </Link>
         <Link href="/admin/analytics" className="w-full">
-          <Button className="bg-primary-500 hover:bg-primary-600 w-full text-white transition-colors duration-300">
+          <Button className="w-full bg-primary-500 text-white transition-colors duration-300 hover:bg-primary-600">
             <BarChart className="mr-2 size-4" /> View Analytics
           </Button>
         </Link>
         <Link href="/admin/settings" className="w-full">
-          <Button className="bg-primary-500 hover:bg-primary-600 w-full text-white transition-colors duration-300">
+          <Button className="w-full bg-primary-500 text-white transition-colors duration-300 hover:bg-primary-600">
             <Settings className="mr-2 size-4" /> System Settings
           </Button>
         </Link>

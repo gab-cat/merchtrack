@@ -6,12 +6,18 @@ type PersonalInfoFormProps = {
   form: UseFormReturn<OnboardingForm>;
 }
 
+type PersonalInfoField = {
+  id: keyof OnboardingForm;
+  label: string;
+  isDisabled?: boolean;
+}
+
 export default function PersonalInfoForm({ form }: Readonly<PersonalInfoFormProps>) {
-  const fields = [
+  const PERSONAL_INFO_FIELDS: PersonalInfoField[] = [
     {
       id: "email" as const,
       label: "Email Address",
-      disabled: true
+      isDisabled: true
     },
     {
       id: "firstName" as const,
@@ -25,7 +31,9 @@ export default function PersonalInfoForm({ form }: Readonly<PersonalInfoFormProp
       id: "phone" as const,
       label: "Phone Number",
     },
-  ];
+  ] as const;
+
+  const fields = PERSONAL_INFO_FIELDS;
 
   return (
     <div className="space-y-4">
@@ -36,7 +44,7 @@ export default function PersonalInfoForm({ form }: Readonly<PersonalInfoFormProp
           </label>
           <Input
             id={field.id}
-            disabled={field.disabled}
+            disabled={field.isDisabled}
             {...form.register(field.id)}
           />
           {form.formState.errors[field.id] && (

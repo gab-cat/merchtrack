@@ -141,3 +141,10 @@ declare type ActionsReturnType<T> = {
   data?: T
   errors?: Record<string, unknown>
 }
+
+declare type TicketUpdate = {
+  status: "OPEN" | "CLOSE" | "IN_PROGRESS" | "RESOLVED" | "REOPEN"
+  message: string
+  assignedTo?: string
+  createdAt?: string
+}

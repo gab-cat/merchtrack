@@ -12,10 +12,10 @@ export default async function OnboardingPage() {
     return redirect('/dashboard');
   }
   return (
-    <div className="to-secondary-500 via-primary-500 relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-blue-400 px-4 py-12 sm:px-6 lg:px-8">
+    <div className="to-secondary-500 relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-blue-400 via-primary-500 px-4 py-12 sm:px-6 lg:px-8">
       <OnboardingBackground />
       <PageAnimation className="min-w-[100vw]">
-        <Card className="bg-neutral-2 text-neutral-7 mx-auto w-full max-w-lg shadow-xl backdrop-blur-sm">
+        <Card className="mx-auto w-full max-w-lg bg-neutral-2 text-neutral-7 shadow-xl backdrop-blur-sm">
           <CardHeader className="text-center">
             <div className="relative mx-auto size-16 pb-4">
               <Image
@@ -26,7 +26,7 @@ export default async function OnboardingPage() {
                 className="w-auto"
               />
             </div>
-            <CardTitle className="text-2xl font-medium">Welcome to <span className="text-primary font-bold tracking-tighter">MerchTrack!</span></CardTitle>
+            <CardTitle className="text-2xl font-medium">Welcome to <span className="font-bold tracking-tighter text-primary">MerchTrack!</span></CardTitle>
             <CardDescription>Let&apos;s get you set up in just a few steps</CardDescription>
           </CardHeader>
           <CardContent>

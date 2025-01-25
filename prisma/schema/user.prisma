@@ -18,6 +18,7 @@ model User {
   role           Role             @default(STUDENT)
   college        College          @default(NOT_APPLICABLE)
   isMerchant     Boolean          @default(false)
+  @@index([isMerchant], name: "idx_user_isMerchant")
 
   // Relations
   listedProducts    Product[]
@@ -39,11 +40,15 @@ model User {
   @@index([email], name: "idx_user_email")
   @@index([clerkId], name: "idx_user_clerkId")
   @@index([isDeleted], name: "idx_user_isDeleted")
-  Message Message[] @relation("MessageToUser")
+  // Shopping cart items associated with the user
   Cart Cart[]
+  // Tickets created by this user
   createdTickets Ticket[] @relation("CreatedTickets")
+  // Tickets assigned to this user for handling
   assignedTickets Ticket[] @relation("AssignedTickets")
+  // Product reviews written by the user
   Review Review[]
+  Message Message[] @relation("MessageToUser")
 }
 
 enum Role {

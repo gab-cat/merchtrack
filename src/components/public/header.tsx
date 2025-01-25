@@ -36,15 +36,18 @@ const HeaderLP = React.memo(() => {
           </span>
         </Link>
         <div className="flex space-x-3 md:order-2">
-          <SignInButton mode={ isSignedIn ? 'redirect' : 'modal'} forceRedirectUrl='/admin/orders'>
+          <SignInButton 
+            mode={isSignedIn ? 'redirect' : 'modal'} 
+            forceRedirectUrl='/dashboard'
+          >
             <button
               type='button'
               className="focus:ring-accent-7 hidden rounded-lg bg-neutral-1 px-6 py-2 text-sm font-medium text-primary outline outline-1 outline-primary transition-all duration-300 ease-in-out hover:scale-105 hover:bg-primary-400 hover:text-neutral-1 hover:shadow-lg focus:outline-none focus:ring-4 md:inline-block"
             >
-                      Sign In
+              Sign In
             </button>
           </SignInButton>
-          <SignUpButton mode={ isSignedIn ? 'redirect' : 'modal'} forceRedirectUrl='/admin/orders'>
+          <SignUpButton mode={ isSignedIn ? 'redirect' : 'modal'} forceRedirectUrl='/dashboard'>
             <button
               type="button"
               className="hover:bg-accent-7 focus:ring-accent-7 hidden rounded-lg bg-primary px-6 py-2 text-sm font-medium text-neutral-1 transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-4 md:inline-block"

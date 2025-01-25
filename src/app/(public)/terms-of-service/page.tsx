@@ -1,14 +1,14 @@
 import React from 'react';
-import AboutUsBody from '@/components/public/about-us-body';
-import { ABOUT_US_CONTENT } from '@/constants';
+import TermsOfServiceBody from '@/components/public/terms-of-service-body';
+import { TERMS_OF_SERVICE_CONTENT } from '@/constants';
 import PageTitle from '@/components/public/page-title';
 import PageAnimation from '@/components/public/page-animation';
 
 const Page: React.FC = () => {
   return (
     <PageAnimation className='max-w-4xl'>
-      <PageTitle title={ABOUT_US_CONTENT.title} description={ABOUT_US_CONTENT.description} />
-      <AboutUsBody />
+      <PageTitle title={TERMS_OF_SERVICE_CONTENT.title} description={TERMS_OF_SERVICE_CONTENT.description} />
+      <TermsOfServiceBody />
     </PageAnimation>
   );
 };
