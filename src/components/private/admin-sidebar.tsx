@@ -9,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { AdminLinks } from "@/constants";
 
-export function AdminSidebar() {
+export default function AdminSidebar() {
   const pathname = usePathname();
 
   return (

@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useTransition } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TextArea } from "@/components/ui/text-area";
@@ -10,7 +11,7 @@ import { formContactSchema, FormContactType } from "@/schema/public-contact";
 import { submitMessage } from "@/actions/public.actions";
 import { Form } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
-import { clientWrapper } from "@/actions";
+import useToast from "@/hooks/use-toast";
 
 const formFields = [
   {
@@ -34,8 +35,6 @@ const formFields = [
 ] as const;
 
 const ContactForm = () => {
-  const [isPending, startTransition] = useTransition();
-  
   const form = useForm<FormContactType>({
     mode: "onBlur",
     resolver: zodResolver(formContactSchema),
@@ -46,35 +45,43 @@ const ContactForm = () => {
     }
   });
 
-  useEffect(() => {
-    if (form.formState.isDirty) {
-      localStorage.setItem('contactMessage', JSON.stringify({
-        email: form.getValues('email'),
-        subject: form.getValues('subject'),
-        message: form.getValues('message'),
-      }));
+  const mutation = useMutation({
+    mutationFn: (formData: FormContactType) => submitMessage(formData),
+    onSuccess: () => {
+      form.reset({ email: '', subject: '', message: '' });
+      localStorage.removeItem('contactMessage');
+      useToast({
+        type: 'success',
+        message: 'Keep an eye on your inbox for a response. We will get back to you within 24 hours. Thank you!',
+        title: 'Message sent successfully',
+        duration: 10
+      });
+    },
+    onError: () => {
+      useToast({
+        type: 'error',
+        message: 'An error occurred while sending the message. Please try again later.',
+        title: 'Error'
+      });
     }
-  }, [form.formState.isDirty]);
-
+  });
 
   async function onSubmit(formData: FormContactType) {
-    startTransition(async () => {
-      clientWrapper(
-        async () => {
-          const result = await submitMessage(formData);
-          if (result.success) {
-            form.reset({ email: '', subject: '', message: '' });
-            localStorage.removeItem('contactMessage');
-          }
-        },
-        {
-          showSuccessToast: true,
-          successMessage: "Your message has been sent successfully!",
-          successTitle: "Message Sent"
-        }
-      );
-    });
+    mutation.mutate(formData);
   }
+
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (form.formState.isDirty) {
+        event.preventDefault();
+        return '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [form.formState.isDirty]);
 
   return (
     <Form {...form}>
@@ -108,12 +115,12 @@ const ContactForm = () => {
           </div>
         ))}
         <Button 
-          disabled={isPending} 
-          className={cn("ml-auto w-full text-neutral-1 sm:w-auto", isPending ? 'bg-primary-700' : 'bg-primary-500')} 
+          disabled={mutation.isPending} 
+          className={cn("ml-auto w-full text-neutral-1 sm:w-auto", mutation.isPending ? 'bg-primary-700' : 'bg-primary-500')} 
           type="submit"
           aria-label="Send contact form message"
         >
-          {isPending ? "Sending..." : "Send Message"}
+          {mutation.isPending ? "Sending..." : "Send Message"}
         </Button>
       </form>
     </Form>

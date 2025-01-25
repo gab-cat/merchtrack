@@ -10,12 +10,8 @@ export const completeOnboarding = async (formData: OnboardingForm): Promise<Acti
   const { userId } = await auth();
   if (!userId) throw new AuthenticationError('User not authenticated');
 
-  const parsed = OnboardingFormSchema.safeParse(formData);
-  if (!parsed.success) {
-    const issues = parsed.error.issues.map(issue => issue.message).join(', ');
-    throw new ValidationError(`Server Error: Invalid form data - ${issues}`);
-  }
-  const { data } = parsed;
+  const { success, data } = OnboardingFormSchema.safeParse(formData);
+  if (!success) throw new ValidationError('Server Error: Invalid form data received');
 
   const existingUser = await prisma.user.findFirst({
     where: { clerkId: userId }

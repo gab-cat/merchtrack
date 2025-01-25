@@ -7,6 +7,7 @@ import tailwindConfig from '../../tailwind.config';
 import { SEO } from '@/constants';
 import Scripts from '@/components/misc/scripts';
 import { Toaster } from '@/components/ui/sonner';
+import Providers from '@/components/misc/providers';
 
 const DatadogInit = dynamic(() => import('@/components/misc/datadog-init'));
 
@@ -68,13 +69,15 @@ export default function RootLayout({
         <body
           className={`${interSans.variable} antialiased`}
         >
-          {children}
-          {process.env.NODE_ENV === 'production' && (
-            <>
-              <DatadogInit />
-              <Scripts />
-            </>)
-          }
+          <Providers>
+            {children}
+            {process.env.NODE_ENV === 'production' && (
+              <>
+                <DatadogInit />
+                <Scripts />
+              </>)
+            }
+          </Providers>
           <Toaster />
         </body>
       </ClerkProvider>

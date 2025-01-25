@@ -1,12 +1,11 @@
 export const permissions = [
-  { code: 'log_permission', description: 'Permission to create and view logs', canCreate: true, canRead: true, canUpdate: true, canDelete: true },
-  { code: 'view_reports', description: 'Permission to view reports', canRead: true },
-  { code: 'edit_profile', description: 'Permission to edit profile', canUpdate: true },
-  { code: 'manage_users', description: 'Permission to manage users', canCreate: true, canRead: true, canUpdate: true, canDelete: true },
-  { code: 'create_orders', description: 'Permission to create orders', canCreate: true },
-  { code: 'process_payments', description: 'Permission to process payments', canCreate: true, canRead: true, canUpdate: true },
-  { code: 'manage_inventory', description: 'Permission to manage inventory', canCreate: true, canRead: true, canUpdate: true, canDelete: true },
-  { code: 'view_dashboard', description: 'Permission to view dashboard', canRead: true },
-  { code: 'access_settings', description: 'Permission to access settings', canRead: true, canUpdate: true },
-  { code: 'generate_reports', description: 'Permission to generate reports', canCreate: true, canRead: true }
+  { code: 'logs', name: 'Logs', description: 'Permission to create, read, update, and delete logs' },
+  { code: 'reports', name: 'Reports', description: 'Permission to view and generate reports' },
+  { code: 'profile', name: 'Profile', description: 'Permission to edit profile' },
+  { code: 'users', name: 'Users', description: 'Permission to manage users' },
+  { code: 'orders', name: 'Orders', description: 'Permission to create orders' },
+  { code: 'payments', name: 'Payments', description: 'Permission to process payments' },
+  { code: 'inventory', name: 'Inventory', description: 'Permission to manage inventory' },
+  { code: 'dashboard', name: 'Dashboard', description: 'Permission to view dashboard' },
+  { code: 'settings', name: 'Settings', description: 'Permission to access settings' }
 ];

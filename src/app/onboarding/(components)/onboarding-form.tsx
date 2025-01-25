@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { redirect } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
 import PersonalInfoForm from "./personal-info-form";
 import RoleSelectionForm from "./role-selection-form";
 import CollegeAndCourseForm from "./college-form";
@@ -13,15 +14,14 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { Role, College } from "@/types/Misc";
-import { clientWrapper } from "@/actions";
 import { completeOnboarding } from "@/app/onboarding/_actions";
 import { OnboardingForm as OnboardingFormType, OnboardingFormSchema } from "@/schema/user";
+import useToast from "@/hooks/use-toast";
 
 
 export default function OnboardingForm() {
-  const { user, isSignedIn } = useUser();
+  const {user, isSignedIn} = useUser();
   const [step, setStep] = useState(1);
-  const [isPending, startTransition] = useTransition();
   const [showRedirect, setShowRedirect] = useState(false);
 
   const form = useForm({
@@ -38,6 +38,32 @@ export default function OnboardingForm() {
     },
   });
 
+  const { mutate, isPending, failureReason} = useMutation({
+    mutationFn: (formData: OnboardingFormType) => completeOnboarding(formData),
+    onSuccess: () => {
+      useToast({
+        type: 'success',
+        message: 'Welcome aboard!',
+        title: 'Onboarding completed successfully.',
+        duration: 10
+      });
+      setShowRedirect(true);
+      user?.reload();
+      setTimeout(() => redirect('/dashboard'), 5000);
+    },
+    onError: () => {
+      useToast({
+        type: 'error',
+        message: 'An error occurred while completing your request. Please try again later.',
+        title: failureReason?.message  ?? 'Error in Completing Onboarding'
+      });
+    }
+  });
+
+  async function onSubmit(formData: OnboardingFormType) {
+    mutate(formData);
+  }
+
   const stepTitle: { [key: number]: string } = {
     1: "Personal",
     2: "Role",
@@ -51,38 +77,10 @@ export default function OnboardingForm() {
   }, [isSignedIn, form, user]);
 
   const handlePageChange = (direction: "next" | "previous") => {
-    if (direction === "next") {
-      setStep((prev) => Math.min(prev + 1, 3));
-    } else {
-      setStep((prev) => Math.max(prev - 1, 1));
-    }
+    if (direction === "next") setStep((prev) => Math.min(prev + 1, 3));
+    else setStep((prev) => Math.max(prev - 1, 1));
   };
 
-  async function onSubmit(formData: OnboardingFormType) {
-    startTransition(async () => {
-      const wrappedFunction = await clientWrapper(
-        async () => {
-          const response = await completeOnboarding(formData);
-          if (response.success) {
-            form.reset();
-          }
-          return response;
-        },
-        {
-          showSuccessToast: true,
-          successMessage: "Onboarding completed successfully!",
-          successTitle: "Welcome aboard!"
-        }
-      );
-      const result = await wrappedFunction(formData);
-      if (result?.success) {
-        setShowRedirect(true);
-        user?.reload();
-        await new Promise(resolve => setTimeout(resolve, 5000));
-        redirect('/dashboard');
-      }
-    });
-  }
 
   return (
     <>

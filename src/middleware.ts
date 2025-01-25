@@ -45,6 +45,10 @@ const isOnboardingRoute = createRouteMatcher([
   '/onboarding(.*)',
 ]);
 
+const isAdminRoute = createRouteMatcher([
+  '/admin(.*)',
+]);
+
 export default clerkMiddleware(async (auth, req: NextRequest) => {
   const { userId, sessionClaims, redirectToSignIn } = await auth();
 
@@ -61,6 +65,11 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   if (userId && !sessionClaims?.metadata?.isOnboardingCompleted) {
     const onboardingUrl = new URL('/onboarding', req.url);
     return NextResponse.redirect(onboardingUrl);
+  }
+
+  // Check if the user is visiting an admin route but is not a staff member
+  if (userId && isAdminRoute(req) && !sessionClaims?.metadata?.data.isStaff) {
+    return NextResponse.rewrite(new URL('/404', req.url));
   }
 
   // If the user is logged in and the route is protected, let them view.
