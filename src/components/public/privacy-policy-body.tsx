@@ -4,9 +4,9 @@ import { FOOTER_DETAILS } from '@/constants';
 
 function PrivacyPolicyBody() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 px-4 py-16 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b  px-4 py-16 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-4xl">   
-        <div className="overflow-hidden rounded-2xl bg-white transition-all">
+        <div className="overflow-hidden rounded-2xl border bg-white transition-all">
           <div className="p-8 sm:p-12">
             <div className="mb-12">
               <h2 className="mb-6 flex items-center text-2xl font-bold text-gray-800">
