@@ -8,9 +8,18 @@ type UserState = {
   clearUser: () => void;
 };
 
-export const useUserStore = create<UserState>((set) => ({
-  userId: null,
-  user: null,
-  setUser: (user: User) => set({ user, userId: user.id }),
-  clearUser: () => set({ userId: null, user: null }),
-}));
+import { persist } from 'zustand/middleware';
+
+export const useUserStore = create(
+  persist<UserState>(
+    (set) => ({
+      userId: null,
+      user: null,
+      setUser: (user: User) => set({ user, userId: user.id }),
+      clearUser: () => set({ userId: null, user: null }),
+    }),
+    {
+      name: 'user-storage',
+    }
+  )
+);

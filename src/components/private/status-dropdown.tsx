@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import { useState, useEffect } from "react";  // Import useState and useEffect
 import { MdKeyboardArrowDown } from 'react-icons/md';
@@ -11,18 +9,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { OrderStatus, PaymentStatus, PaymentMethod, CustomerType, StatusOption } from "@/types/Misc";
+import { StatusOption } from "@/types/Misc";
 
-type StatusType = OrderStatus | PaymentStatus | PaymentMethod | CustomerType;
+
 
 type StatusDropdownProps = {
   options: StatusOption[];
-  value: StatusType;
-  onChange: (value: StatusType) => void;
+  value: string;
+  onChange: (value: string) => void;
   align?: "start" | "center" | "end";
 }
 
-export function StatusDropdown({ options, value, onChange, align = "center" }: StatusDropdownProps) {
+export function StatusDropdown({ options, value, onChange, align = "center" }: Readonly<StatusDropdownProps>) {
   const [isClient, setIsClient] = useState(false);  // Manage client-side render state
 
   useEffect(() => {
@@ -32,19 +30,19 @@ export function StatusDropdown({ options, value, onChange, align = "center" }: S
   if (!isClient) return null;  // Prevent rendering on the server side
 
   const selectedOption = options.find(option => option.value === value);
-  if (!selectedOption) {
-    console.warn(`No option found for value: ${value}`);
-  }
+  // if (!selectedOption) {
+  //   console.warn(`No option found for value: ${value}`);
+  // }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="focus:outline-none">
         <div className="flex items-center gap-1">
           <Badge
-            variant={selectedOption?.variant || "default"}
+            variant={selectedOption?.variant ?? "default"}
             className={cn("min-w-[80px]", selectedOption?.className)}
           >
-            {selectedOption?.label || value}
+            {selectedOption?.label ?? value}
           </Badge>
           <MdKeyboardArrowDown className="size-3 opacity-50" />
         </div>
@@ -57,7 +55,7 @@ export function StatusDropdown({ options, value, onChange, align = "center" }: S
             className="flex items-center gap-2"
           >
             <Badge
-              variant={option.variant || "default"}
+              variant={option.variant ?? "default"}
               className={cn("min-w-[80px]", option.className)}
             >
               {option.label}

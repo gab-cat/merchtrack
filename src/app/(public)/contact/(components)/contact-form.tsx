@@ -48,8 +48,7 @@ const ContactForm = () => {
   const mutation = useMutation({
     mutationFn: (formData: FormContactType) => submitMessage(formData),
     onSuccess: () => {
-      form.reset({ email: '', subject: '', message: '' });
-      localStorage.removeItem('contactMessage');
+      form.reset();
       useToast({
         type: 'success',
         message: 'Keep an eye on your inbox for a response. We will get back to you within 24 hours. Thank you!',
@@ -65,10 +64,6 @@ const ContactForm = () => {
       });
     }
   });
-
-  async function onSubmit(formData: FormContactType) {
-    mutation.mutate(formData);
-  }
 
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -87,7 +82,7 @@ const ContactForm = () => {
     <Form {...form}>
       <form
         className="mb-4 flex w-full flex-col space-y-4 pt-8 font-inter"
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
       >
         {formFields.map((field) => (
           <div key={field.id} className="space-y-2">
@@ -116,6 +111,7 @@ const ContactForm = () => {
         ))}
         <Button 
           disabled={mutation.isPending} 
+          aria-busy={mutation.isPending}
           className={cn("ml-auto w-full text-neutral-1 sm:w-auto", mutation.isPending ? 'bg-primary-700' : 'bg-primary-500')} 
           type="submit"
           aria-label="Send contact form message"

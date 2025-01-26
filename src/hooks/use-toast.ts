@@ -18,7 +18,8 @@ interface ToastProps {
  */
 export default function useToast ({ type, message, title, duration = 5 }: ToastProps): void {
 
-  const colorMap = {
+  type ToastColorMap = Record<ToastProps['type'], string>;
+  const colorMap: ToastColorMap = {
     success: 'green',
     error: 'red',
     warning: 'orange',

@@ -11,11 +11,21 @@ const SyncUserData = () => {
 
   useEffect(() => {
     if (isSignedIn && userData === null) {
-      setUser(user.publicMetadata.data as User);
+      try {
+        const metadata = user?.publicMetadata?.data;
+        if (!metadata) {
+          throw new Error('User metadata is missing');
+        }
+        setUser(metadata as User);
+      } catch (error) {
+        // no-dd-sa:typescript-best-practices/no-console
+        console.error('Failed to sync user data:', error);
+        clearUser();
+      }
     } else if (!isSignedIn) {
       clearUser();
     }
-  }, [isSignedIn]);
+  }, [isSignedIn, user, userData, setUser, clearUser]);
 
   return null;
 };

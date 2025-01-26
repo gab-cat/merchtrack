@@ -21,8 +21,9 @@ export default async function OnboardingPage() {
               <Image
                 src="/img/logo.png"
                 alt="MerchTrack Logo"
-                layout="fill"
-                objectFit="contain"
+                width={64}
+                height={64}
+                priority
                 className="w-auto"
               />
             </div>

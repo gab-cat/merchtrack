@@ -50,14 +50,19 @@ export const verifyPermission = async (params: VerifyPermissionParams): Promise<
     return false;
   }
 
+  // Create a map for O(1) lookup
+  const userPermissionMap = Object.fromEntries(
+    userPermissions.map(up => [up.permissionId, up])
+  );
+
   return actionCodes.every(actionCode => {
-    const userPermission = userPermissions.find(up => up.permissionId === actionCode);
+    const userPermission = userPermissionMap[actionCode];
     if (!userPermission) return false;
 
     const requiredPermissions = params.permissions[actionCode];
-    return Object.entries(requiredPermissions || {}).every(([key, value]) => {
-      return userPermission[key as keyof typeof userPermission] === value;
-    });
+    return Object.entries(requiredPermissions || {}).every(([key, value]) => 
+      userPermission[key as keyof typeof userPermission] === value
+    );
   });
 };
 

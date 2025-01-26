@@ -1,10 +1,14 @@
 /**
  * Converts a given UTC date to Manila time in 'YYYY-MM-DD HH:mm:ss' format.
- * @param {Date} utcDate - The UTC date to be converted.
+ * @param {Date | string} utcDate - The UTC date to be converted.
  * @returns {string} - The formatted date string in Manila time.
  */
-export function toManilaTime(utcDate: Date): string {
-  return utcDate.toLocaleString('en-PH', {
+export function toManilaTime(utcDate: Date | string): string {
+  const date = new Date(utcDate);
+  if (!(date instanceof Date) || isNaN(date.getTime())) {
+    throw new Error('Invalid date provided');
+  }
+  return date.toLocaleString('en-PH', {
     timeZone: 'Asia/Manila',
     year: 'numeric',
     month: '2-digit',
@@ -22,36 +26,40 @@ export function toManilaTime(utcDate: Date): string {
 export const manilaTime = {
   /**
    * Converts a given UTC date to Manila date and time in 'YYYY-MM-DD HH:mm:ss' format.
-   * @param {Date} utcDate - The UTC date to be converted.
+   * @param {Date | string} utcDate - The UTC date to be converted.
    * @returns {string} - The formatted date and time string in Manila time.
    */
-  dateTime: (utcDate: Date): string => toManilaTime(utcDate),
+  dateTime: (utcDate: Date | string): string => toManilaTime(utcDate),
 
   /**
    * Converts a given UTC date to Manila date in 'YYYY-MM-DD' format.
-   * @param {Date} utcDate - The UTC date to be converted.
+   * @param {Date | string} utcDate - The UTC date to be converted.
    * @returns {string} - The formatted date string in Manila time.
    */
-  dateOnly: (utcDate: Date): string => 
-    utcDate.toLocaleDateString('en-PH', {
+  dateOnly: (utcDate: Date | string): string => {
+    const date = new Date(utcDate);
+    return date.toLocaleDateString('en-PH', {
       timeZone: 'Asia/Manila',
       year: 'numeric',
       month: '2-digit',
       day: '2-digit'
-    }),
+    });
+  },
 
   /**
    * Converts a given UTC date to Manila time in 'HH:mm' format.
-   * @param {Date} utcDate - The UTC date to be converted.
+   * @param {Date | string} utcDate - The UTC date to be converted.
    * @returns {string} - The formatted time string in Manila time.
    */
-  timeOnly: (utcDate: Date): string =>
-    utcDate.toLocaleTimeString('en-PH', {
+  timeOnly: (utcDate: Date | string): string => {
+    const date = new Date(utcDate);
+    return date.toLocaleTimeString('en-PH', {
       timeZone: 'Asia/Manila',
       hour: '2-digit',
       minute: '2-digit',
       hour12: false
-    })
+    });
+  }
 };
 
 // Usage examples:

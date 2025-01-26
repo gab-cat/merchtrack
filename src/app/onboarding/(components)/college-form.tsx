@@ -29,7 +29,7 @@ export default function CollegeAndCourseForm({ form }: Readonly<CollegeAndCourse
           <SelectContent className="bg-neutral-2">
             {colleges.map((college) => (
               <SelectItem className="cursor-pointer transition-colors hover:bg-primary-200" key={college} value={college}>
-                {college.replace("_", " ")}
+                {college.replaceAll("_", " ")}
               </SelectItem>
             ))}
           </SelectContent>
@@ -48,6 +48,7 @@ export default function CollegeAndCourseForm({ form }: Readonly<CollegeAndCourse
           id="courses"
           {...form.register("courses")}
           className="mt-1"
+          maxLength={100}
           placeholder="e.g. BS Computer Science, BS Information Technology, etc."
         />
         {form.formState.errors.courses && (

@@ -45,6 +45,8 @@ export default function PersonalInfoForm({ form }: Readonly<PersonalInfoFormProp
           <Input
             id={field.id}
             disabled={field.isDisabled}
+            aria-required="true"
+            aria-describedby={form.formState.errors[field.id] ? `${field.id}-error` : undefined}
             {...form.register(field.id)}
           />
           {form.formState.errors[field.id] && (

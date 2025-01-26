@@ -47,9 +47,9 @@ export interface Order {
   balance: number
 }
 
-export interface StatusOption {
+export interface StatusOption<T = string> {
   label: string
-  value: OrderStatus | PaymentStatus | PaymentMethod | CustomerType
+  value: T
   variant?: "default" | "outline"
   className?: string
 }
