@@ -1,5 +1,5 @@
 # Stage: Install and cache dependencies
-FROM --platform=linux/amd64 node:22.12.0-alpine3.21 AS client-cache
+FROM --platform=linux/amd64 node:23.6.1-alpine3.21 AS client-cache
 LABEL author=gab-cat
 
 WORKDIR /app
