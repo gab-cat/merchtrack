@@ -19,7 +19,7 @@
   "dependencies": {
     "@clerk/elements": "^0.22.15",
     "@clerk/nextjs": "^6.10.0",
-    "@clerk/shared": "^2.20.11",
+    "@clerk/shared": "^2.20.15",
     "@datadog/browser-rum": "^5.35.0",
     "@fortawesome/fontawesome-free": "^6.7.2",
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
