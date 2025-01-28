@@ -50,6 +50,10 @@ const isAdminRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
+
+  // If visiting a public route, let the user view
+  if (isPublicRoute(req)) return NextResponse.next();
+
   const { userId, sessionClaims, redirectToSignIn } = await auth();
 
   // For users visiting /onboarding, don't try to redirect

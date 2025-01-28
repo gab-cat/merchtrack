@@ -75,7 +75,11 @@ export default {
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
   			'accordion-up': 'accordion-up 0.2s ease-out'
-  		}
+  		},
+      backdropFilter: {
+        none: "none",
+        blur: "blur(20px)",
+      },
   	}
   },
   // eslint-disable-next-line @typescript-eslint/no-require-imports

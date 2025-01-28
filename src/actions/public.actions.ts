@@ -1,6 +1,7 @@
 "use server";
 
 import prisma from "@/lib/db";
+import { invalidateCache } from "@/lib/redis";
 import { formContactSchema, FormContactType } from "@/schema/public-contact";
 
 
@@ -47,9 +48,12 @@ export async function submitMessage(formData: FormContactType): Promise<ActionsR
   try {
     const contactSubmit = await prisma.message.create({
       data: {
-        ...sanitizedData
+        ...sanitizedData,
+        isSentByCustomer: true,
       },
     });
+
+    await invalidateCache(['messages']);
 
     return {
       success: true, 

@@ -1,9 +1,10 @@
 // no-dd-sa:typescript-best-practices/boolean-prop-naming
 'use server';
 import prisma from "@/lib/db";
-import redis from '@/lib/redis';
+import { getCached, setCached } from '@/lib/redis';
 
-type ActionCode = 'logs' | 'reports' | 'profile' | 'users' | 'orders' | 'payments' | 'inventory' | 'dashboard' | 'settings';
+
+type ActionCode = 'logs' | 'reports' | 'profile' | 'users' | 'orders' | 'payments' | 'inventory' | 'dashboard' | 'settings' | 'messages';
 
 type RequiredPermissions = {
   canCreate?: boolean, 
@@ -29,14 +30,6 @@ type UserPermission = {
 
 // Use redis in the future to cache user permissions
 
-const getCachedPermissions = async (userId: string): Promise<UserPermission[] | null> => {
-  const cachedPermissions = await redis.get(`permissions:${userId}`);
-  return cachedPermissions ? JSON.parse(cachedPermissions) : null;
-};
-
-const setCachedPermissions = async (userId: string, permissions: UserPermission[]): Promise<void> => {
-  await redis.set(`permissions:${userId}`, JSON.stringify(permissions), 'EX', 3600); // Cache for 1 hour
-};
 
 /**
  * Verifies if a user has the required permissions for the specified action codes.
@@ -48,10 +41,8 @@ const setCachedPermissions = async (userId: string, permissions: UserPermission[
 export const verifyPermission = async (params: VerifyPermissionParams): Promise<boolean> => {
   const actionCodes = Object.keys(params.permissions) as ActionCode[];
 
-  // Check cache first
-  let userPermissions: UserPermission[] | null = await getCachedPermissions(params.userId);
+  let userPermissions: UserPermission[] | null = await getCached<UserPermission[]>(`permissions:${params.userId}`);
   if (!userPermissions) {
-    console.time('Prisma Query Time');
     userPermissions = (await prisma.userPermission.findMany({
       where: {
         userId: params.userId,
@@ -65,10 +56,8 @@ export const verifyPermission = async (params: VerifyPermissionParams): Promise<
         canDelete: true
       }
     })) as UserPermission[];
-    console.timeEnd('Prisma Query Time');
-
     if (userPermissions.length) {
-      await setCachedPermissions(params.userId, userPermissions);
+      await setCached(`permissions:${params.userId}`, userPermissions);
     }
   }
 

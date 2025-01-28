@@ -3,6 +3,7 @@
 import prisma from "@/lib/db";
 import { verifyPermission } from "@/utils/permissions";
 import { ExtendedOrder } from "@/types/orders";
+import { getCached, setCached} from "@/lib/redis";
 
 export async function getAllOrders(userId: string): Promise<ActionsReturnType<ExtendedOrder[]>> {
   const isAuthorized = await verifyPermission({
@@ -19,16 +20,20 @@ export async function getAllOrders(userId: string): Promise<ActionsReturnType<Ex
     };
   }
 
+  let orders: ExtendedOrder[] | null = await getCached('orders');
+  if (!orders || orders.length === 0) {
+    orders = await prisma.order.findMany({
+      where: {
+        isDeleted: false
+      },
+      include: {
+        payments: true,
+        customer: true,
+      }
+    });
 
-  const orders = await prisma.order.findMany({
-    where: {
-      isDeleted: false
-    },
-    include: {
-      payments: true,
-      customer: true,
-    }
-  });
+    await setCached('orders', orders);
+  }
 
 
   return {

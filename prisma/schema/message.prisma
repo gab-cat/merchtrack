@@ -5,6 +5,7 @@ model Message {
   isResolved Boolean @default(false)
   isSentByCustomer Boolean @default(false)
   isSentByAdmin Boolean @default(false)
+  repliesToId String?
   sentBy    String?
   email     String
   subject   String
@@ -14,8 +15,11 @@ model Message {
   
   // Relations
   user      User? @relation("MessageToUser", fields: [sentBy], references: [id])
+  repliesTo Message? @relation("MessageToMessage", fields: [repliesToId], references: [id])
   @@index([isArchived], name: "idx_message_isArchived")
   @@index([isRead], name: "idx_message_isRead")
   @@index([isResolved], name: "idx_message_isResolved")
   @@index([isRead, isResolved, isSentByCustomer, isArchived], name: "idx_message_initial")
+
+  Message Message[] @relation("MessageToMessage")
 }

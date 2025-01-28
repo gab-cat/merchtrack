@@ -16,7 +16,12 @@ const nextConfig: NextConfig = {
       }
     ],
   },
-  serverExternalPackages: ['require-in-the-middle'],
+  serverExternalPackages: [
+    'require-in-the-middle',
+    '@react-email/components',
+    '@react-email/render',
+    '@react-email/tailwind'
+  ],
   experimental: {
     serverActions: {
       allowedOrigins: [
@@ -25,11 +30,11 @@ const nextConfig: NextConfig = {
         process.env.NEXT_PUBLIC_APP_URL as string,
       ]
     },
-    useLightningcss: true,
+    // useLightningcss: true,
   },
   eslint: {
     ignoreDuringBuilds: true
-  }
+  },
 };
 
 export default withSentryConfig(nextConfig, {
