@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import type { SessionMetadata, SessionClaims, AuthSession } from "../types/auth";
+import type { SessionMetadata, SessionClaims } from "../types/auth";
 
 export async function getSessionData(): Promise<{
   sessionClaims: SessionClaims;

@@ -17,7 +17,7 @@ export default async function AdminWelcome() {
   }
   
   const currentTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-};
+}
 
 export default async function AdminWelcome() {
   const { sessionClaims } = await auth();

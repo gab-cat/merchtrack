@@ -22,6 +22,9 @@ const AdminOrdersPage: FC = async () => {
     permissions: {
       dashboard: { canRead: true },
     }
+  })) {
+    return <PermissionDenied />;
+  }
   const { sessionClaims } = await auth();
 
   if (!await verifyPermission({
@@ -63,4 +66,5 @@ const AdminOrdersPage: FC = async () => {
   );
 };
 
-export default AdminOrdersPage;
+export default AdminOrdersPage;
+
