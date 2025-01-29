@@ -1,16 +1,22 @@
 import { FaUserFriends, FaShoppingCart } from "react-icons/fa";
 import { FaChartSimple } from "react-icons/fa6";
 import { MdSettings } from "react-icons/md";
-import { auth } from "@clerk/nextjs/server";
-import { StatCard } from "./components/StatCard";
-import { AnnouncementsCard } from "./components/AnnouncementsCard";
-import { MessageOfTheDayCard } from "./components/MessageOfTheDayCard";
-import { QuickActions } from "./components/QuickActions";
-import PageAnimation from "@/components/public/page-animation";
+import { getSessionData } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 export const metadata = {
   title: "Admin Dashboard",
   description: "Welcome back to your admin dashboard",
+};
+
+export default async function AdminWelcome() {
+  const { metadata } = await getSessionData();
+  
+  if (!metadata?.data) {
+    return redirect('/auth/sign-in');
+  }
+  
+  const currentTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 };
 
 export default async function AdminWelcome() {

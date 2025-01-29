@@ -1,14 +1,14 @@
 import Image from "next/image";
-import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import OnboardingForm from "./(components)/onboarding-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import OnboardingBackground from "@/app/onboarding/(components)/onboarding-background";
 import PageAnimation from "@/components/public/page-animation";
+import { getSessionData, isOnboardingCompleted } from "@/lib/auth";
 
 export default async function OnboardingPage() {
-  const user = await auth();
-  if (user.sessionClaims?.metadata.isOnboardingCompleted){
+  const { metadata } = await getSessionData();
+  if (isOnboardingCompleted(metadata)) {
     return redirect('/dashboard');
   }
   return (
