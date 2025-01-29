@@ -1,9 +1,6 @@
 import Redis from 'ioredis';
 
 const redisClientSingleton = () => {
-  if (!process.env.REDIS_HOST || !process.env.REDIS_PORT || !process.env.REDIS_PASSWORD) {
-    throw new Error('Missing one or more required environment variables for Redis');
-  }
   return new Redis({
     host: process.env.REDIS_HOST,
     port: Number(process.env.REDIS_PORT),

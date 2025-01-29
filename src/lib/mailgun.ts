@@ -2,9 +2,6 @@ import formData from 'form-data';
 import Mailgun, { type MessagesSendResult } from 'mailgun.js';
 
 const mailgunClientSingleton = () => {
-  if (!process.env.MAILGUN_API_KEY || !process.env.MAILGUN_DOMAIN) {
-    throw new Error('Mailgun API key or domain is missing.');
-  }
   const mailgun = new Mailgun(formData);
   return mailgun.client({
     username: 'api',
