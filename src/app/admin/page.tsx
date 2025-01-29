@@ -8,6 +8,11 @@ import { MessageOfTheDayCard } from "./components/MessageOfTheDayCard";
 import { QuickActions } from "./components/QuickActions";
 import PageAnimation from "@/components/public/page-animation";
 
+export const metadata = {
+  title: "Admin Dashboard",
+  description: "Welcome back to your admin dashboard",
+};
+
 export default async function AdminWelcome() {
   const { sessionClaims } = await auth();
   const metadata = sessionClaims?.metadata.data;

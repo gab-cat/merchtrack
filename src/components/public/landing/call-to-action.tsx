@@ -6,7 +6,10 @@ import { Input } from "@/components/ui/input";
 
 export default function CallToAction() {
   return (
-    <section className="text-primary-foreground  py-16">
+    <section 
+      className="text-primary-foreground  py-16"
+      aria-label="Newsletter subscription"
+    >
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
@@ -14,9 +17,12 @@ export default function CallToAction() {
           transition={{ duration: 0.8 }}
           className="text-center"
         >
-          <h2 className="mb-4 text-3xl font-bold">Stay Updated</h2>
+          <h2 className="mb-4 text-3xl font-bold" id="newsletter-heading">Stay Updated</h2>
           <p className="mb-8 text-xl">Subscribe to our newsletter for exclusive deals and updates</p>
-          <form className="mx-auto flex max-w-md flex-col gap-4 sm:flex-row">
+          <form 
+            className="mx-auto flex max-w-md flex-col gap-4 sm:flex-row"
+            aria-labelledby="newsletter-heading"
+          >
             <Input
               type="email"
               placeholder="Enter your email"

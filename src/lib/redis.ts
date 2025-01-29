@@ -1,6 +1,9 @@
 import Redis from 'ioredis';
 
 const redisClientSingleton = () => {
+  if (!process.env.REDIS_HOST || !process.env.REDIS_PORT || !process.env.REDIS_PASSWORD) {
+    throw new Error('Missing one or more required environment variables for Redis');
+  }
   return new Redis({
     host: process.env.REDIS_HOST,
     port: Number(process.env.REDIS_PORT),
@@ -28,11 +31,11 @@ export const getCached = async <T>(key: string): Promise<T | null> => {
   return cachedData ? JSON.parse(cachedData) : null;
 };
 
-export const setCached = async <T>(key: string, data: T, expirationInSeconds: number = 3600): Promise<void> => {
+export const setCached = async <T>(key: string, data: T, expirationInSeconds: number = 3600) => {
   await redis.set(key, JSON.stringify(data), 'EX', expirationInSeconds);
 };
 
-export const invalidateCache = async (keys: string[]): Promise<void> => {
+export const invalidateCache = async (keys: string[]) => {
   if (keys.length > 0) {
     await redis.del(keys);
   }

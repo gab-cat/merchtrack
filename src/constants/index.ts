@@ -7,3 +7,4 @@ export { paymentStatusOptions, orderStatusOptions, paymentMethodOptions, custome
 export { ABOUT_US_CONTENT, ABOUT_DEVELOPERS } from './about-us';
 export { PRIVACY_POLICY_CONTENT } from './privacy-policy';
 export { TERMS_OF_SERVICE_CONTENT } from './terms-of-service';
+export { emailContent, emailStyles } from './email';

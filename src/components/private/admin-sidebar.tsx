@@ -4,16 +4,19 @@ import { FiLogOut } from "react-icons/fi";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { UserButton } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { AdminLinks } from "@/constants";
+import { useUserStore } from "@/stores/user.store";
 
 export default function AdminSidebar() {
+  const { user } = useUserStore();
   const pathname = usePathname();
 
   return (
-    <div className="bg-background flex w-64 flex-col border-r">
+    <div className="bg-background flex h-full w-64 flex-col border-r">
       {/* Logo Section */}
       <div className="flex items-center justify-center p-6">
         <Link href="/admin" className="flex flex-col items-center gap-2">
@@ -26,12 +29,12 @@ export default function AdminSidebar() {
               className="w-auto"
             />
           </div>
-          <span className="text-2xl font-bold tracking-tighter text-neutral-7">MerchTrack</span>
+          <span className="text-2xl font-bold tracking-tight text-primary">MerchTrack</span>
         </Link>
       </div>
 
       {/* Navigation */}
-      <ScrollArea className="flex-1 py-2">
+      <ScrollArea className="flex-1 border-y py-2">
         <nav className="grid gap-1 px-14 py-4">
           {AdminLinks.map((item) => {
             const isActive = pathname?.includes(item.href); 
@@ -58,18 +61,23 @@ export default function AdminSidebar() {
       {/* User Info and Logout */}
       <div className="mt-auto px-10 py-8">
         <div className="flex items-center gap-2 py-4">
-          <Image 
-            src="/img/sample_pfp.jpg" 
-            alt="User" 
-            className="size-16 rounded-full" 
-            width={64} // Match the actual dimensions (h-16 = 64px)
-            height={64} 
-          />
+          <div className="relative size-12">
+            <UserButton appearance={{ 
+              elements: {
+                userButtonAvatarBox: "w-12 h-12", // Custom width and height
+                userButtonPopoverCard: "bg-blue-100", // Custom background for the popover card
+                userButtonPopoverActionButton: "text-neutral-600", // Custom text color for action buttons
+              }
+            }} 
+            />
+          </div>
           <div className="flex flex-col">
-            <span className="text-sm font-semibold">Kyla Ronquillo</span>
-            <span className="text-xs text-gray-600">Admin</span>
+            <span className="text-sm font-semibold">{user?.firstName} {user?.lastName}</span>
+            <span className="text-xs text-gray-600">{user?.isAdmin ? "Admin" : "Staff"}</span>
           </div>
         </div>
+
+
         <Button variant="ghost" className="w-full justify-start gap-2">
           <FiLogOut className="size-4" />
           Back to Customer View
@@ -78,4 +86,5 @@ export default function AdminSidebar() {
     </div>
   );
 }
+
 

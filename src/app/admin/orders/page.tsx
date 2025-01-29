@@ -11,6 +11,11 @@ import { OrdersTable } from "@/components/private/orders-table";
 
 const PermissionDenied = dynamic(() => import("@/components/private/permission-denied"));
 
+export const metadata = {  
+  title: 'Orders | Admin Dashboard',
+  description: 'View and manage orders'
+};  
+
 const AdminOrdersPage: FC = async () => {
   const { sessionClaims } = await auth();
 

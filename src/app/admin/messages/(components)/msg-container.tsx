@@ -1,12 +1,15 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState, useEffect } from "react";
 import { SearchIcon } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { IoMdRefresh } from "react-icons/io";
 import MessageList from "./msg-list";
 import MessageDetail from "./msg-detail";
 import MessageSkeleton from "./msg-skeleton";
+import ComposeEmail from "./compose-email";
+import MessageTabs from "./msg-tabs";
+import SentMessageList from "./sent-msg-list";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -19,94 +22,141 @@ import { cn } from "@/lib/utils";
 
 export default function MessagesContainer() {
   const { userId } = useUserStore();
-  const { data: messages, isPending, refetch } = useQuery({
-    queryKey: ["messages"],
+  const { data: messages, isPending, refetch, isRefetching } = useQuery({
+    queryKey: ["messages:all"],
     queryFn: async () => {
-      const response = await getMessages(userId as string);
-      if (!response.success) {
-        useToast({
-          type: "error",
-          message: response.message as string,
-          title: "Error fetching messages",
-        });
-      }
-      return response.data;
+      return await fetchMessages(userId as string);
     },
   });
   const [selectedMessage, setSelectedMessage] = useState<ExtendedMessage | null>(null);
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState<"inbox" | "sent">("inbox");
 
-  const handleMessageSelect = (message: ExtendedMessage) => {
+  const handleMessageSelect = useCallback((message: ExtendedMessage) => {
     setSelectedMessage(message);
     if (!message.isRead) {
       messages?.map((m) => (m.id === message.id ? { ...m, isRead: true } : m));
     }
-  };
+  }, [messages]);
 
-  const selectedMessageReply = messages?.find(m => m.repliesToId === selectedMessage?.id) as ExtendedMessage | undefined;
+  const selectedMessageReply = useMemo(() => {
+    return messages?.find(m => m.repliesToId === selectedMessage?.id) as ExtendedMessage | undefined;
+  }, [messages, selectedMessage]);
 
-  const handleReply = () => {
+  const handleReply = useCallback(async () => {
     if (selectedMessage) {
       setSelectedMessage(null);
     }
-    refetch();
-  };
+    await refetch();
+  }, [selectedMessage, refetch]);
 
   const handleRefresh = useCallback(async () => {
     await refetch();
-  }, [isPending]);
+  }, [refetch]);
 
-  const filteredMessages = messages?.filter(
-    (message) =>
-      (!showUnreadOnly || !message.isRead) &&
-      (message.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        message.message.toLowerCase().includes(searchTerm.toLowerCase())),
-  );
+  const filteredMessages = useMemo(() => {
+    const tabFiltered = messages?.filter(message => 
+      activeTab === "inbox" ? !message.isSentByAdmin : message.isSentByAdmin
+    );
+
+    return tabFiltered?.filter(
+      (message) =>
+        (!showUnreadOnly || !message.isRead) &&
+        (message.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          message.message.toLowerCase().includes(searchTerm.toLowerCase()) || 
+          message.email.toLowerCase().includes(searchTerm.toLowerCase())),
+    );
+  }, [messages, showUnreadOnly, searchTerm, activeTab]);
+
+  const counts = useMemo(() => ({
+    inbox: messages?.filter(m => !m.isSentByAdmin).length ?? 0,
+    sent: messages?.filter(m => m.isSentByAdmin).length ?? 0,
+  }), [messages]);
+
+  useEffect(() => {
+    if (selectedMessage) {
+      setSelectedMessage(messages?.find(m => m.id === selectedMessage.id) as ExtendedMessage || null);
+    }
+  }, [messages, selectedMessage]);
 
   return (
-    <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-      <div>
-        <div className="mb-4 flex items-center justify-between space-x-2">
-          <div className="flex items-center space-x-2">
-            <Switch className="border ring-neutral-7" id="unread-filter" checked={showUnreadOnly} onCheckedChange={setShowUnreadOnly} />
-            <Label htmlFor="unread-filter">Show unread only</Label>
-            <span className="text-sm text-gray-500">Total messages: {messages?.length ?? 0}</span>
-          </div>
-          <div>
-            <Button disabled={isPending} className={cn(isPending && "bg-neutral-6", 'active:bg-slate-500')} onClick={handleRefresh} variant='outline'>
-              <IoMdRefresh className={cn("mr-2", isPending && "animate-spin")} />
-              Refresh
-            </Button>
-          </div>
-        </div>
-        <div className="mb-4 flex items-center space-x-2">
-          <SearchIcon className="" />
-          <Input
-            type="text"
-            placeholder="Search messages..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+    <div className="grid h-[calc(100vh-8rem)] grid-cols-1 gap-8 md:grid-cols-2">
+      <div className="overflow-y-auto pb-6">
+        <div className="sticky top-0 z-10 mb-4 bg-white pb-4 shadow-lg">
+          <MessageTabs 
+            activeTab={activeTab} 
+            onTabChange={setActiveTab}
+            inboxCount={counts.inbox}
+            sentCount={counts.sent}
+            handleMessageSelect={setSelectedMessage}
           />
+          <div className="mb-4 flex items-center justify-between space-x-2">
+            <div className="flex items-center space-x-2">
+              <Switch className="border  ring-neutral-7" id="unread-filter" checked={showUnreadOnly} onCheckedChange={setShowUnreadOnly} />
+              <Label htmlFor="unread-filter">Show unread only</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <ComposeEmail />
+              <Button disabled={isRefetching} className={cn(isRefetching && "bg-neutral-6", 'active:bg-slate-500')} onClick={handleRefresh} variant='outline'>
+                <IoMdRefresh className={cn("mr-2", isRefetching && "animate-spin")} />
+                Refresh
+              </Button>
+            </div>
+          </div>
+          <div className="mb-4 flex items-center space-x-2">
+            <SearchIcon className="" />
+            <Input
+              type="text"
+              placeholder="Search messages..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
         </div>
         {isPending ? (
           <MessageSkeleton />
         ) : (
-          <MessageList
-            messages={filteredMessages as ExtendedMessage[]}
-            onSelectMessage={handleMessageSelect}
-            selectedMessageId={selectedMessage?.id}
-          />
+          activeTab === "inbox" ? (
+            <MessageList
+              messages={filteredMessages as ExtendedMessage[]}
+              onSelectMessage={handleMessageSelect}
+              selectedMessageId={selectedMessage?.id}
+            />
+          ) : (
+            <SentMessageList
+              messages={filteredMessages as ExtendedMessage[]}
+              onSelectMessage={handleMessageSelect}
+              selectedMessageId={selectedMessage?.id}
+            />
+          )
         )}
       </div>
-      <div>
+      <div className="overflow-y-auto">
         {selectedMessage ? (
-          <MessageDetail message={selectedMessage} replyMessage={selectedMessageReply} onReply={handleReply} />
+          <MessageDetail 
+            message={selectedMessage} 
+            replyMessage={selectedMessageReply} 
+            onReply={handleReply}
+            mode={activeTab}
+          />
         ) : (
           <div className="mt-8 text-center text-gray-500">Select a message to view details</div>
         )}
       </div>
     </div>
   );
+}
+
+async function fetchMessages(userId: string) {
+  const response = await getMessages(userId);
+  if (!response.success) {
+    useToast({
+      type: "error",
+      message: response.message as string,
+      title: "Error fetching messages",
+    });
+  }
+  return response.data;
 }
 

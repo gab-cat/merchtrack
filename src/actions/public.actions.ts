@@ -53,7 +53,7 @@ export async function submitMessage(formData: FormContactType): Promise<ActionsR
       },
     });
 
-    await invalidateCache(['messages']);
+    await invalidateCache([`messages:customer:${sanitizedData.email}`, 'messages:all']);
 
     return {
       success: true, 

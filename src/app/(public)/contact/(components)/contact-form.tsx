@@ -4,6 +4,8 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
+import { IoIosSend } from "react-icons/io";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TextArea } from "@/components/ui/text-area";
@@ -92,6 +94,7 @@ const ContactForm = () => {
             {field.type === 'textarea' ? (
               <TextArea
                 id={field.id}
+                disabled={mutation.isPending}
                 placeholder={field.placeholder}
                 {...form.register(field.id as keyof FormContactType)}
               />
@@ -99,6 +102,7 @@ const ContactForm = () => {
               <Input
                 id={field.id}
                 placeholder={field.placeholder}
+                disabled={mutation.isPending}
                 {...form.register(field.id as keyof FormContactType)}
               />
             )}
@@ -116,6 +120,11 @@ const ContactForm = () => {
           type="submit"
           aria-label="Send contact form message"
         >
+          {mutation.isPending ? (
+            <AiOutlineLoading3Quarters className="size-5 animate-spin" />
+          ) : (
+            <IoIosSend className="size-5" />
+          )}
           {mutation.isPending ? "Sending..." : "Send Message"}
         </Button>
       </form>

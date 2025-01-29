@@ -4,10 +4,12 @@ import SyncUserData from "@/components/misc/sync-user-data";
 
 export default function AdminLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div className="flex min-h-screen text-neutral-7">
+    <div className="flex">
       <SyncUserData />
-      <AdminSidebar />
-      <div className="flex-1">
+      <div className="fixed left-0 top-0 h-screen">
+        <AdminSidebar />
+      </div>
+      <div className="ml-64 flex-1 overflow-auto">
         {children}
       </div>
     </div>

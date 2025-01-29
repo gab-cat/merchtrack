@@ -1,11 +1,17 @@
 import { nanoid } from 'nanoid';
-import React from 'react';
+import { useMemo } from 'react';
 
 export default function MessageSkeleton() {
+  const SKELETON_COUNT = 4;
+  const memoizedKeys = useMemo(() => 
+    Array.from({ length: SKELETON_COUNT }, () => nanoid()),  
+  []  
+  );
+
   return (
     <div className="space-y-4">
-      {[...Array(4)].map(() => (
-        <div key={nanoid()} className="animate-pulse rounded-lg border p-4">
+      {memoizedKeys.map((key) => (
+        <div key={key} className="animate-pulse rounded-lg border p-4">
           <div className="mb-2 h-6 rounded bg-gray-300"></div>
           <div className="space-y-2">
             <div className="h-4 rounded bg-gray-300"></div>

@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
-const PageAnimation = ({ children, className }: { children: React.ReactNode, className?: string  }) => {
+const PageAnimation = ({ children, className }: { children: React.ReactNode, className?: string }) => {
   return (
     <AnimatePresence>
       <motion.div 

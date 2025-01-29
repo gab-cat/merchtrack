@@ -2,10 +2,13 @@ import formData from 'form-data';
 import Mailgun, { type MessagesSendResult } from 'mailgun.js';
 
 const mailgunClientSingleton = () => {
+  if (!process.env.MAILGUN_API_KEY || !process.env.MAILGUN_DOMAIN) {
+    throw new Error('Mailgun API key or domain is missing.');
+  }
   const mailgun = new Mailgun(formData);
   return mailgun.client({
     username: 'api',
-    key: process.env.MAILGUN_API_KEY as string,
+    key: process.env.MAILGUN_API_KEY,
   });
 };
 
@@ -22,14 +25,14 @@ if (process.env.NODE_ENV !== 'production') {globalThis.mailgunGlobal = mailgunCl
 type EmailOptions = {
   to: string | string[]
   subject: string
-  text: string
+  html: string
   from: string
 }
 
 export const sendEmail = async ({
   to,
   subject,
-  text,
+  html,
   from = 'MerchTrack Support'
 }: EmailOptions): Promise<ActionsReturnType<MessagesSendResult>> => {
   try {
@@ -37,7 +40,7 @@ export const sendEmail = async ({
       from: `${from} <no-reply@${process.env.MAILGUN_DOMAIN}>`,
       to,
       subject,
-      html: text
+      html
     });
     return { success: true, data: result, message: 'Email sent successfully!' };
   } catch (error) {

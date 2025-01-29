@@ -9,6 +9,7 @@ export const OnboardingFormSchema = z.object({
   role: z.nativeEnum(Role, { message: "Invalid role" }),
   college: z.nativeEnum(College, { message: "Invalid college" }),
   courses: z.string().min(2, { message: "Courses must be at least 2 characters long" }),
+  imageUrl: z.string().optional()
 });
 
 export type OnboardingForm = z.infer<typeof OnboardingFormSchema>;

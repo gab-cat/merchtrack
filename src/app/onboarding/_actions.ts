@@ -31,7 +31,8 @@ export const completeOnboarding = async (formData: OnboardingForm): Promise<Acti
       role: data.role,
       college: data.college,
       courses: data.courses,
-      isOnboarded: true
+      isOnboarded: true,
+      imageUrl: data.imageUrl,
     }
   });
 
