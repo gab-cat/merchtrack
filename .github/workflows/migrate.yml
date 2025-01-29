@@ -47,6 +47,29 @@ jobs:
             --relational-database-name merchtrack-db-sgp1 \
             --publicly-accessible
 
+      - name: Wait for Database Availability
+        run: |
+          MAX_ATTEMPTS=30
+          ATTEMPT=1
+          
+          while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+            DB_STATUS=$(aws lightsail get-relational-database --relational-database-name merchtrack-db-sgp1 | jq -r '.relationalDatabase.state')
+            
+            if [ "$DB_STATUS" = "available" ]; then
+              echo "Database is available!"
+              break
+            fi
+            
+            echo "Attempt $ATTEMPT: Database status is $DB_STATUS. Waiting 10 seconds..."
+            sleep 10
+            ATTEMPT=$((ATTEMPT + 1))
+          done
+          
+          if [ $ATTEMPT -gt $MAX_ATTEMPTS ]; then
+            echo "Database did not become available within the timeout period"
+            exit 1
+          fi
+
       - name: Create Database Backup
         uses: tj-actions/pg-dump@c826d55715b153f5572006e464e69b2bf0422fea # v3.0.1
         with:
