@@ -1,22 +1,27 @@
 import { type FC } from "react";
 import { BiDownload, BiTrash, BiUpload } from "react-icons/bi";
 import dynamic from "next/dynamic";
-import { auth } from "@clerk/nextjs/server";
-import { Button } from "@/components/ui/button";
-import { AdminTopbar } from "@/components/private/admin-topbar";
-import PageAnimation from "@/components/public/page-animation";
-import { verifyPermission } from "@/utils/permissions";
-import { OrdersTable } from "@/components/private/orders-table";
+import { getSessionData, getUserId } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
-
-const PermissionDenied = dynamic(() => import("@/components/private/permission-denied"));
-
-export const metadata = {  
+export const metadata = {
   title: 'Orders | Admin Dashboard',
   description: 'View and manage orders'
 };  
 
 const AdminOrdersPage: FC = async () => {
+  const { metadata } = await getSessionData();
+  const userId = getUserId(metadata);
+  
+  if (!userId) {
+    return redirect('/auth/sign-in');
+  }
+
+  if (!await verifyPermission({
+    userId,
+    permissions: {
+      dashboard: { canRead: true },
+    }
   const { sessionClaims } = await auth();
 
   if (!await verifyPermission({
@@ -58,4 +63,4 @@ const AdminOrdersPage: FC = async () => {
   );
 };
 
-export default AdminOrdersPage;
+export default AdminOrdersPage;
