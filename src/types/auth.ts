@@ -1,3 +1,5 @@
+import { User } from "@prisma/client";
+
 export interface SessionMetadataData {
   id?: string;
   isStaff?: boolean;
@@ -5,7 +7,7 @@ export interface SessionMetadataData {
 
 export interface SessionMetadata {
   isOnboardingCompleted?: boolean;
-  data?: SessionMetadataData;
+  data?: User;
 }
 
 export interface SessionClaims {

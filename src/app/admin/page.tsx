@@ -2,26 +2,20 @@ import { FaUserFriends, FaShoppingCart } from "react-icons/fa";
 import { FaChartSimple } from "react-icons/fa6";
 import { MdSettings } from "react-icons/md";
 import { getSessionData } from "@/lib/auth";
-import { redirect } from "next/navigation";
+import { AnnouncementsCard } from "@/app/admin/components/AnnouncementsCard";
+import { MessageOfTheDayCard } from "@/app/admin/components/MessageOfTheDayCard";
+import { QuickActions } from "@/app/admin/components/QuickActions";
+import { StatCard } from "@/app/admin/components/StatCard";
+import PageAnimation from "@/components/public/page-animation";
 
 export const metadata = {
   title: "Admin Dashboard",
   description: "Welcome back to your admin dashboard",
 };
 
-export default async function AdminWelcome() {
-  const { metadata } = await getSessionData();
-  
-  if (!metadata?.data) {
-    return redirect('/auth/sign-in');
-  }
-  
-  const currentTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-}
 
 export default async function AdminWelcome() {
-  const { sessionClaims } = await auth();
-  const metadata = sessionClaims?.metadata.data;
+  const { metadata } = await getSessionData();
   const currentTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   
   const announcements = [
@@ -48,7 +42,7 @@ export default async function AdminWelcome() {
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold tracking-tight text-gray-900">
-              Welcome back, {`${metadata?.firstName} ${metadata?.lastName}`}!
+              Welcome back, {`${metadata?.data?.firstName} ${metadata?.data?.lastName}`}!
             </h1>
             <p className="mt-2 text-base tracking-tight text-gray-600">
               It&apos;s {currentTime}. Here&apos;s what&apos;s happening in your admin dashboard.
