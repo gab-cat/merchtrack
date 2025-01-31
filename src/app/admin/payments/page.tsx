@@ -1,42 +1,59 @@
 "use client";
 
 import { useState } from "react";
-import { PaymentForm } from "@/components/private/payment-form";
-import { OrderSearch } from "@/components/private/order-search";
-import { type Order } from "@/types/Misc";
+import { OnsitePayment } from "@/components/private/onsite-payment";
+import { OffsitePayment } from "@/components/private/offsite-payment";
+import { TransactionHistory } from "@/components/private/transaction-history";
+import { offsitePayments as initialOffsitePayments, transactions as initialTransactions } from "@/types/payments";
+import type { Transaction, OffsitePaymentRequest } from "@/types/payments";
 
 export default function PaymentsPage() {
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [balance, setBalance] = useState(0);
+  const [offsitePayments, setOffsitePayments] = useState(initialOffsitePayments);
+  const [transactions, setTransactions] = useState(initialTransactions);
 
-  // Handle order selection
-  const handleOrderSelect = (order: Order | null) => {
-    setSelectedOrder(order);
-    if (order) {
-      setBalance(order.balance);
-    }
+  const handleOnsitePayment = (orderId: string, amount: number) => {
+    const order = offsitePayments.find((p) => p.orderId === orderId);
+    const newTransaction: Transaction = {
+      id: `TRX${transactions.length + 1}`.padStart(6, "0"),
+      orderId,
+      orderNo: order?.orderNo || `#${orderId}`,
+      customerName: order?.customerName || "Customer",
+      amount,
+      paymentType: "onsite",
+      date: new Date().toISOString().split("T")[0],
+    };
+    setTransactions((prev) => [newTransaction, ...prev]);
   };
 
-  // Handle balance update
-  const handleBalanceUpdate = (newBalance: number) => {
-    setBalance(newBalance);
+  const handleOffsiteConfirm = (payment: OffsitePaymentRequest) => {
+    setOffsitePayments((prev) => prev.filter((p) => p.orderId !== payment.orderId));
+
+    const newTransaction: Transaction = {
+      id: `TRX${transactions.length + 1}`.padStart(6, "0"),
+      orderId: payment.orderId,
+      orderNo: payment.orderNo,
+      customerName: payment.customerName,
+      amount: payment.amount,
+      paymentType: "offsite",
+      date: new Date().toISOString().split("T")[0],
+    };
+    setTransactions((prev) => [newTransaction, ...prev]);
   };
 
-  // Handle payment submission
-  const handlePaymentSubmit = (amount: number) => {
-    if (selectedOrder) {
-      const newBalance = Math.max(balance - amount, 0);
-      setBalance(newBalance);
-      selectedOrder.balance = newBalance;
-    }
+  const handleOffsiteReject = (payment: OffsitePaymentRequest) => {
+    setOffsitePayments((prev) => prev.filter((p) => p.orderId !== payment.orderId));
   };
 
   return (
-    <div className="p-6">
-      <h1 className="mb-6 text-2xl font-bold">Payments</h1>
-      <div className="grid gap-6 md:grid-cols-2">
-        <OrderSearch onOrderSelect={handleOrderSelect} onBalanceUpdate={handleBalanceUpdate} />
-        <PaymentForm selectedOrder={selectedOrder} onPaymentSubmit={handlePaymentSubmit} />
+    <div className="mx-auto max-w-7xl p-4">
+      <div className="grid gap-4 lg:grid-cols-2">
+        <div>
+          <OnsitePayment onPaymentComplete={handleOnsitePayment} />
+        </div>
+        <div className="space-y-4">
+          <OffsitePayment payments={offsitePayments} onConfirm={handleOffsiteConfirm} onReject={handleOffsiteReject} />
+          <TransactionHistory transactions={transactions} />
+        </div>
       </div>
     </div>
   );
