@@ -11,8 +11,7 @@ model Product {
   supposedPrice Json?
   rating        Float           @default(0.0)
   reviewsCount  Int             @default(0)
-  imageUrl      String
-  imageUrlDark  String?
+  imageUrl      String[]
   isBestPrice   Boolean         @default(false)
   inventory     Int             @default(0)
   inventoryType InventoryType   @default(PREORDER)

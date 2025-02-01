@@ -105,7 +105,7 @@ async function main() {
             categoryId: categories[i].id,
             postedById: adminUser.id,
             slug: faker.helpers.slugify(faker.commerce.productName()),
-            imageUrl: faker.image.url(),
+            imageUrl: [faker.image.url()],
             variants: {
               create: Array(3).fill(null).map(() => {
                 const basePrice = faker.number.float({ min: 10, max: 100, fractionDigits: 2 });
@@ -141,8 +141,8 @@ async function main() {
             estimatedDelivery: faker.date.future(),
             orderItems: {
               create: Array(faker.number.int({ min: 1, max: 5 })).fill(null).map(() => {
-                const product = products[faker.number.int({ min: 0, max: 9 })];
-                const variant = product.variants[0];
+                const randomProduct = faker.number.int({ min: 0, max: 9 });
+                const variant = products[randomProduct].variants[0];
                 return {
                   variantId: variant.id,
                   quantity: faker.number.int({ min: 1, max: 5 }),
@@ -164,7 +164,7 @@ async function main() {
             userId: user.id,
             cartItems: {
               create: Array(faker.number.int({ min: 1, max: 5 })).fill(null).map(() => ({
-                variantId: faker.helpers.arrayElement(products[faker.number.int({ min: 0, max: 9 })].variants).id,
+                variantId: products[faker.number.int({ min: 0, max: 9 })].variants[0].id,
                 quantity: faker.number.int({ min: 1, max: 5 })
               }))
             }
