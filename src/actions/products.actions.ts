@@ -8,6 +8,7 @@ import { ExtendedProduct, GetObjectByTParams } from "@/types/extended";
 import { verifyPermission } from "@/utils/permissions";
 import { calculatePagination, removeFields } from "@/utils/query.utils";
 
+
 export async function getProducts(
   userId: string,
   params: QueryParams = {}
