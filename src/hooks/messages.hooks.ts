@@ -6,26 +6,27 @@ import useToast from "@/hooks/use-toast";
 import { useUserStore } from "@/stores/user.store";
 import type { ExtendedMessage } from "@/types/messages";
 import { getMessages, getMessage } from "@/actions/messages.actions";
+import { QueryParams } from "@/types/common";
+import { EMPTY_PAGINATED_RESPONSE } from "@/constants";
 
-export function useMessagesQuery() {
+export function useMessagesQuery(params: QueryParams = {}) {
   const { userId } = useUserStore();
   
   return useQuery({
     enabled: !!userId,
-    queryKey: ["messages:all"],
+    queryKey: ["messages:all", params],
     queryFn: async () => {
-      const response = await getMessages(userId as string);
+      const response = await getMessages(userId as string, params);
       if (!response.success) {
         useToast({
           type: "error",
           message: response.message as string,
           title: "Error fetching messages",
         });
-        return [];  // Return empty array on error
+        return EMPTY_PAGINATED_RESPONSE;
       }
-      return response.data ?? []; // Return data or empty array if data is undefined
-    },
-    initialData: [], // Set initial data as empty array
+      return response.data;
+    }
   });
 }
 

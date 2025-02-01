@@ -1,24 +1,25 @@
 'use client';
 
 import { useQuery } from "@tanstack/react-query";
-import { getOrderById, getOrders } from "@/actions/orders.actions";
+import { getPayments, getPaymentById } from "@/actions/payments.actions";
 import useToast from "@/hooks/use-toast";
 import { useUserStore } from "@/stores/user.store";
 import { QueryParams } from "@/types/common";
 import { EMPTY_PAGINATED_RESPONSE } from "@/constants";
 
-export function useOrdersQuery(params: QueryParams = {}) {
+export function usePaymentsQuery(params: QueryParams = {}) {
   const { userId } = useUserStore();
+
   return useQuery({
     enabled: !!userId,
-    queryKey: ["orders:all", params],
+    queryKey: ["payments:all", params],
     queryFn: async () => {
-      const response = await getOrders(userId as string, params);
+      const response = await getPayments(userId as string, params);
       if (!response.success) {
         useToast({
           type: "error",
           message: response.message as string,
-          title: "Error fetching orders",
+          title: "Error fetching payments",
         });
         return EMPTY_PAGINATED_RESPONSE;
       }
@@ -27,18 +28,19 @@ export function useOrdersQuery(params: QueryParams = {}) {
   });
 }
 
-export function useOrderQuery(orderId: string | null) {
+export function usePaymentQuery(paymentId: string | null) {
   const { userId } = useUserStore();
+
   return useQuery({
-    queryKey: [`orders:${orderId}`],
+    queryKey: [`payments:${paymentId}`],
     queryFn: async () => {
-      if (!orderId) return null;
-      const response = await getOrderById({
+      if (!paymentId) return null;
+      const response = await getPaymentById({
         userId: userId as string,
-        orderId: orderId
+        paymentId
       });
       return response.success ? response.data : null;
     },
-    enabled: !!orderId
+    enabled: !!paymentId
   });
 }

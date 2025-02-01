@@ -3,9 +3,15 @@
 import prisma from "@/lib/db";
 import { verifyPermission } from "@/utils/permissions";
 import { ExtendedOrder } from "@/types/orders";
-import { getCached, setCached} from "@/lib/redis";
+import { getCached, setCached } from "@/lib/redis";
+import { QueryParams, PaginatedResponse } from "@/types/common";
+import { calculatePagination, removeFields } from "@/utils/query.utils";
+import { GetObjectByTParams } from "@/types/extended";
 
-export async function getOrders(userId: string): Promise<ActionsReturnType<ExtendedOrder[]>> {
+export async function getOrders(
+  userId: string,
+  params: QueryParams = {}
+): Promise<ActionsReturnType<PaginatedResponse<ExtendedOrder[]>>> {
   const isAuthorized = await verifyPermission({
     userId: userId,
     permissions: {
@@ -20,34 +26,48 @@ export async function getOrders(userId: string): Promise<ActionsReturnType<Exten
     };
   }
 
-  let orders: ExtendedOrder[] | null = await getCached('orders:all');
-  if (!orders || orders.length === 0) {
-    orders = await prisma.order.findMany({
-      where: {
-        isDeleted: false
-      },
-      include: {
-        payments: true,
-        customer: true,
-      }
-    });
+  const { skip, take, page } = calculatePagination(params);
 
-    await setCached('orders', orders);
+  let orders: ExtendedOrder[] | null = await getCached(`orders:${page}:${take}`);
+  let total = await getCached('orders:total');
+
+  if (!orders) {
+    [orders, total] = await prisma.$transaction([
+      prisma.order.findMany({
+        where: { isDeleted: false },
+        include: { payments: true, customer: true },
+        skip,
+        take,
+      }),
+      prisma.order.count({ where: { isDeleted: false } })
+    ]);
+
+    await setCached(`orders:${page}:${take}`, orders);
+    await setCached('orders:total', total);
   }
 
+  const lastPage = Math.ceil(total as number / take);
+  const processedOrders = orders.map(order => 
+    removeFields(order, params.limitFields)
+  );
 
   return {
     success: true,
-    data: JSON.parse(JSON.stringify(orders))
+    data: {
+      data: JSON.parse(JSON.stringify(processedOrders)),
+      metadata: {
+        total: total as number,
+        page,
+        lastPage,
+        hasNextPage: page < lastPage,
+        hasPrevPage: page > 1
+      }
+    }
   };
 }
 
-type GetOrderByIdParams = {
-  userId: string
-  orderId: string
-}
 
-export async function getOrderById({userId, orderId}: GetOrderByIdParams): Promise<ActionsReturnType<ExtendedOrder>> {
+export async function getOrderById({userId, orderId, limitFields}: GetObjectByTParams<'orderId'>): Promise<ActionsReturnType<ExtendedOrder>> {
   const isAuthorized = await verifyPermission({
     userId: userId,
     permissions: {
@@ -86,6 +106,6 @@ export async function getOrderById({userId, orderId}: GetOrderByIdParams): Promi
 
   return {
     success: true,
-    data: JSON.parse(JSON.stringify(order))
+    data: JSON.parse(JSON.stringify(removeFields(order, limitFields)))
   };
 }
