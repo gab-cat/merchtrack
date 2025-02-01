@@ -13,6 +13,10 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'img.clerk.com',
+      },
+      {
+        protocol: 'https',
+        hostname: process.env.CLOUDFLARE_R2_PUBLIC_DOMAIN!,
       }
     ],
   },
@@ -24,6 +28,7 @@ const nextConfig: NextConfig = {
   ],
   experimental: {
     serverActions: {
+      bodySizeLimit: '10mb',
       allowedOrigins: [
         'https://merchtrack.tech',
         'https://staging.merchtrack.tech',
