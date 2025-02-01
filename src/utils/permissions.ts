@@ -58,7 +58,9 @@ export const verifyPermission = async (params: VerifyPermissionParams): Promise<
         }
       })) as UserPermission[];
       if (userPermissions.length) await setCached(`permissions:${params.userId}`, userPermissions);
-    } catch {
+    } catch (error) {
+      // no-dd-sa:typescript-best-practices/no-console
+      console.error('Error fetching user permissions:', error);
       return false;
     }
   }

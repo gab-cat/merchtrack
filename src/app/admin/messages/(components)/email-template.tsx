@@ -17,7 +17,7 @@ export default function ReplyEmailTemplate({ replyContent, customerName, subject
           {/* Header with university branding */}
           <Section style={emailStyles.header}>
             <Img
-              src="https://merchtrack.tech/img/logo-white.png"
+              src={emailContent.storeInfo.logoUrl}
               alt="MerchTrack Logo"
               style={emailStyles.logo}
             />

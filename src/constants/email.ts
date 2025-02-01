@@ -97,6 +97,7 @@ export const emailContent = {
     phone: '(555) 123-4567',
     email: 'support@merchtrack.tech',
     website: 'https://merchtrack.tech',
+    logoUrl: 'https://merchtrack.tech/img/logo-white.png',
   },
 
   faqs: [
