@@ -79,7 +79,11 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   // If the user is logged in and the route is protected, let them view.
   if (userId && !isPublicRoute(req)) return NextResponse.next();
 }, {
-  authorizedParties: ['https://staging.merchtrack.tech', 'https://merchtrack.tech', 'http://localhost:3000'],
+  authorizedParties: [
+    'https://staging.merchtrack.tech', 
+    'https://merchtrack.tech', 
+    ...(process.env.NODE_ENV === 'development' ? ['http://localhost:3000', 'https://*.github.dev'] : [])
+  ],
   afterSignUpUrl: '/onboarding',
 });
 

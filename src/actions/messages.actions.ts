@@ -52,7 +52,7 @@ export const getMessage = async (params: GetMessageParams): Promise<ActionsRetur
           message: "Message not found."
         };
       }
-      await setCached(`message:${params.messageId}`, message);
+      await setCached(`messages:${params.messageId}`, message);
     };
 
     return {

@@ -42,7 +42,12 @@ export async function getOrders(userId: string): Promise<ActionsReturnType<Exten
   };
 }
 
-export async function getOrderById(userId: string, orderId: string): Promise<ActionsReturnType<ExtendedOrder>> {
+type GetOrderByIdParams = {
+  userId: string
+  orderId: string
+}
+
+export async function getOrderById({userId, orderId}: GetOrderByIdParams): Promise<ActionsReturnType<ExtendedOrder>> {
   const isAuthorized = await verifyPermission({
     userId: userId,
     permissions: {

@@ -32,28 +32,28 @@ export const getCached = async <T>(key: string): Promise<T | null> => {
 };
 
 type ExpirationLength = '1m' | '5m' | '15m' | '30m' | '1h' | '6h' | '12h' | '24h' | '48h' | '72h' | '1w' | '2w' | '1mo';
+const expirationLengths: Record<ExpirationLength, number> = {
+  '1m': 60,
+  '5m': 300,
+  '15m': 900,
+  '30m': 1800,
+  '1h': 3600,
+  '6h': 21600,
+  '12h': 43200,
+  '24h': 86400,
+  '48h': 172800,
+  '72h': 259200,
+  '1w': 604800,
+  '2w': 1209600,
+  '1mo': 2592000,
+};
 
 export const setCached = async <T>(key: string, data: T, expirationInSeconds: number | ExpirationLength = 3600) => {
   if (NODE_ENV === 'development') return null;
-  if (typeof expirationInSeconds === 'string') {
-    const expirationLengths: Record<ExpirationLength, number> = {
-      '1m': 60,
-      '5m': 300,
-      '15m': 900,
-      '30m': 1800,
-      '1h': 3600,
-      '6h': 21600,
-      '12h': 43200,
-      '24h': 86400,
-      '48h': 172800,
-      '72h': 259200,
-      '1w': 604800,
-      '2w': 1209600,
-      '1mo': 2592000,
-    };
-    expirationInSeconds = expirationLengths[expirationInSeconds];
-  }
-  await redis.set(key, JSON.stringify(data), 'EX', expirationInSeconds);
+  const duration = typeof expirationInSeconds === 'number' 
+    ? expirationInSeconds 
+    : expirationLengths[expirationInSeconds];
+  await redis.set(key, JSON.stringify(data), 'EX', duration);
 };
 
 export const invalidateCache = async (keys: string[]) => {

@@ -12,7 +12,7 @@ export function useMessagesQuery() {
   
   return useQuery({
     enabled: !!userId,
-    queryKey: ["messages", "messages:all"],
+    queryKey: ["messages:all"],
     queryFn: async () => {
       const response = await getMessages(userId as string);
       if (!response.success) {

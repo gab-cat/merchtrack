@@ -19,7 +19,7 @@ export default function MessageDetail({ message, replyMessage, onReply, mode }: 
 
   const { data: originalMessage, isLoading } = useMessageQuery(
     message.repliesToId,
-    mode === "sent"
+    mode === "sent" as const
   );
 
   useEffect(() => {
