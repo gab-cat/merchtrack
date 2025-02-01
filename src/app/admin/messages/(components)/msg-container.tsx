@@ -2,7 +2,6 @@
 
 import { useCallback, useMemo, useState, useEffect } from "react";
 import { SearchIcon } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
 import { IoMdRefresh } from "react-icons/io";
 import MessageList from "./msg-list";
 import MessageDetail from "./msg-detail";
@@ -14,20 +13,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { ExtendedMessage } from "@/types/messages";
-import { getMessages } from "@/app/admin/messages/_actions";
-import { useUserStore } from "@/stores/user.store";
-import useToast from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useMessagesQuery } from "@/hooks/messages.hooks";
 
 export default function MessagesContainer() {
-  const { userId } = useUserStore();
-  const { data: messages, isPending, refetch, isRefetching } = useQuery({
-    queryKey: ["messages:all"],
-    queryFn: async () => {
-      return await fetchMessages(userId as string);
-    },
-  });
+  const { data: messages, isPending, refetch, isRefetching } = useMessagesQuery();
   const [selectedMessage, setSelectedMessage] = useState<ExtendedMessage | null>(null);
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -148,15 +139,4 @@ export default function MessagesContainer() {
   );
 }
 
-async function fetchMessages(userId: string) {
-  const response = await getMessages(userId);
-  if (!response.success) {
-    useToast({
-      type: "error",
-      message: response.message as string,
-      title: "Error fetching messages",
-    });
-  }
-  return response.data;
-}
 

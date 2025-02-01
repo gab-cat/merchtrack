@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { useQuery } from "@tanstack/react-query";
 import MessageHeaderContent from "./msg-detail-header-content";
 import MessageReply from "./msg-detail-reply";
 import MessageReplyForm from "./msg-detail-replyform";
 import MessageOriginalSkeleton from "./msg-original-skeleton";
-import { getMessage } from "@/app/admin/messages/_actions";
 import type { ExtendedMessage } from "@/types/messages";
-import { useUserStore } from "@/stores/user.store";
+import { useMessageQuery } from "@/hooks/messages.hooks";
 
 interface MessageDetailProps {
   message: ExtendedMessage
@@ -18,20 +16,11 @@ interface MessageDetailProps {
 
 export default function MessageDetail({ message, replyMessage, onReply, mode }: Readonly<MessageDetailProps>) {
   const [key, setKey] = useState(0);
-  const { userId } = useUserStore();
 
-  const { data: originalMessage, isLoading } = useQuery({
-    queryKey: [`messages:${message.repliesToId}` ],
-    queryFn: async () => {
-      if (!message.repliesToId) return null;
-      const response = await getMessage({
-        userId: userId as string,
-        messageId: message.repliesToId
-      });
-      return response.success ? (response.data as ExtendedMessage) : null;
-    },
-    enabled: mode === "sent" && !!message.repliesToId
-  });
+  const { data: originalMessage, isLoading } = useMessageQuery(
+    message.repliesToId,
+    mode === "sent"
+  );
 
   useEffect(() => {
     setKey((prevKey) => prevKey + 1);

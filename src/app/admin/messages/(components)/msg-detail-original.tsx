@@ -1,22 +1,16 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { MdEmail } from "react-icons/md";
-import { getMessages } from "@/app/admin/messages/_actions";
 import { manilaTime } from "@/utils/formatTime";
+import { useMessageQuery } from "@/hooks/messages.hooks";
 
 interface OriginalMessageProps {
   messageId: string;
 }
 
 export default function OriginalMessage({ messageId }: Readonly<OriginalMessageProps>) {
-  const { data: originalMessage } = useQuery({
-    queryKey: [`messages:${messageId}`],
-    queryFn: async () => {
-      const response = await getMessages(messageId);
-      return response.success ? response.data : null;
-    },
-  });
+  const { data: message } = useMessageQuery(messageId, true);
 
-  if (!originalMessage) {
+  if (!message) {
     return null;
   }
 
@@ -27,24 +21,22 @@ export default function OriginalMessage({ messageId }: Readonly<OriginalMessageP
         Original Message
       </h3>
       <div>
-        {originalMessage.map((message) => (
-          <div 
-            key={message.id} 
-            className="space-y-4">
-            <div className="flex items-center space-x-4 text-sm text-gray-500">
-              <span className="flex items-center">
-                <MdEmail className="mr-2 size-4" />
-                {message.email}
-              </span>
-              <span className="flex items-center">
-                {manilaTime.dateTime(message.createdAt)}
-              </span>
-            </div>
-            <div className="rounded-lg bg-gray-50 p-4">
-              <p className="whitespace-pre-wrap text-gray-700">{message.message}</p>
-            </div>
+        <div 
+          key={message.id} 
+          className="space-y-4">
+          <div className="flex items-center space-x-4 text-sm text-gray-500">
+            <span className="flex items-center">
+              <MdEmail className="mr-2 size-4" />
+              {message.email}
+            </span>
+            <span className="flex items-center">
+              {manilaTime.dateTime(message.createdAt)}
+            </span>
           </div>
-        ))}
+          <div className="rounded-lg bg-gray-50 p-4">
+            <p className="whitespace-pre-wrap text-gray-700">{message.message}</p>
+          </div>
+        </div>
       </div>
     </div>
   );

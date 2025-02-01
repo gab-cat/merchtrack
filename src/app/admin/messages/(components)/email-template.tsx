@@ -1,5 +1,4 @@
-// eslint-disable-next-line import/named
-import { Html, Head, Preview, Body, Container, Section, Heading, Text, Link, Button } from '@react-email/components';
+import { Html, Head, Preview, Body, Container, Section, Heading, Text, Link, Button, Img } from '@react-email/components';
 import { emailStyles, emailContent } from '@/constants/';
 
 interface EmailTemplateProps {
@@ -17,9 +16,9 @@ export default function ReplyEmailTemplate({ replyContent, customerName, subject
         <Container style={emailStyles.container}>
           {/* Header with university branding */}
           <Section style={emailStyles.header}>
-            <img
-              src="/placeholder.svg?height=60&width=200&text=University+Logo"
-              alt="University Logo"
+            <Img
+              src="https://merchtrack.tech/img/logo-white.png"
+              alt="MerchTrack Logo"
               style={emailStyles.logo}
             />
             <Heading style={emailStyles.heading}>MerchTrack Support</Heading>
