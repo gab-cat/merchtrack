@@ -8,3 +8,17 @@ export { ABOUT_US_CONTENT, ABOUT_DEVELOPERS } from './about-us';
 export { PRIVACY_POLICY_CONTENT } from './privacy-policy';
 export { TERMS_OF_SERVICE_CONTENT } from './terms-of-service';
 export { emailContent, emailStyles } from './email';
+
+
+export const ITEMS_PER_PAGE = 10;
+
+export const EMPTY_PAGINATED_RESPONSE = { 
+  data: [], 
+  metadata: { 
+    total: 0, 
+    page: 1, 
+    lastPage: 1, 
+    hasNextPage: false, 
+    hasPrevPage: false 
+  } 
+};
