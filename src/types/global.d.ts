@@ -1,5 +1,6 @@
 export {};
 
+import type { User } from '@prisma/client';
 
 declare global {
   interface CustomJwtSessionClaims {

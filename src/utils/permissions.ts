@@ -43,21 +43,23 @@ export const verifyPermission = async (params: VerifyPermissionParams): Promise<
 
   let userPermissions: UserPermission[] | null = await getCached<UserPermission[]>(`permissions:${params.userId}`);
   if (!userPermissions) {
-    userPermissions = (await prisma.userPermission.findMany({
-      where: {
-        userId: params.userId,
-        permissionId: { in: actionCodes }
-      },
-      select: {  
-        permissionId: true,
-        canCreate: true,
-        canRead: true,
-        canUpdate: true,
-        canDelete: true
-      }
-    })) as UserPermission[];
-    if (userPermissions.length) {
-      await setCached(`permissions:${params.userId}`, userPermissions);
+    try {
+      userPermissions = (await prisma.userPermission.findMany({
+        where: {
+          userId: { equals: params.userId },
+          permissionId: { in: actionCodes }
+        },
+        select: {  
+          permissionId: true,
+          canCreate: true,
+          canRead: true,
+          canUpdate: true,
+          canDelete: true
+        }
+      })) as UserPermission[];
+      if (userPermissions.length) await setCached(`permissions:${params.userId}`, userPermissions);
+    } catch {
+      return false;
     }
   }
 
