@@ -68,11 +68,16 @@ export async function updateProduct(
     // Prepare cache data
     const cacheData = JSON.parse(JSON.stringify(product));
 
-    // Update cache
+    // Update cache with comprehensive invalidation
     await Promise.all([
       setCached(`products:all`, null),
       setCached(`product:${product.id}`, cacheData),
-      setCached(`product:${product.slug}`, cacheData)
+      setCached(`product:${product.slug}`, cacheData),
+      setCached('products:total', null),
+      // Invalidate paginated caches
+      ...Array.from({ length: 10 }, (_, i) => 
+        setCached(`products:${i + 1}:*`, null)
+      )
     ]);
 
     return {
@@ -127,11 +132,16 @@ export async function deleteProductById(
       }
     });
 
-    // Update cache
+    // Comprehensive cache invalidation
     await Promise.all([
       setCached(`products:all`, null),
       setCached(`product:${product.id}`, null),
-      setCached(`product:${product.slug}`, null)
+      setCached(`product:${product.slug}`, null),
+      setCached('products:total', null),
+      // Invalidate paginated caches
+      ...Array.from({ length: 10 }, (_, i) => 
+        setCached(`products:${i + 1}:*`, null)
+      )
     ]);
 
     return {

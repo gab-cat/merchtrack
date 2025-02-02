@@ -47,8 +47,10 @@ export async function getProducts(
         prisma.product.count({ where: { isDeleted: false } })
       ]);
       
-      await setCached(`products:${page}:${take}`, products);
-      await setCached('products:total', total);
+      Promise.all([
+        await setCached(`products:${page}:${take}`, products),
+        await setCached('products:total', total)
+      ]);
     }
 
     const lastPage = Math.ceil(total as number / take);

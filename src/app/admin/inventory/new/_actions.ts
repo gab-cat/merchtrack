@@ -67,10 +67,15 @@ export async function createProduct(
       }
     });
 
-    // Invalidate cache
-    await setCached(`products:all`, null);
-    await setCached(`product:${product.id}`, product);
-    await setCached(`product:${product.slug}`, product);
+    await Promise.all([
+      setCached(`products:all`, null),
+      setCached(`product:${product.id}`, product),
+      setCached(`product:${product.slug}`, product),
+      setCached('products:total', null),
+      ...Array.from({ length: 10 }, (_, i) => 
+        setCached(`products:${i + 1}:*`, null)
+      )
+    ]);
 
     return {
       success: true,
