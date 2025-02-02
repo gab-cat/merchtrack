@@ -8,6 +8,27 @@ const prisma = new PrismaClient();
 
 console.log('Seeding database...');
 
+/**
+ * Seeds the database with initial test data using Prisma and Faker.
+ *
+ * This asynchronous function performs a series of operations to populate the database, including:
+ * - Creating an admin user and a staff user (reporting to the admin) with randomized personal details.
+ * - Inserting predefined permissions and assigning full access rights to both users.
+ * - Generating 10 categories with names and descriptions.
+ * - Creating 10 products, each with 3 variants, where each variant includes a base price and role-specific pricing.
+ * - Creating 10 orders with associated order items, where each item corresponds to a product variant with random quantity, size, and price.
+ * - Populating carts for the admin and staff users with random items.
+ * - Creating 10 payments, fulfillments, survey categories, customer surveys, messages, logs, tickets, and reviews, all with randomly generated data.
+ *
+ * In case of an error during any of these operations, the function:
+ * - Logs the error message.
+ * - Executes raw SQL queries to truncate key tables and rollback any changes.
+ * - Exits the process with a non-zero status code.
+ *
+ * Finally, the function disconnects the Prisma client to ensure proper cleanup.
+ *
+ * @returns A promise that resolves when the seeding process completes successfully.
+ */
 async function main() {
   try {
     // Create the admin user

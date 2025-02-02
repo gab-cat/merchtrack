@@ -9,6 +9,22 @@ import { verifyPermission } from "@/utils/permissions";
 import type { ExtendedProduct } from "@/types/extended";
 import { uploadToR2 } from "@/lib/s3";
 
+/**
+ * Creates a new product with the specified details and updates the cache.
+ *
+ * This asynchronous function first verifies if the user (specified by `userId`) has the necessary permissions to create a product.
+ * It then validates the provided product data using a schema. If the user is not authorized or the data validation fails,
+ * the function returns a failure response with an appropriate error message.
+ *
+ * Upon successful validation, a unique slug is generated based on the product title by checking for existing slugs in the database.
+ * Temporary file data is removed from the product data before proceeding. The function then creates a new product record in the database,
+ * including processing associated variants (with the variant price converted to a Decimal type), and sets up relationships with the category,
+ * the user who posted it, and reviews. After successful creation, several cache entries related to products are updated.
+ *
+ * @param userId - The ID of the user attempting to create the product.
+ * @param data - The product information conforming to CreateProductType, including title, variants, and related details.
+ * @returns A promise that resolves to an object containing a success flag and either the created product data (on success) or an error message (on failure).
+ */
 export async function createProduct(
   userId: string,
   data: CreateProductType
@@ -89,6 +105,21 @@ export async function createProduct(
   }
 }
 
+/**
+ * Asynchronously uploads images to R2 storage for a verified user.
+ *
+ * This function first checks if the user has the necessary permissions to upload images.
+ * If the user is not authorized, it returns an error message. Upon successful authorization,
+ * it retrieves all files from the provided FormData under the key 'files', uploads each file
+ * to R2 storage using a unique key format "products/{timestamp}-{fileName}", and collects the URLs
+ * of the uploaded images. If any error occurs during upload, it returns a failure response with 
+ * the error message.
+ *
+ * @param userId - The identifier of the user performing the upload.
+ * @param formData - The FormData object containing the image files (expected under the key 'files').
+ * @returns A promise that resolves to an object indicating the success status. On success, the object
+ *          includes an array of URL strings for the uploaded images; on failure, it contains an error message.
+ */
 export async function uploadImages(userId: string, formData: FormData): Promise<ActionsReturnType<string[]>> {
   if (!await verifyPermission({
     userId: userId,
