@@ -10,30 +10,34 @@ The **MerchTrack Repository** is a comprehensive solution designed for an e-comm
 ### Prerequisites
 Before setting up the project, ensure the following tools and versions are installed:
 
-- **Node.js**: Version `22.12.0` is strictly required. It is recommended to use `nvm` (Node Version Manager) for managing Node.js versions.
-    - If you do not have `nvm` installed yet. Refer to this guide [Node Version Manager Installation](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/)
-- **Package Manager**: Use `pnpm` for faster and more efficient dependency management.
+- **Bun**: Version `1.2.2` is strictly required
+    - If you do not have `bun` installed yet, refer to the [official Bun installation guide](https://bun.sh/docs/installation)
 
 ### Setup Steps
-1. **Install Node.js**:
-   Use `nvm` to install and switch to the required Node.js version:
+1. **Install Bun**:
    ```sh
-   nvm install 22.12.0
-   nvm use 22.12.0
+   # Using npm
+   npm install -g bun
+
+   # On Linux
+   curl -fsSL https://bun.sh/install | bash
+
+   # or on macOS
+   brew tap oven-sh/bun
+   brew install bun@1.2.2
    ```
 
 2. **Install Dependencies**:
-   Install project dependencies using `pnpm`:
+   Install project dependencies using Bun:
    ```sh
-   npm install -g pnpm
-   pnpm install
+   bun install
    ```
 
 3. **Environment Configuration**:
    Obtain the `.env` files for production from the system administrator. These files contain sensitive configuration details such as API keys and database credentials.
 
    Example `.env` file:
-   ```env
+   ```.env
    DATABASE_URL="postgresql://user:password@localhost:5432/merchtrack"
    CLERK_SECRET_KEY="sk_test_xxxxxxxxxxxxxxxx"
    ```
@@ -41,7 +45,7 @@ Before setting up the project, ensure the following tools and versions are insta
 4. **Run the Development Server**:
    Start the development server to begin working on the project:
    ```sh
-   pnpm run dev
+   bun run dev
    ```
 
 ## Further Reading
