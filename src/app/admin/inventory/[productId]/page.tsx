@@ -1,25 +1,26 @@
 import dynamic from 'next/dynamic';
 import { redirect } from 'next/navigation';
-import { Plus } from 'lucide-react';
 import type { FC } from 'react';
-import Link from 'next/link';
-import { verifyPermission } from '@/utils/permissions';
+import UpdateProductContainer from './(components)/update-product-container';
 import { getSessionData, getUserId } from '@/lib/auth';
+import { verifyPermission } from '@/utils/permissions';
 import PageAnimation from '@/components/public/page-animation';
 import PageTitle from '@/components/private/page-title';
-import { Button } from '@/components/ui/button';
-import ProductsGrid from '@/app/admin/inventory/(components)/products-grid';
-
-export const metadata = {
-  title: 'Inventory | Admin Dashboard',
-  description: 'View and manage products'
-};  
 
 const PermissionDenied = dynamic(() => import('@/components/private/permission-denied'));
 
-const Page: FC = async () => {
+
+
+interface PageProps {
+  params: Promise<{
+    productId: string;
+  }>;
+}
+
+const Page: FC<PageProps> = async ({ params }) => {
   const { metadata } = await getSessionData();
   const userId = getUserId(metadata);
+  const productId = (await params).productId;
     
   if (!userId) {
     return redirect('/sign-in');
@@ -33,18 +34,12 @@ const Page: FC = async () => {
   })) {
     return <PermissionDenied />;
   }
+
   return (
     <PageAnimation>
       <div className="p-6">
-        <div className="mb-6 flex items-center justify-between">
-          <PageTitle title='Manage Inventory' />
-          <Button asChild>
-            <Link href="/admin/inventory/new" className='text-white'>
-              <Plus className="mr-2 size-4" /> Add Product
-            </Link>
-          </Button>
-        </div>
-        <ProductsGrid />
+        <PageTitle title="Update Product" />
+        <UpdateProductContainer productId={productId} />
       </div>
     </PageAnimation>
   );

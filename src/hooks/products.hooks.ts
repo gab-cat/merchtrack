@@ -5,11 +5,12 @@ import { QueryParams } from "@/types/common";
 import useToast from "@/hooks/use-toast";
 import { EMPTY_PAGINATED_RESPONSE } from "@/constants";
 
+
 export function useProductsQuery(params: QueryParams = {}) {
   const { userId } = useUserStore();
   return useQuery({
     enabled: !!userId,
-    queryKey: ["products:all"],
+    queryKey: ["products:all", params],
     queryFn: async () => {
       const response = await getProducts(userId as string, params);
       if (!response.success) {

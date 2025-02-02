@@ -4,15 +4,18 @@ import { X } from 'lucide-react';
 import Image from 'next/image';
 
 interface ImageUploadProps {
-  value: string[];
+  value?: string[];
   onChange: (urls: string[], files?: File[]) => void;
 }
 
-export default function ImageUpload({ value, onChange }: Readonly<ImageUploadProps>) {
+export default function ImageUpload({ value = [], onChange }: Readonly<ImageUploadProps>) {
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    // Create local URLs for preview
     const localUrls = acceptedFiles.map(file => URL.createObjectURL(file));
-    onChange(localUrls, acceptedFiles);
-  }, [onChange]);
+    // Combine with existing URLs if any
+    const newUrls = [...value, ...localUrls];
+    onChange(newUrls, acceptedFiles);
+  }, [onChange, value]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: (acceptedFiles) => { void onDrop(acceptedFiles); },
@@ -40,6 +43,9 @@ export default function ImageUpload({ value, onChange }: Readonly<ImageUploadPro
             'Drag & drop images here, or click to select files'
           }
         </p>
+        <p className="mt-2 text-sm text-gray-500">
+          Maximum 5 images, up to 10MB each
+        </p>
       </div>
 
       {value.length > 0 && (
@@ -54,6 +60,7 @@ export default function ImageUpload({ value, onChange }: Readonly<ImageUploadPro
                 className="h-40 w-full rounded-lg object-cover"
               />
               <button
+                type="button"
                 onClick={() => removeImage(index)}
                 className="absolute right-2 top-2 rounded-full bg-red-500 p-1 
                          text-white opacity-0 transition-opacity group-hover:opacity-100"

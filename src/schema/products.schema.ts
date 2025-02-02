@@ -31,5 +31,6 @@ export const createProductSchema = z.object({
 
 export type CreateProductType = z.infer<typeof createProductSchema> & {
   _tempFiles?: File[];
-};;
+};
+
 

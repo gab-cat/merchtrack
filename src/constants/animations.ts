@@ -12,6 +12,18 @@ export const fadeInUp = {
   }
 };
 
+export const fadeIn = {
+  initial: { opacity: 0 },
+  animate: {
+    opacity: 1,
+    transition: { duration: 0.2 }
+  },
+  exit: {
+    opacity: 0,
+    transition: { duration: 0.2 }
+  }
+};
+
 export const fadeOutUp = {
   initial: { y: 0, opacity: 1 },
   animate: {
