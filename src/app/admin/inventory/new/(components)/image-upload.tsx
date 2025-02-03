@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { X } from 'lucide-react';
 import Image from 'next/image';
+import useToast from '@/hooks/use-toast';
 
 interface ImageUploadProps {
   value?: string[];
@@ -15,10 +16,21 @@ export default function ImageUpload({ value = [], onChange }: Readonly<ImageUplo
     // Combine with existing URLs if any
     const newUrls = [...value, ...localUrls];
     onChange(newUrls, acceptedFiles);
+    return () => localUrls.forEach(url => URL.revokeObjectURL(url));
   }, [onChange, value]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: (acceptedFiles) => { void onDrop(acceptedFiles); },
+    onDropRejected: (fileRejections) => {
+      const errors = fileRejections.map(rejection => 
+        `${rejection.file.name}: ${rejection.errors.map(e => e.message).join(', ')}`
+      );
+      useToast({
+        type: 'error',
+        message: `Failed to upload images: ${errors.join('; ')}`,
+        title: 'Error uploading images'
+      });
+    },
     accept: { 'image/*': [] },
     maxFiles: 5,
     maxSize: 10 * 1024 * 1024,

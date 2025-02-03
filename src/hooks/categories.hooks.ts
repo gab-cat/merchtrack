@@ -18,7 +18,7 @@ import useToast from "@/hooks/use-toast";
  */
 export function useCategoriesQuery () {
   return useQuery({
-    queryKey: ['categories'],
+    queryKey: ['categories:all'],
     queryFn: async () => {
       const response = await getCategories();
       if (!response.success) {

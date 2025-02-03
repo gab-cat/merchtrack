@@ -2,7 +2,7 @@
 
 import { Prisma } from "@prisma/client";
 import prisma from "@/lib/db";
-import { setCached } from "@/lib/redis";
+import { invalidateCache } from "@/lib/redis";
 import { type CreateProductType as UpdateProductType } from "@/schema/products.schema";
 import { verifyPermission } from "@/utils/permissions";
 import type { ExtendedProduct } from "@/types/extended";
@@ -99,17 +99,19 @@ export async function updateProduct(
     // Prepare cache data
     const cacheData = JSON.parse(JSON.stringify(product));
 
-    // Update cache with comprehensive invalidation
-    await Promise.all([
-      setCached(`products:all`, null),
-      setCached(`product:${product.id}`, cacheData),
-      setCached(`product:${product.slug}`, cacheData),
-      setCached('products:total', null),
-      // Invalidate paginated caches
-      ...Array.from({ length: 10 }, (_, i) => 
-        setCached(`products:${i + 1}:*`, null)
-      )
-    ]);
+    // Get total number of product pages
+    const totalProducts = await prisma.product.count();
+    const totalPages = Math.ceil(totalProducts / 12); // Assuming 10 products per page
+
+    // Invalidate cache
+    const keysToInvalidate = [
+      `products:all`,
+      `product:${product.id}`,
+      `product:${product.slug}`,
+      'products:total',
+      ...Array.from({ length: totalPages }, (_, i) => `products:${i + 1}:*`)
+    ];
+    await invalidateCache(keysToInvalidate);
 
     return {
       success: true,
@@ -178,17 +180,19 @@ export async function deleteProductById(
       }
     });
 
-    // Comprehensive cache invalidation
-    await Promise.all([
-      setCached(`products:all`, null),
-      setCached(`product:${product.id}`, null),
-      setCached(`product:${product.slug}`, null),
-      setCached('products:total', null),
-      // Invalidate paginated caches
-      ...Array.from({ length: 10 }, (_, i) => 
-        setCached(`products:${i + 1}:*`, null)
-      )
-    ]);
+    // Get total number of product pages
+    const totalProducts = await prisma.product.count();
+    const totalPages = Math.ceil(totalProducts / 12); // Assuming 10 products per page
+
+    // Invalidate cache
+    const keysToInvalidate = [
+      `products:all`,
+      `product:${product.id}`,
+      `product:${product.slug}`,
+      'products:total',
+      ...Array.from({ length: totalPages }, (_, i) => `products:${i + 1}:*`)
+    ];
+    await invalidateCache(keysToInvalidate);
 
     return {
       success: true,

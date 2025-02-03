@@ -2,12 +2,11 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { getClerkUserImageUrl } from "@/actions/users.action";
-import useToast from "@/hooks/use-toast";
 import { useUserStore } from "@/stores/user.store";
 import type { ExtendedMessage } from "@/types/messages";
 import { getMessages, getMessage } from "@/actions/messages.actions";
 import { QueryParams } from "@/types/common";
-import { EMPTY_PAGINATED_RESPONSE } from "@/constants";
+import { useResourceQuery } from "@/hooks/index.hooks";
 
 /**
  * Fetches all messages for the current user.
@@ -24,23 +23,10 @@ import { EMPTY_PAGINATED_RESPONSE } from "@/constants";
  * const { data, error, isLoading } = useMessagesQuery({ limit: 20 });
  */
 export function useMessagesQuery(params: QueryParams = {}) {
-  const { userId } = useUserStore();
-  
-  return useQuery({
-    enabled: !!userId,
-    queryKey: ["messages:all", params],
-    queryFn: async () => {
-      const response = await getMessages(userId as string, params);
-      if (!response.success) {
-        useToast({
-          type: "error",
-          message: response.message as string,
-          title: "Error fetching messages",
-        });
-        return EMPTY_PAGINATED_RESPONSE;
-      }
-      return response.data;
-    }
+  return useResourceQuery({
+    resource: "messages", 
+    fetcher: getMessages, 
+    params
   });
 }
 
@@ -61,7 +47,6 @@ export function useMessagesQuery(params: QueryParams = {}) {
  */
 export function useMessageQuery(messageId: string | null, enabled: boolean) {
   const { userId } = useUserStore();
-
   return useQuery({
     queryKey: [`messages:${messageId}`],
     queryFn: async () => {

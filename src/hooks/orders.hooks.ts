@@ -1,11 +1,8 @@
 'use client';
-
-import { useQuery } from "@tanstack/react-query";
+;
 import { getOrderById, getOrders } from "@/actions/orders.actions";
-import useToast from "@/hooks/use-toast";
-import { useUserStore } from "@/stores/user.store";
 import { QueryParams } from "@/types/common";
-import { EMPTY_PAGINATED_RESPONSE } from "@/constants";
+import { useResourceByIdQuery, useResourceQuery } from "@/hooks/index.hooks";
 
 /**
  * Custom hook for fetching all orders for the current user.
@@ -19,22 +16,10 @@ import { EMPTY_PAGINATED_RESPONSE } from "@/constants";
  * @returns The react-query result object containing the orders data, error status, and query state.
  */
 export function useOrdersQuery(params: QueryParams = {}) {
-  const { userId } = useUserStore();
-  return useQuery({
-    enabled: !!userId,
-    queryKey: ["orders:all", params],
-    queryFn: async () => {
-      const response = await getOrders(userId as string, params);
-      if (!response.success) {
-        useToast({
-          type: "error",
-          message: response.message as string,
-          title: "Error fetching orders",
-        });
-        return EMPTY_PAGINATED_RESPONSE;
-      }
-      return response.data;
-    }
+  return useResourceQuery({
+    resource: "orders",
+    fetcher: getOrders,
+    params
   });
 }
 
@@ -50,17 +35,9 @@ export function useOrdersQuery(params: QueryParams = {}) {
  * @returns The react-query result object containing the order data on success, or null otherwise.
  */
 export function useOrderQuery(orderId: string | null) {
-  const { userId } = useUserStore();
-  return useQuery({
-    queryKey: [`orders:${orderId}`],
-    queryFn: async () => {
-      if (!orderId) return null;
-      const response = await getOrderById({
-        userId: userId as string,
-        orderId: orderId
-      });
-      return response.success ? response.data : null;
-    },
-    enabled: !!orderId
+  return useResourceByIdQuery({
+    resource: "orders",
+    fetcher: (userId: string, id: string) => getOrderById({ userId, orderId: id }),
+    identifier: orderId as string
   });
 }

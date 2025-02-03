@@ -23,10 +23,10 @@ export function slugify(text: string): string {
     .toLowerCase()
     .trim()
     .normalize('NFD') // Normalize unicode characters
-    .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+    .replace(/\u0300-\u036f/g, '') // Remove diacritics
     .replace(/[^a-z0-9\s-]/g, '') // Remove special chars
     .replace(/[\s_-]+/g, '-') // Replace spaces and underscores with hyphens
-    .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+    .replace(/(?:^-+)|(?:-+$)/g, ''); // Remove leading/trailing hyphens
 }
 
 /**
@@ -57,9 +57,16 @@ export async function generateUniqueSlug(
   const slug = slugify(baseSlug);
   let counter = 1;
   let finalSlug = slug;
+  const checkedSlugs = new Set<string>();
 
   while (await checkExists(finalSlug)) {
+    checkedSlugs.add(finalSlug);
     finalSlug = `${slug}-${counter}`;
+    // Skip if we've already checked this slug
+    while (checkedSlugs.has(finalSlug)) {
+      counter++;
+      finalSlug = `${slug}-${counter}`;
+    }
     counter++;
   }
 

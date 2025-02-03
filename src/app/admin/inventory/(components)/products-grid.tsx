@@ -20,12 +20,13 @@ export default function ProductsGrid() {
     page: 1,
     limit: 12,
     inventoryType: "all",
+    limitFields: ["createdAt", "updatedAt"],
   });
 
   const [filters, setFilters] = useState({
     inventoryType: [] as ("PREORDER" | "STOCK")[],
     categories: [] as string[],
-    priceRange: [0, Infinity] as [number, number],
+    priceRange: [0, 10000] as [number, number],
     tags: [] as string[]
   });
 
@@ -40,19 +41,13 @@ export default function ProductsGrid() {
 
   const filteredProducts = useMemo(() => {
     return products.filter(product => {
-      const matchesInventoryType = filters.inventoryType.length === 0 || 
-        filters.inventoryType.includes(product.inventoryType);
-      
-      const matchesCategory = filters.categories.length === 0 || 
-        (product.category && filters.categories.includes(product.category.name));
-      
-      const matchesTags = filters.tags.length === 0 || 
-        filters.tags.some(tag => product.tags.includes(tag));
-
-      const matchesSearch = product.title.toLowerCase().includes(localSearch.toLowerCase()) ||
-        product.description?.toLowerCase().includes(localSearch.toLowerCase());
-
-      return matchesInventoryType && matchesCategory && matchesTags && matchesSearch;
+      const searchLower = localSearch.toLowerCase();
+      return (
+        (filters.inventoryType.length === 0 || filters.inventoryType.includes(product.inventoryType)) &&
+        (filters.categories.length === 0 || (product.category && filters.categories.includes(product.category.name))) &&
+        (filters.tags.length === 0 || filters.tags.some(tag => product.tags.includes(tag))) &&
+        (product.title.toLowerCase().includes(searchLower) || product.description?.toLowerCase().includes(searchLower))
+      );
     });
   }, [products, filters, localSearch]);
 

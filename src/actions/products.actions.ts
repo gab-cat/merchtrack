@@ -57,17 +57,47 @@ export async function getProducts(
 
   try {
     let products: Product[] | null = await getCached(`products:${page}:${take}`);
-    let total = await getCached('products:total');
+    let total: number | null = await getCached('products:total');
 
     if (!products || !total) {
       [products, total] = await prisma.$transaction([
         prisma.product.findMany({
           where: { isDeleted: false },
           include: {
-            category: true,
-            postedBy: true,
-            reviews: true,
-            variants: true
+            category: {
+              select: { name: true }
+            },
+            postedBy: {
+              select: {
+                firstName: true,
+                lastName: true,
+                clerkId: true,
+                email: true
+              }
+            },
+            reviews: {
+              select: {
+                rating: true,
+                createdAt: true,
+                comment: true,
+                user: {
+                  select: {
+                    firstName: true,
+                    lastName: true,
+                    clerkId: true,
+                    email: true
+                  }
+                }
+              }
+            },
+            variants: {
+              select: {
+                id: true,
+                variantName: true,
+                price: true,
+                rolePricing: true
+              }
+            }
           },
           skip,
           take
@@ -76,22 +106,22 @@ export async function getProducts(
       ]);
       
       Promise.all([
-        await setCached(`products:${page}:${take}`, products),
+        await setCached(`products:${page}:*`, products),
         await setCached('products:total', total)
       ]);
     }
 
-    const lastPage = Math.ceil(total as number / take);
-    const processedProducts = products.map(product => 
-      removeFields(product, params.limitFields)
-    );
+    const lastPage = Math.ceil(total/ take);
+    const processedProducts = products.map(product => {
+      return removeFields(product, params.limitFields);
+    });
 
     return {
       success: true,
       data: {
         data: JSON.parse(JSON.stringify(processedProducts)),
         metadata: {
-          total: total as number,
+          total: total,
           page: page,
           lastPage: lastPage,
           hasNextPage: page < lastPage,
@@ -158,6 +188,7 @@ export async function getProductById({ userId, limitFields, productId }: GetObje
         message: "Product not found."
       };
     }
+
 
     return {
       success: true,

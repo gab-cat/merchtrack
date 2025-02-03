@@ -23,10 +23,24 @@ type CurrencyInput = number | Prisma.Decimal;
  * formatCurrency(new Prisma.Decimal('2500.50'));
  */
 export function formatCurrency(amount: CurrencyInput, currency = 'PHP') {
+  if (amount === null || amount === undefined) {
+    throw new Error('Amount is required');
+  }
+
   const numericAmount = amount instanceof Prisma.Decimal ? amount.toNumber() : amount;
+  
+  if (isNaN(numericAmount)) {
+    throw new Error('Invalid numeric amount');
+  }
+
+  if (numericAmount < 0) {
+    throw new Error('Amount cannot be negative');
+  }
   
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(numericAmount);
 }

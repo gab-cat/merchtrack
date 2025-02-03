@@ -87,13 +87,15 @@ export function BasicInformationSection() {
               id="tags"
               type="text"
               placeholder="Type a tag and press Enter"
+              pattern="[A-Za-z0-9\s-]+"
+              title="Tags can only contain letters, numbers, spaces, and hyphens"
               onKeyDown={handleKeyDown}
             />
             <div className="flex flex-wrap gap-2">
               {tags.map((tag) => (
                 <span
                   key={tag}
-                  className="flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-sm text-primary"
+                  className="flex items-center gap-1 rounded-full border border-primary/50 bg-primary/10 px-3 py-1 text-sm text-primary"
                 >
                   {tag}
                   <button

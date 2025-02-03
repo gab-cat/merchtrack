@@ -18,18 +18,19 @@ import { deleteProductById, updateProduct } from '../_actions';
 import { Button } from "@/components/ui/button";
 import { createProductSchema as updateProductSchema, type CreateProductType as UpdateProductType } from '@/schema/products.schema';
 import { useUserStore } from '@/stores/user.store';
-import { useProductQuery } from '@/hooks/products.hooks';
+import { useProductSlugQuery } from '@/hooks/products.hooks';
 import useToast from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { uploadImages } from '@/app/admin/inventory/new/_actions';
 import { fadeInUp } from '@/constants/animations';
+import { cn } from '@/lib/utils';
 
 
 interface UpdateProductContainerProps {
-  productId: string;
+  slug: string;
 }
 
-export default function UpdateProductContainer({ productId }: Readonly<UpdateProductContainerProps>) {
+export default function UpdateProductContainer({ slug }: Readonly<UpdateProductContainerProps>) {
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [formDataToSubmit, setFormDataToSubmit] = useState<UpdateProductType | null>(null);
@@ -37,7 +38,7 @@ export default function UpdateProductContainer({ productId }: Readonly<UpdatePro
   const { userId } = useUserStore();
   const router = useRouter();
   
-  const { data: product, isLoading } = useProductQuery(productId);
+  const { data: product, isLoading } = useProductSlugQuery(slug);
   
   const methods = useForm<UpdateProductType>({
     mode: 'onBlur',
@@ -82,7 +83,7 @@ export default function UpdateProductContainer({ productId }: Readonly<UpdatePro
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (formData: UpdateProductType) => {
-      const response = await updateProduct(userId as string, productId, formData);
+      const response = await updateProduct(userId as string, product?.id as string, formData);
       if (!response.success) {
         throw new Error(response.message);
       }
@@ -106,8 +107,8 @@ export default function UpdateProductContainer({ productId }: Readonly<UpdatePro
     }
   });
 
-  const { mutate: deleteProduct }: { mutate: () => void } = useMutation({
-    mutationFn: async () => await deleteProductById(userId as string, productId),
+  const { mutate: deleteProduct, isPending: isDeletePending }= useMutation({
+    mutationFn: async () => await deleteProductById(userId as string, product?.id as string),
     onSuccess: () => {
       router.push('/admin/inventory');
       useToast({
@@ -190,21 +191,20 @@ export default function UpdateProductContainer({ productId }: Readonly<UpdatePro
           <div className="flex justify-end space-x-4">
             <Button 
               type="button" 
-              className='bg-red-500 text-white'
-              disabled={isPending}
+              className={cn('text-white bg-red-500', isDeletePending ? 'bg-gray-400' : 'bg-red-500')}
+              disabled={isPending || isDeletePending}
               onClick={(event) => { event.preventDefault(); setIsDeleteDialogOpen(true); }}
               variant={isPending ? 'ghost' : 'destructive'}
             >
-              {!isPending 
+              {!isDeletePending 
                 ? (<><FaRegTrashAlt className="mr-2 size-4" /> Delete Product</>)
                 : (<><AiOutlineLoading3Quarters className="mr-2 size-5 animate-spin" /> Deleting...</>)
               }
             </Button>
             <Button 
               type="button" 
-              className='text-white'
-              disabled={isPending}
-              variant={isPending ? 'ghost' : 'default'}
+              className={cn('text-white', isPending ? 'bg-gray-400' : 'bg-primary')}
+              disabled={isPending || isDeletePending}
               onClick={() => handleSubmit(methods.getValues())}
             >
               {!isPending 

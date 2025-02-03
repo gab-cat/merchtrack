@@ -1,4 +1,4 @@
-export const EMPTY_PAGINATED_RESPONSE = { 
+export const EMPTY_PAGINATED_RESPONSE = Object.freeze({ 
   data: [], 
   metadata: { 
     total: 0, 
@@ -6,5 +6,5 @@ export const EMPTY_PAGINATED_RESPONSE = {
     lastPage: 1, 
     hasNextPage: false, 
     hasPrevPage: false 
-  } 
-};
+  }
+});

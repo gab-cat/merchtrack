@@ -7,6 +7,7 @@ import { Heart, Star, Eye } from "lucide-react";
 import { FaTags } from "react-icons/fa";
 import { SlOptionsVertical } from "react-icons/sl";
 import Link from "next/link";
+import DOMPurify from 'dompurify';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -53,7 +54,7 @@ export function ProductCard({ product }: Readonly<{ product: ExtendedProduct }>)
           {isHovered && (
             <motion.div {...fadeIn} className="absolute inset-0 flex items-center justify-center bg-black/40 transition-all">
               <Button variant="default" size="sm" className="mr-2 text-white">
-                <Link className="flex items-center" href={`/admin/inventory/${product.id}`} passHref>
+                <Link className="flex items-center" href={`/admin/inventory/${product.slug}`} passHref>
                   <Eye className="mr-2 size-4" />
                   Quick View
                 </Link>
@@ -95,7 +96,7 @@ export function ProductCard({ product }: Readonly<{ product: ExtendedProduct }>)
           </div>
 
           {product.description && (
-            <p dangerouslySetInnerHTML={{ __html: product.description }} className="text-muted-foreground mt-2 line-clamp-3 text-sm" />
+            <p dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product.description) }} className="text-muted-foreground mt-2 line-clamp-3 text-sm" />
           )}
 
           <div className="mt-4 space-y-2">
@@ -103,7 +104,7 @@ export function ProductCard({ product }: Readonly<{ product: ExtendedProduct }>)
               <Badge variant={product.inventory > 0 ? "default" : "destructive"} className={cn("text-xs underline", product.inventory <= 0 ? "text-primary" : "text-white")}>
                 {product.inventory > 0 || product.inventoryType === "PREORDER" ? "In Stock" : "Out of Stock"}
               </Badge>
-              <span className="rounded-md border bg-neutral-2 px-3 py-1 text-xs font-normal">{product.inventoryType.toWellFormed()}</span>
+              <span className="rounded-md border bg-neutral-2 px-3 py-1 text-xs font-normal">{product.inventoryType.toString()}</span>
             </div>
 
             {product.variants.length > 0 && (

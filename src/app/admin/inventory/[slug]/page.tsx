@@ -13,14 +13,14 @@ const PermissionDenied = dynamic(() => import('@/components/private/permission-d
 
 interface PageProps {
   params: Promise<{
-    productId: string;
+    slug: string;
   }>;
 }
 
 const Page: FC<PageProps> = async ({ params }) => {
   const { metadata } = await getSessionData();
   const userId = getUserId(metadata);
-  const productId = (await params).productId;
+  const slug = (await params).slug;
     
   if (!userId) {
     return redirect('/sign-in');
@@ -39,7 +39,7 @@ const Page: FC<PageProps> = async ({ params }) => {
     <PageAnimation>
       <div className="p-6">
         <PageTitle title="Update Product" />
-        <UpdateProductContainer productId={productId} />
+        <UpdateProductContainer slug={slug} />
       </div>
     </PageAnimation>
   );

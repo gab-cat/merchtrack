@@ -141,7 +141,7 @@ export async function getPaymentById({ userId, paymentId, limitFields }: GetObje
 
   let payment: Payment | null = await getCached<Payment>(`payments:${paymentId}`);
   try {
-    if (payment) {
+    if (!payment) {
       payment = await prisma.payment.findFirst({
         where: {
           id: paymentId,
