@@ -1,0 +1,146 @@
+import { useState } from "react";
+import { FaBoxes, FaTags } from "react-icons/fa";
+import { FaPesoSign } from "react-icons/fa6";
+import { MdCategory } from "react-icons/md";
+import { Slider } from "@/components/ui/slider";
+import { Checkbox } from "@/components/ui/checkbox";
+import type { ExtendedProduct } from "@/types/extended";
+
+interface FilterSidebarProps {
+  products: ExtendedProduct[]
+  filters: {
+    inventoryType: ("PREORDER" | "STOCK")[]
+    categories: string[]
+    priceRange: [number, number]
+    tags: string[]
+  }
+  setFilters: React.Dispatch<
+    React.SetStateAction<{
+      inventoryType: ("PREORDER" | "STOCK")[]
+      categories: string[]
+      priceRange: [number, number]
+      tags: string[]
+    }>
+  >
+  className?: string
+}
+
+export function FilterSidebar({ products, filters, setFilters, className = "" }: Readonly<FilterSidebarProps>) {
+  const [priceRange, setPriceRange] = useState(filters.priceRange);
+
+  const allCategories = Array.from(new Set(products.map((p) => p.category?.name).filter(Boolean)));
+  const allTags = Array.from(new Set(products.flatMap((p) => p.tags)));
+
+  const handleInventoryTypeChange = (type: "PREORDER" | "STOCK") => {
+    setFilters((prev) => ({
+      ...prev,
+      inventoryType: prev.inventoryType.includes(type)
+        ? prev.inventoryType.filter((t) => t !== type)
+        : [...prev.inventoryType, type],
+    }));
+  };
+
+  const handleCategoryChange = (category: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      categories: prev.categories.includes(category)
+        ? prev.categories.filter((c) => c !== category)
+        : [...prev.categories, category],
+    }));
+  };
+
+  const handleTagChange = (tag: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      tags: prev.tags.includes(tag) ? prev.tags.filter((t) => t !== tag) : [...prev.tags, tag],
+    }));
+  };
+
+  const handlePriceRangeChange = (value: number[]) => {
+    setPriceRange([value[0], value[1]]);
+    setFilters((prev) => ({ ...prev, priceRange: [value[0], value[1]] }));
+  };
+
+  return (
+    <div className={`space-y-6 ${className}`}>
+      <div>
+        <h3 className="mb-2 flex items-center font-bold text-primary"><FaBoxes className="mr-2"/>Inventory Type</h3>
+        <div className="space-y-2">
+          <div className="flex items-center">
+            <Checkbox
+              id="preorder"
+              checked={filters.inventoryType.includes("PREORDER")}
+              onCheckedChange={() => handleInventoryTypeChange("PREORDER")}
+            />
+            <label htmlFor="preorder" className="ml-2 text-sm">
+              Pre-order
+            </label>
+          </div>
+          <div className="flex items-center">
+            <Checkbox
+              id="instock"
+              checked={filters.inventoryType.includes("STOCK")}
+              onCheckedChange={() => handleInventoryTypeChange("STOCK")}
+            />
+            <label htmlFor="instock" className="ml-2 text-sm">
+              In Stock
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="mb-2 flex items-center font-bold text-primary"><MdCategory className="mr-2"/>Category</h3>
+        <div className="space-y-2">
+          {allCategories.map((category) => (
+            <div key={category} className="flex items-center">
+              <Checkbox
+                id={`category-${category}`}
+                checked={filters.categories.includes(category)}
+                onCheckedChange={() => handleCategoryChange(category)}
+              />
+              <label htmlFor={`category-${category}`} className="ml-2 text-sm">
+                {category}
+              </label>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <h3 className="mb-2 flex items-center font-bold text-primary"><FaPesoSign className="mr-2"/>Price Range</h3>
+        <Slider
+          min={0}
+          max={1000}
+          step={10}
+          value={priceRange}
+          onValueChange={handlePriceRangeChange}
+          className="mt-2"
+        />
+        <div className="mt-2 flex justify-between text-sm">
+          <span>${priceRange[0]}</span>
+          <span>${priceRange[1]}</span>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="mb-2 flex items-center font-bold text-primary"><FaTags className="mr-2"/>Tags</h3>
+        <div className="space-y-2">
+          {allTags.map((tag) => (
+            <div key={tag} className="flex items-center">
+              <Checkbox
+                id={`tag-${tag}`}
+                checked={filters.tags.includes(tag)}
+                onCheckedChange={() => handleTagChange(tag)}
+              />
+              <label htmlFor={`tag-${tag}`} className="ml-2 text-sm">
+                {tag}
+              </label>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+

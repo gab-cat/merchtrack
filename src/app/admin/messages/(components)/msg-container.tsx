@@ -16,23 +16,33 @@ import { ExtendedMessage } from "@/types/messages";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useMessagesQuery } from "@/hooks/messages.hooks";
+import type { QueryParams } from "@/types/common";
+import { PaginationNav } from "@/components/pagination-nav";
 
 export default function MessagesContainer() {
-  const { data: messages, isPending, refetch, isRefetching } = useMessagesQuery();
+  const [params, setParams] = useState<QueryParams>({
+    page: 1,
+    limit: 20
+  });
+  const { data, isPending, refetch, isRefetching } = useMessagesQuery(params);
+  const messages: ExtendedMessage[] = data?.data ?? [];
+  const { total, page, lastPage } = data?.metadata ?? {};
+
   const [selectedMessage, setSelectedMessage] = useState<ExtendedMessage | null>(null);
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<"inbox" | "sent">("inbox");
 
+
   const handleMessageSelect = useCallback((message: ExtendedMessage) => {
     setSelectedMessage(message);
     if (!message.isRead) {
-      messages?.map((m) => (m.id === message.id ? { ...m, isRead: true } : m));
+      messages?.map((m: ExtendedMessage) => (m.id === message.id ? { ...m, isRead: true } : m));
     }
   }, [messages]);
 
   const selectedMessageReply = useMemo(() => {
-    return messages?.find(m => m.repliesToId === selectedMessage?.id) as ExtendedMessage | undefined;
+    return messages?.find(m => m.repliesToId === selectedMessage?.id);
   }, [messages, selectedMessage]);
 
   const handleReply = useCallback(async () => {
@@ -45,6 +55,10 @@ export default function MessagesContainer() {
   const handleRefresh = useCallback(async () => {
     await refetch();
   }, [refetch]);
+
+  const handlePageChange = useCallback((newPage: number) => {
+    setParams(prev => ({ ...prev, page: newPage }));
+  }, []);
 
   const filteredMessages = useMemo(() => {
     const tabFiltered = messages?.filter(message => 
@@ -108,19 +122,32 @@ export default function MessagesContainer() {
         {isPending ? (
           <MessageSkeleton />
         ) : (
-          activeTab === "inbox" ? (
-            <MessageList
-              messages={filteredMessages as ExtendedMessage[]}
-              onSelectMessage={handleMessageSelect}
-              selectedMessageId={selectedMessage?.id}
-            />
-          ) : (
-            <SentMessageList
-              messages={filteredMessages as ExtendedMessage[]}
-              onSelectMessage={handleMessageSelect}
-              selectedMessageId={selectedMessage?.id}
-            />
-          )
+          <>
+            {activeTab === "inbox" ? (
+              <MessageList
+                messages={filteredMessages}
+                onSelectMessage={handleMessageSelect}
+                selectedMessageId={selectedMessage?.id}
+              />
+            ) : (
+              <SentMessageList
+                messages={filteredMessages}
+                onSelectMessage={handleMessageSelect}
+                selectedMessageId={selectedMessage?.id}
+              />
+            )}
+            
+          </>
+        )}
+        {!isPending && (
+          <PaginationNav
+            currentPage={page ?? 1}
+            totalPages={lastPage ?? 1}
+            totalItems={total}
+            onPageChange={handlePageChange}
+            disabled={isRefetching}
+            className="mt-4"
+          />
         )}
       </div>
       <div className="overflow-y-auto">

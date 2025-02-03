@@ -85,5 +85,6 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
     ...(process.env.NODE_ENV === 'development' ? ['http://localhost:3000', 'https://*.github.dev'] : [])
   ],
   afterSignUpUrl: '/onboarding',
+  secretKey: process.env.CLERK_SECRET_KEY,
 });
 

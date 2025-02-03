@@ -6,6 +6,7 @@ import {
   MdEmail, 
   MdBarChart
 } from 'react-icons/md';
+import { FaAddressBook } from "react-icons/fa6";
 import type { IconType } from 'react-icons';
 import { OrderStatus } from '@prisma/client';
   
@@ -46,6 +47,11 @@ export const AdminLinks: AdminNavigation[] = [
     href: "/admin/insights",
     icon: MdBarChart,
   },
+  {
+    name: "Logs",
+    href: "/admin/logs",
+    icon: FaAddressBook,
+  }
 ];
 
 export const ADMIN_TABS = [

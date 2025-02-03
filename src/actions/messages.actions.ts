@@ -4,14 +4,16 @@ import { Message } from "@prisma/client";
 import prisma from "@/lib/db";
 import { getCached, setCached } from "@/lib/redis";
 import { verifyPermission } from "@/utils/permissions";
-
+import { QueryParams, PaginatedResponse } from "@/types/common";
+import { calculatePagination, removeFields } from "@/utils/query.utils";
+import { ExtendedMessage } from "@/types/messages";
 
 type GetMessageParams = {
   messageId: string
   userId: string
 }
 
-export const getMessage = async (params: GetMessageParams): Promise<ActionsReturnType<Message>> => {
+export const getMessage = async (params: GetMessageParams): Promise<ActionsReturnType<ExtendedMessage>> => {
   const isAuthorized = await verifyPermission({
     userId: params.userId,
     permissions: {
@@ -68,7 +70,10 @@ export const getMessage = async (params: GetMessageParams): Promise<ActionsRetur
   }
 };
 
-export const getMessages = async (userId: string): Promise<ActionsReturnType<Message[]>> => {
+export const getMessages = async (
+  userId: string,
+  params: QueryParams = {}
+): Promise<ActionsReturnType<PaginatedResponse<ExtendedMessage[]>>> => {
   const isAuthorized = await verifyPermission({
     userId: userId,
     permissions: {
@@ -83,32 +88,55 @@ export const getMessages = async (userId: string): Promise<ActionsReturnType<Mes
     };
   }
 
+  const { skip, take, page } = calculatePagination(params);
+
   try {
-    let messages: Message[] | null = await getCached<Message[]>('messages:all');
-    if (!messages || messages.length === 0) {
-      messages = await prisma.message.findMany({
-        include: {
-          user: {
-            select: {
-              id: true,
-              email: true,
-              firstName: true,
-              lastName: true,
-              role: true,
-              clerkId: true,
-            }
+    let messages: Message[] | null = await getCached(`messages:${page}:${take}`);
+    let total = await getCached('messages:total');
+
+    if (!messages || !total) {
+      [messages, total] = await prisma.$transaction([
+        prisma.message.findMany({
+          skip,
+          take,
+          include: {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                role: true,
+                clerkId: true,
+              }
+            },
           },
-        },
-        orderBy: {
-          createdAt: 'desc'
-        }
-      });
-      await setCached('messages:all', messages);
+          orderBy: { createdAt: 'desc' }
+        }),
+        prisma.message.count()
+      ]);
+
+      await setCached(`messages:${page}:${take}`, messages);
+      await setCached('messages:total', total);
     }
-  
+
+    const lastPage = Math.ceil(total as number / take);
+    const processedMessages = messages.map(msg => 
+      removeFields(msg, params.limitFields)
+    );
+
     return {
       success: true,
-      data: JSON.parse(JSON.stringify(messages))
+      data: {
+        data: JSON.parse(JSON.stringify(processedMessages)),
+        metadata: {
+          total: total as number,
+          page,
+          lastPage,
+          hasNextPage: page < lastPage,
+          hasPrevPage: page > 1
+        }
+      }
     };
   } catch (error) {
     return {

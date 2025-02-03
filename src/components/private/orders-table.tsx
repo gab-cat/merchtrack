@@ -20,7 +20,7 @@ export function OrdersTable() {
 
   const { data: orders, isLoading } = useOrdersQuery();
   const updateOrder = (id: string, field: keyof ExtendedOrder, value: OrderStatus | PaymentStatus | PaymentMethod | CustomerType) => {
-    orders?.map(order => 
+    orders?.data.map(order => 
       order.id === id ? { ...order, [field]: value } : order
     );
   };
@@ -51,7 +51,7 @@ export function OrdersTable() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
           transition={{ duration: 0.3 }}>
-          <OrdersTableRows orders={orders} updateOrder={updateOrder} />
+          <OrdersTableRows orders={orders?.data as ExtendedOrder[]} updateOrder={updateOrder} />
         </motion.tbody>
       )}
     </Table>

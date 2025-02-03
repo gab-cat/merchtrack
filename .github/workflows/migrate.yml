@@ -92,10 +92,13 @@ jobs:
             echo "DATABASE_URL=${{ secrets.STAGING }}" > .env
           fi
 
+      - uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 #v2.0.1
+        with:
+          bun-version: latest
 
       - name: Run Database Migration
         run: |
-          npm install -g pnpm@9.15.3 && pnpm install && pnpm prisma migrate deploy
+          bun install --frozen-lockfile && bunx prisma migrate deploy
 
       - name: Close Database to Public Network
         run: |
