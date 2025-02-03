@@ -52,6 +52,7 @@
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dompurify": "^3.2.4",
     "flowbite": "^2.5.2",
     "framer-motion": "^11.18.2",
     "import-in-the-middle": "^1.12.0",

@@ -35,7 +35,7 @@ const nextConfig: NextConfig = {
         process.env.NEXT_PUBLIC_APP_URL as string,
       ]
     },
-    // useLightningcss: true,
+    useLightningcss: true,
   },
   eslint: {
     ignoreDuringBuilds: true
