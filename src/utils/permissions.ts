@@ -47,7 +47,6 @@ export const verifyPermission = async (params: VerifyPermissionParams): Promise<
       userPermissions = (await prisma.userPermission.findMany({
         where: {
           userId: { equals: params.userId },
-          permissionId: { in: actionCodes }
         },
         select: {  
           permissionId: true,
@@ -57,7 +56,7 @@ export const verifyPermission = async (params: VerifyPermissionParams): Promise<
           canDelete: true
         }
       })) as UserPermission[];
-      if (userPermissions.length) await setCached(`permissions:${params.userId}`, userPermissions);
+      if (userPermissions.length) await setCached(`permissions:${params.userId}`, userPermissions, '30m');
     } catch (error) {
       // no-dd-sa:typescript-best-practices/no-console
       console.error('Error fetching user permissions:', error);
