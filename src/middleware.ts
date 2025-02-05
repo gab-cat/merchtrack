@@ -38,7 +38,7 @@ const isPublicRoute = createRouteMatcher([
   '/faqs',
   '/terms-of-service',
   '/privacy-policy',
-  '/test'
+  '/test',
 ]);
 
 const isOnboardingRoute = createRouteMatcher([

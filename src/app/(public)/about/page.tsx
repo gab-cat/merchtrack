@@ -1,16 +1,12 @@
-import React from 'react';
-import AboutUsBody from '@/components/public/about-us-body';
-import { ABOUT_US_CONTENT } from '@/constants';
-import PageTitle from '@/components/public/page-title';
-import PageAnimation from '@/components/public/page-animation';
+import React from "react";
 
-const Page: React.FC = () => {
+const MyOrdersPage = () => {
   return (
-    <PageAnimation className='max-w-4xl'>
-      <PageTitle title={ABOUT_US_CONTENT.title} description={ABOUT_US_CONTENT.description} />
-      <AboutUsBody />
-    </PageAnimation>
+    <div>
+      <h1>My Orders</h1>
+      <p>This is the page for your orders!</p>
+    </div>
   );
 };
 
-export default Page;
+export default MyOrdersPage;

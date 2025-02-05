@@ -10,5 +10,5 @@ export const HEADER_LINKS: LinkType[] = [
   {
     href: '/faqs',
     displayName: 'FAQs'
-  }
+  },
 ];
