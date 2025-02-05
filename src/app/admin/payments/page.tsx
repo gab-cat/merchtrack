@@ -1,20 +1,30 @@
 "use client";
-
-import { useState } from "react";
-import { OnsitePayment } from "@/components/private/onsite-payment";
-import { OffsitePayment } from "@/components/private/offsite-payment";
+import React from "react";
+import PageTitle from "@/components/private/page-title";
+import { OnsitePayment } from "@/app/admin/payments/components/onsite-payment";
+import { OffsitePayment } from "@/app/admin/payments/components/offsite-payment";
 import { TransactionHistory } from "@/components/private/transaction-history";
 import { offsitePayments as initialOffsitePayments, transactions as initialTransactions } from "@/types/payments";
 import type { Transaction, OffsitePaymentRequest } from "@/types/payments";
 
-export default function PaymentsPage() {
-  const [offsitePayments, setOffsitePayments] = useState(initialOffsitePayments);
-  const [transactions, setTransactions] = useState(initialTransactions);
+interface PaymentsPageState {
+  offsitePayments: OffsitePaymentRequest[];
+  transactions: Transaction[];
+}
 
-  const handleOnsitePayment = (orderId: string, amount: number) => {
-    const order = offsitePayments.find((p) => p.orderId === orderId);
+export default class PaymentsPage extends React.Component<object, PaymentsPageState> {
+  constructor(props: object) {
+    super(props);
+    this.state = {
+      offsitePayments: initialOffsitePayments,
+      transactions: initialTransactions,
+    };
+  }
+
+  handleOnsitePayment = (orderId: string, amount: number) => {
+    const order = this.state.offsitePayments.find((p) => p.orderId === orderId);
     const newTransaction: Transaction = {
-      id: `TRX${transactions.length + 1}`.padStart(6, "0"),
+      id: `TRX${this.state.transactions.length + 1}`.padStart(6, "0"),
       orderId,
       orderNo: order?.orderNo || `#${orderId}`,
       customerName: order?.customerName || "Customer",
@@ -22,14 +32,18 @@ export default function PaymentsPage() {
       paymentType: "onsite",
       date: new Date().toISOString().split("T")[0],
     };
-    setTransactions((prev) => [newTransaction, ...prev]);
+    this.setState((prevState) => ({
+      transactions: [newTransaction, ...prevState.transactions],
+    }));
   };
 
-  const handleOffsiteConfirm = (payment: OffsitePaymentRequest) => {
-    setOffsitePayments((prev) => prev.filter((p) => p.orderId !== payment.orderId));
+  handleOffsiteConfirm = (payment: OffsitePaymentRequest) => {
+    this.setState((prevState) => ({
+      offsitePayments: prevState.offsitePayments.filter((p) => p.orderId !== payment.orderId),
+    }));
 
     const newTransaction: Transaction = {
-      id: `TRX${transactions.length + 1}`.padStart(6, "0"),
+      id: `TRX${this.state.transactions.length + 1}`.padStart(6, "0"),
       orderId: payment.orderId,
       orderNo: payment.orderNo,
       customerName: payment.customerName,
@@ -37,25 +51,31 @@ export default function PaymentsPage() {
       paymentType: "offsite",
       date: new Date().toISOString().split("T")[0],
     };
-    setTransactions((prev) => [newTransaction, ...prev]);
+    this.setState((prevState) => ({
+      transactions: [newTransaction, ...prevState.transactions],
+    }));
   };
 
-  const handleOffsiteReject = (payment: OffsitePaymentRequest) => {
-    setOffsitePayments((prev) => prev.filter((p) => p.orderId !== payment.orderId));
+  handleOffsiteReject = (payment: OffsitePaymentRequest) => {
+    this.setState((prevState) => ({
+      offsitePayments: prevState.offsitePayments.filter((p) => p.orderId !== payment.orderId),
+    }));
   };
 
-  return (
-    <div className="mx-auto max-w-7xl p-4">
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div>
-          <OnsitePayment onPaymentComplete={handleOnsitePayment} />
-        </div>
-        <div className="space-y-4">
-          <OffsitePayment payments={offsitePayments} onConfirm={handleOffsiteConfirm} onReject={handleOffsiteReject} />
-          <TransactionHistory transactions={transactions} />
+  render() {
+    return (
+      <div className="mx-auto max-w-7xl p-4">
+        <PageTitle title='Payments' />
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div>
+            <OnsitePayment onPaymentComplete={this.handleOnsitePayment} />
+          </div>
+          <div className="space-y-4">
+            <OffsitePayment payments={this.state.offsitePayments} onConfirm={this.handleOffsiteConfirm} onReject={this.handleOffsiteReject} />
+            <TransactionHistory transactions={this.state.transactions} />
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  }
 }
-
