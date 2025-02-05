@@ -4,7 +4,6 @@ import { ProfileForm } from "./profile-form";
 import MyProfileSideBar from '@/components/public/profile/my-profile-sidebar';
 
 function MyAccountBody() {
-  
   return (
     <div>
       <div className='my-8 flex min-h-[80vh] w-full px-12'>
@@ -32,6 +31,3 @@ function MyAccountBody() {
 }
 
 export default MyAccountBody;
-[/*          <div className="w-full max-w-2xl px-4">
-            
-          </div> */];

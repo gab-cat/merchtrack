@@ -2,11 +2,10 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { useUser, useClerk } from '@clerk/nextjs';
 import { Button } from "@/components/ui/button";
 
 function MyProfileSideBar() {
-  const { user } = useUser();
+  {/*const { user } = useUser();
   const { signOut } = useClerk();
 
   const fullName = user ? `${user.firstName} ${user.lastName}` : "Name";
@@ -14,7 +13,7 @@ function MyProfileSideBar() {
 
   const handleLogout = () => {
     signOut();
-  };
+  };*/}
   
   return (
     <div className='flex w-1/4 flex-col place-items-center justify-between'>
@@ -26,8 +25,8 @@ function MyProfileSideBar() {
           height={150}
           className="my-4 mr-2 place-self-center"
         />
-        <p className='font-bold'>{fullName}</p>
-        <p className='text-xs'>{email}</p>
+        <p className='font-bold'>fullName</p>
+        <p className='text-xs'>email</p>
       </div>
 
       <div className='flex flex-col'>
@@ -54,11 +53,11 @@ function MyProfileSideBar() {
         </Button>
       </div>
 
+      {/*onClick={handleLogout}*/}
       <Button 
         className='mb-8 size-fit hover:bg-blue-500/50 hover:text-white' 
         color="blue" 
         variant="outline"
-        onClick={handleLogout}
       >
         <Image
           src="/img/logout-icon.png"

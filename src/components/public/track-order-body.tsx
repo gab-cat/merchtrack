@@ -2,19 +2,13 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { useUser } from '@clerk/nextjs';
 import { Button } from "@/components/ui/button";
 
 
 function TrackOrderBody() {
-  const { user } = useUser();
-  
-  const fullName = user ? `${user.firstName} ${user.lastName}` : "Name";
-  const email = user && user.primaryEmailAddress ? user.primaryEmailAddress.emailAddress : "email@gmail.com";
-  
   return (
     <div className='my-8 flex min-h-[80vh] w-full flex-col items-center justify-center'>
-      <div className='flex w-3/5 flex-row items-start items-center'>
+      <div className='flex w-3/5 flex-row items-center'>
         <p className='font-bold'>Track My Order: </p>
         <p className='m-2 w-1/5 rounded-md border-2 border-blue-500 bg-blue-500/50 p-4'>2201</p>
       </div>
