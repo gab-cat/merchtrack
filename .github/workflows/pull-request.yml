@@ -23,17 +23,18 @@ jobs:
       - name: Check IP Address
         run: curl ifconfig.me
 
-      - name: Install pnpm
-        run: npm install -g pnpm
+      - uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 #v2.0.1
+        with:
+          bun-version: latest
 
       - name: Install dependencies
-        run: pnpm install --shamefully-hoist
+        run: bun install --frozen-lockfile
 
      # - name: Unit tests
      #   run: pnpm test:run
 
       - name: Automatic Lint Fix
-        run: pnpm lint
+        run: bun run lint
 
       - name: Add and Commit Changes
         id: commit_changes

@@ -1,4 +1,4 @@
-FROM gabcat/merchtrack:cache AS builder
+FROM gabcat/merchtrack:cache-bun AS builder
 LABEL author=gab-cat
 
 WORKDIR /app
@@ -7,9 +7,10 @@ COPY . .
 ENV NODE_ENV=production
 ENV APP_ENV=build
 
-RUN npm i -g dotenv-cli@8.0.0 && npx next telemetry disable && ls && dotenv -e .env -- npm run build
+RUN bunx next telemetry disable && bun install && bunx dotenv-cli -e .env -- bun run build
+
 # Stage: Runner
-FROM node:22.12.0-alpine3.21 AS runner
+FROM oven/bun:1.2.2-alpine AS runner
 LABEL author=gab-cat
 
 WORKDIR /app
@@ -23,19 +24,17 @@ RUN addgroup --system --gid 1001 nodejs && \
     mkdir .next && \
     chown nextjs:nodejs .next
 
-
 # Copy only the necessary files from the builder stage
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
-# Ensure nextjs has ownership of the entire app
-RUN chown -R nextjs:nodejs /app
+# Ensure environment file and app directory are owned by nextjs user
+RUN chown nextjs:nodejs .env && chown -R nextjs:nodejs /app && bun add react react-dom
 
 USER nextjs
-# Expose port 3000
 EXPOSE 3000
 
-# Start the Next.js app
-CMD ["node", "server.js"]
+ENTRYPOINT ["bun", "server.js"]
+
 

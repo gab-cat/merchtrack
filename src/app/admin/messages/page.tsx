@@ -26,6 +26,7 @@ const Page = async () => {
     userId,
     permissions: {
       dashboard: { canRead: true },
+      messages: { canRead: true }
     }
   })) {
     return <PermissionDenied />;

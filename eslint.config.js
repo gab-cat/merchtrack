@@ -5,11 +5,22 @@ import pluginReact from "eslint-plugin-react";
 import importPlugin from 'eslint-plugin-import';
 import jsxPlugin from 'eslint-plugin-jsx-a11y';
 import tailwind from "eslint-plugin-tailwindcss";
+import nextPlugin from '@next/eslint-plugin-next';
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
   { files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"] },
   { languageOptions: { globals: globals.browser } },
+  // Next.js rules in flat config format
+  {
+    plugins: {
+      '@next/next': nextPlugin
+    },
+    rules: {
+      ...nextPlugin.configs.recommended.rules,
+      ...nextPlugin.configs['core-web-vitals'].rules
+    }
+  },
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
   pluginReact.configs.flat.recommended,

@@ -1,22 +1,15 @@
 import Image from "next/image";
-import { useQuery } from "@tanstack/react-query";
 import { manilaTime } from "@/utils/formatTime";
 import type { ExtendedMessage } from "@/types/messages";
-import { getClerkUserImageUrl } from "@/actions/users.action";
+import { useUserImageQuery } from "@/hooks/messages.hooks";
 
 interface MessageReplyProps {
   replyMessage: ExtendedMessage;
 }
 
 export default function MessageReply({ replyMessage }: Readonly<MessageReplyProps>) {
-  const { data: userData } = useQuery({
-    enabled: replyMessage.user?.clerkId !== undefined,
-    queryKey: [`users:${replyMessage.user?.clerkId}`],
-    queryFn: async () => {
-      const response = await getClerkUserImageUrl(replyMessage.user?.clerkId as string);
-      return response.data;
-    },
-  });
+  const { data: userData } = useUserImageQuery(replyMessage.user?.clerkId);
+  
   return (
     <div className="my-2 space-y-4 rounded-lg border border-gray-200 bg-gray-50 p-6 dark:border-gray-700 dark:bg-gray-700">
       <h3 className="text-2xl font-semibold text-gray-900 dark:text-white">Reply</h3>

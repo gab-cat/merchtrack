@@ -5,6 +5,7 @@ import { Slot } from "@radix-ui/react-slot";
 import { ChevronRight, MoreHorizontal } from "lucide-react";
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { MdHome } from "react-icons/md";
 
 import { cn } from "@/lib/utils";
 
@@ -14,9 +15,7 @@ export function CustomBreadcrumb() {
 
   return (
     <nav className="flex py-3 text-sm">
-      <Link href="/" className="text-neutral-5 hover:text-neutral-7">
-        Home
-      </Link>
+      <MdHome className="text-xl text-primary"/>
       {paths.map((path, index) => {
         const href = `/${paths.slice(0, index + 1).join('/')}`;
         const isLast = index === paths.length - 1;

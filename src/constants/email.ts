@@ -5,7 +5,7 @@ export const emailStyles = {
   },
 
   container: {
-    margin: '5px auto',
+    margin: '10px auto',
     padding: '20px',
     backgroundColor: '#ffffff',
     borderRadius: '8px',
@@ -24,6 +24,10 @@ export const emailStyles = {
   logo: {
     marginBottom: '10px',
     height: '60px',
+    // center the image
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
   },
 
   heading: {
@@ -93,6 +97,7 @@ export const emailContent = {
     phone: '(555) 123-4567',
     email: 'support@merchtrack.tech',
     website: 'https://merchtrack.tech',
+    logoUrl: 'https://merchtrack.tech/img/logo-white.png',
   },
 
   faqs: [
