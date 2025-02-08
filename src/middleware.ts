@@ -21,7 +21,6 @@ export const config = {
  * `isPublicRoute` is a route matcher function that determines
  * whether a given route path corresponds to a publicly accessible route in the application.
  *
- *
  * Any routes matching these patterns will be identified as public routes.
  */
 const isPublicRoute = createRouteMatcher([
@@ -45,12 +44,7 @@ const isOnboardingRoute = createRouteMatcher([
   '/onboarding(.*)',
 ]);
 
-const isAdminRoute = createRouteMatcher([
-  '/admin(.*)',
-]);
-
 export default clerkMiddleware(async (auth, req: NextRequest) => {
-
   // If visiting a public route, let the user view
   if (isPublicRoute(req)) return NextResponse.next();
 
@@ -63,17 +57,10 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
 
   // If the user isn't signed in and the route is private, redirect to sign-in
   if (!userId && !isPublicRoute(req)) return redirectToSignIn({ returnBackUrl: req.url });
-  
 
   // Catch users who do not have `onboardingComplete: true` in their publicMetadata
-  // Redirect them to the /onboarding route to complete onboarding
   if (userId && !sessionClaims?.metadata?.isOnboardingCompleted && !isOnboardingRoute(req)) {
     return NextResponse.redirect(new URL('/onboarding', req.url));
-  }
-
-  // Check if the user is visiting an admin route but is not a staff member
-  if (userId && isAdminRoute(req) && !sessionClaims?.metadata?.data.isStaff) {
-    return NextResponse.rewrite(new URL('/404', req.url));
   }
 
   // If the user is logged in and the route is protected, let them view.
@@ -87,4 +74,3 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   afterSignUpUrl: '/onboarding',
   secretKey: process.env.CLERK_SECRET_KEY,
 });
-

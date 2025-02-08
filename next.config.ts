@@ -24,7 +24,8 @@ const nextConfig: NextConfig = {
     'require-in-the-middle',
     '@react-email/components',
     '@react-email/render',
-    '@react-email/tailwind'
+    '@react-email/tailwind',
+    'react-dom/server',
   ],
   experimental: {
     serverActions: {
@@ -32,7 +33,7 @@ const nextConfig: NextConfig = {
       allowedOrigins: [
         'https://merchtrack.tech',
         'https://staging.merchtrack.tech',
-        process.env.NEXT_PUBLIC_APP_URL as string,
+        process.env.NEXT_PUBLIC_APP_URL!,
       ]
     },
     // useLightningcss: true,

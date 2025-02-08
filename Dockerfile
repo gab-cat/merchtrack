@@ -29,11 +29,8 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
-# Copy environment variables
-COPY --from=builder /app/.env ./.env
-
 # Ensure environment file and app directory are owned by nextjs user
-RUN chown nextjs:nodejs .env && chown -R nextjs:nodejs /app
+RUN chown nextjs:nodejs .env && chown -R nextjs:nodejs /app && bun add react react-dom
 
 USER nextjs
 EXPOSE 3000
