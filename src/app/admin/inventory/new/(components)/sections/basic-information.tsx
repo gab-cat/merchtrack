@@ -3,6 +3,7 @@
 import { useFormContext, Controller } from 'react-hook-form';
 import { FaFileAlt } from "react-icons/fa";
 import { X } from "lucide-react";
+import DOMPurify from 'isomorphic-dompurify';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FormSection } from "@/components/ui/form-section";
@@ -19,7 +20,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export function BasicInformationSection() {
+type Props = {
+  description?: string;
+}
+
+export function BasicInformationSection({ description }: Readonly<Props>) {
   const { register, control, formState: { errors }, watch, setValue } = useFormContext<CreateProductType>();
   const { data: categories = [] } = useCategoriesQuery();
   const tags = watch('tags') ?? []; // Ensure tags is initialized as an array
@@ -62,12 +67,18 @@ export function BasicInformationSection() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="description">Description</Label>
+          {description && (
+            <div className="rounded-md bg-gray-100 p-2 text-gray-700">
+              <p className='text-semibold text-base font-semibold text-neutral-7'>Current Description</p>
+              <p className='text-sm' dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(description)}}/>
+            </div>
+          )}
           <Controller
             name="description"
             control={control}
             render={({ field }) => (
               <RichTextEditor
-                value={field.value ?? ''}
+                value={field.value ?? description ?? ''}
                 onChange={field.onChange}
                 placeholder="Describe your product's features, materials, and any other important details..."
               />

@@ -56,7 +56,20 @@ export async function updateProduct(
   }
 
   try {
-    // Clean up the data before update
+    // Verify product exists
+    const existingProduct = await prisma.product.findUnique({
+      where: { id: productId }
+    });
+
+    if (!existingProduct) {
+      return {
+        success: false,
+        message: "Product not found"
+      };
+    }
+
+    // Keep existing imageUrl if not provided in update
+    // This prevents accidental image removal during regular updates
     const cleanData = {
       ...data,
       _tempFiles: undefined,
@@ -72,18 +85,6 @@ export async function updateProduct(
         }))
       }
     };
-
-    // Verify product exists
-    const existingProduct = await prisma.product.findUnique({
-      where: { id: productId }
-    });
-
-    if (!existingProduct) {
-      return {
-        success: false,
-        message: "Product not found"
-      };
-    }
 
     const product = await prisma.product.update({
       where: { id: productId },

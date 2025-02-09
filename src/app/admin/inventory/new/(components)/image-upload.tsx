@@ -1,23 +1,32 @@
 import { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { X } from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
 import Image from 'next/image';
 import useToast from '@/hooks/use-toast';
 
 interface ImageUploadProps {
   value?: string[];
-  onChange: (urls: string[], files?: File[]) => void;
+  onChange: (urls: string[], files?: File[]) => void | Promise<void>;
+  isLoading?: boolean;
+  isRealtime?: boolean;
 }
 
-export default function ImageUpload({ value = [], onChange }: Readonly<ImageUploadProps>) {
+export default function ImageUpload({ value = [], onChange, isLoading = false, isRealtime = false }: Readonly<ImageUploadProps>) {
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    // Create local URLs for preview
-    const localUrls = acceptedFiles.map(file => URL.createObjectURL(file));
-    // Combine with existing URLs if any
-    const newUrls = [...value, ...localUrls];
-    onChange(newUrls, acceptedFiles);
-    return () => localUrls.forEach(url => URL.revokeObjectURL(url));
-  }, [onChange, value]);
+    if (isRealtime) {
+      await onChange(value, acceptedFiles);
+    } else {
+      // For new product, just store the URLs as data URLs temporarily
+      const urls = await Promise.all(
+        acceptedFiles.map(file => new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(file);
+        }))
+      );
+      onChange([...value, ...urls], acceptedFiles);
+    }
+  }, [onChange, value, isRealtime]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: (acceptedFiles) => { void onDrop(acceptedFiles); },
@@ -34,30 +43,48 @@ export default function ImageUpload({ value = [], onChange }: Readonly<ImageUplo
     accept: { 'image/*': [] },
     maxFiles: 5,
     maxSize: 10 * 1024 * 1024,
+    disabled: isLoading
   });
 
-  const removeImage = (index: number) => {
+  const removeImage = async (index: number) => {
     const newImages = value.filter((_, i) => i !== index);
-    onChange(newImages);
+    if (isRealtime) {
+      await onChange(newImages);
+    } else {
+      onChange(newImages);
+    }
   };
 
   return (
     <div className="space-y-4">
-      <div {...getRootProps()} className={`
-        cursor-pointer rounded-lg border-2 border-dashed p-6 text-center
-        transition-colors duration-200 ease-in-out
-        ${isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}
-      `}>
+      <div 
+        {...getRootProps()} 
+        className={`
+          cursor-pointer rounded-lg border-2 border-dashed p-6 text-center
+          transition-colors duration-200 ease-in-out
+          ${isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}
+          ${isLoading ? 'cursor-not-allowed opacity-50' : ''}
+        `}
+      >
         <input {...getInputProps()} />
-        <p className="text-gray-600">
-          {isDragActive ? 
-            'Drop the files here...' : 
-            'Drag & drop images here, or click to select files'
-          }
-        </p>
-        <p className="mt-2 text-sm text-gray-500">
-          Maximum 5 images, up to 10MB each
-        </p>
+        {isLoading ? (
+          <div className="flex items-center justify-center space-x-2">
+            <Loader2 className="size-4 animate-spin" />
+            <p className="text-gray-600">Processing images...</p>
+          </div>
+        ) : (
+          <>
+            <p className="text-gray-600">
+              {isDragActive ? 
+                'Drop the files here...' : 
+                'Drag & drop images here, or click to select files'
+              }
+            </p>
+            <p className="mt-2 text-sm text-gray-500">
+              Maximum 5 images, up to 10MB each
+            </p>
+          </>
+        )}
       </div>
 
       {value.length > 0 && (
@@ -73,9 +100,13 @@ export default function ImageUpload({ value = [], onChange }: Readonly<ImageUplo
               />
               <button
                 type="button"
+                disabled={isLoading}
                 onClick={() => removeImage(index)}
-                className="absolute right-2 top-2 rounded-full bg-red-500 p-1 
-                         text-white opacity-0 transition-opacity group-hover:opacity-100"
+                className={`
+                  absolute right-2 top-2 rounded-full bg-red-500 p-1 
+                  text-white opacity-0 transition-opacity group-hover:opacity-100
+                  ${isLoading ? 'cursor-not-allowed opacity-50' : ''}
+                `}
               >
                 <X size={16} />
               </button>

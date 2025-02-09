@@ -21,7 +21,7 @@ import { useUserStore } from '@/stores/user.store';
 import { useProductSlugQuery } from '@/hooks/products.hooks';
 import useToast from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
-import { uploadImages } from '@/app/admin/inventory/new/_actions';
+import { deleteProductImages, uploadProductImages } from '@/actions/media.actions';
 import { fadeInUp } from '@/constants/animations';
 import { cn } from '@/lib/utils';
 
@@ -34,7 +34,7 @@ export default function UpdateProductContainer({ slug }: Readonly<UpdateProductC
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [formDataToSubmit, setFormDataToSubmit] = useState<UpdateProductType | null>(null);
-  const [tempFiles, setTempFiles] = useState<File[]>([]);
+  const [isPendingImageOp, setIsPendingImageOp] = useState(false);
   const { userId } = useUserStore();
   const router = useRouter();
   
@@ -126,50 +126,77 @@ export default function UpdateProductContainer({ slug }: Readonly<UpdateProductC
     }
   });
 
-  const handleImageChange = (urls: string[], files?: File[]) => {
-    methods.setValue('imageUrl', urls);
-    if (files) {
-      setTempFiles(files);
+  const handleImageChange = async (urls: string[], files?: File[]) => {
+    try {
+      setIsPendingImageOp(true);
+      if (files && files.length > 0) {
+        // Handle new image uploads using server action
+        const imageResult = await uploadProductImages(userId as string, files);
+        if (!imageResult.success || !imageResult.data) {
+          throw new Error(imageResult.message || 'Failed to upload images');
+        }
+        
+        // Update URLs in DB
+        const updateResult = await updateProduct(userId as string, product?.id as string, {
+          ...methods.getValues(),
+          imageUrl: [...(product?.imageUrl || []), ...imageResult.data]
+        });
+
+        if (!updateResult.success || !updateResult.data) {
+          throw new Error(updateResult.message || 'Failed to update product');
+        }
+
+        methods.setValue('imageUrl', updateResult.data.imageUrl || []);
+      } else {
+        // Handle image removal using server action
+        const previousUrls = product?.imageUrl || [];
+        const removedUrls = previousUrls.filter(url => !urls.includes(url));
+
+        if (removedUrls.length > 0) {
+          // Delete from R2 and update DB in parallel
+          await Promise.all([
+            deleteProductImages(userId as string, removedUrls),
+            updateProduct(userId as string, product?.id as string, {
+              ...methods.getValues(),
+              imageUrl: urls
+            })
+          ]);
+        }
+
+        methods.setValue('imageUrl', urls);
+      }
+
+      useToast({
+        type: "success",
+        message: "Images updated successfully",
+        title: "Success"
+      });
+    } catch (error) {
+      useToast({
+        type: "error",
+        message: error instanceof Error ? error.message : "Failed to update images",
+        title: "Error"
+      });
+      // Revert to previous state on error
+      methods.setValue('imageUrl', product?.imageUrl || []);
+    } finally {
+      setIsPendingImageOp(false);
     }
   };
 
   const handleSubmit = (formData: UpdateProductType) => {
-    setFormDataToSubmit({ ...formData, _tempFiles: tempFiles });
+    // Remove image handling from main update since it's handled separately
+    setFormDataToSubmit({ 
+      ...formData,
+      imageUrl: product?.imageUrl || [] // Ensure imageUrl is always an array
+    });
     setIsSaveDialogOpen(true);
   };
 
   const confirmSave = async () => {
     if (!formDataToSubmit) return;
-
-    try {
-      let finalData = { ...formDataToSubmit };
-      
-      if (tempFiles.length > 0) {
-        const formData = new FormData();
-        tempFiles.forEach(file => {
-          formData.append('files', file);
-        });
-        
-        const imageResult = await uploadImages(userId as string, formData);
-        if (!imageResult.success) {
-          throw new Error(imageResult.message);
-        }
-        
-        finalData = {
-          ...finalData,
-          imageUrl: [...(formDataToSubmit.imageUrl || []), ...(imageResult.data || [])]
-        };
-      }
-
-      mutate(finalData);
-      setIsSaveDialogOpen(false);
-    } catch (error) {
-      useToast({
-        type: "error",
-        message: error instanceof Error ? error.message : "Failed to update product",
-        title: "Error"
-      });
-    }
+    mutate(formDataToSubmit);
+    setIsSaveDialogOpen(false);
   };
 
   if (isLoading) {
@@ -184,8 +211,8 @@ export default function UpdateProductContainer({ slug }: Readonly<UpdateProductC
     <motion.div {...fadeInUp}>
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit(handleSubmit)} className="mx-auto max-w-4xl space-y-6">
-          <BasicInformationSection />
-          <ImagesSection onChange={handleImageChange} />
+          <BasicInformationSection description={product.description as string}/>
+          <ImagesSection onChange={handleImageChange} isLoading={isPendingImageOp} />
           <InventorySection />
           <VariantsSection />
           <div className="flex justify-end space-x-4">

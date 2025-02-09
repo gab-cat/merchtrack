@@ -2,7 +2,6 @@
 
 import { useFormContext } from 'react-hook-form';
 import { FaImage } from "react-icons/fa";
-import { useCallback } from 'react';
 import ImageUpload from '../image-upload';
 import { FormSection } from "@/components/ui/form-section";
 import { FormDescription } from "@/components/ui/form-description";
@@ -10,15 +9,24 @@ import { FormError } from "@/components/ui/form-error";
 import type { CreateProductType } from '@/schema/products.schema';
 
 type ImagesSectionProps = Readonly<{
-  onChange?: (urls: string[], files?: File[]) => void;
+  onChange?: (urls: string[], files?: File[]) => void | Promise<void>;
+  isLoading?: boolean;
+  isRealtime?: boolean;
 }>;
 
-export function ImagesSection({ onChange }: ImagesSectionProps) {
+export function ImagesSection({ onChange, isLoading, isRealtime = false }: ImagesSectionProps) {
   const { watch, setValue, formState: { errors } } = useFormContext<CreateProductType>();
-  const handleChange = useCallback((urls: string[], files?: File[]) => {
+  
+  const handleChange = async (urls: string[], files?: File[]) => {
     setValue('imageUrl', urls);
-    onChange?.(urls, files);
-  }, [setValue, onChange]);
+    if (onChange) {
+      if (isRealtime) {
+        await onChange(urls, files);
+      } else {
+        onChange(urls, files);
+      }
+    }
+  };
 
   return (
     <FormSection title="Images" icon={<FaImage className='text-primary'/>}>
@@ -28,6 +36,8 @@ export function ImagesSection({ onChange }: ImagesSectionProps) {
       <ImageUpload
         value={watch('imageUrl')}
         onChange={handleChange}
+        isLoading={isLoading}
+        isRealtime={isRealtime}
       />
       {errors.imageUrl && (
         <FormError>{errors.imageUrl.message}</FormError>

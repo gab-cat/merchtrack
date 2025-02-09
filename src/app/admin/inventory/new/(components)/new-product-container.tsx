@@ -34,7 +34,7 @@ export default function NewProductContainer() {
       inventoryType: 'PREORDER',
       imageUrl: [],
       tags: [],
-      categoryId: '', // Add this line
+      categoryId: '',
     }
   });
 
@@ -69,9 +69,16 @@ export default function NewProductContainer() {
   };
 
   const handleImageChange = (urls: string[], files?: File[]) => {
-    methods.setValue('imageUrl', urls);
+    methods.setValue('imageUrl', urls, { shouldDirty: true });
     if (files) {
-      setTempFiles(files);
+      setTempFiles(prevFiles => [...prevFiles, ...files]);
+    } else {
+      // If no new files, it means we're removing images
+      // Find which URLs were removed and remove corresponding files
+      const removedUrls = methods.getValues('imageUrl').filter(url => !urls.includes(url));
+      setTempFiles(prevFiles => 
+        prevFiles.filter((_, index) => !removedUrls.includes(methods.getValues('imageUrl')[index]))
+      );
     }
   };
 
@@ -105,7 +112,7 @@ export default function NewProductContainer() {
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(handleSubmit)} className="mx-auto max-w-4xl space-y-6">
         <BasicInformationSection />
-        <ImagesSection onChange={handleImageChange} />
+        <ImagesSection onChange={handleImageChange} isRealtime={false} />
         <InventorySection />
         <VariantsSection />
         
