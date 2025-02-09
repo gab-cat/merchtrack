@@ -34,7 +34,7 @@ export function CreateCategoryModal() {
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (formData: CreateNewCategoryType) => createCategory({
-      userId: userId!,
+      userId: userId as string,
       name: formData.name
     }),
     onSuccess: () => {
