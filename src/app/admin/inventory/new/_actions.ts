@@ -9,6 +9,7 @@ import { verifyPermission } from "@/utils/permissions";
 import type { ExtendedProduct } from "@/types/extended";
 import { uploadToR2 } from "@/lib/s3";
 
+
 /**
  * Creates a new product with the specified details and updates the cache.
  *

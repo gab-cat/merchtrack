@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 if (!process.env.CLOUDFLARE_R2_BUCKET_NAME) {
   throw new Error('R2 bucket name is not configured');
@@ -48,3 +48,6 @@ export async function uploadToR2(file: File, key: string) {
     throw new Error('Failed to upload file');
   }
 }
+
+export default s3Client;
+

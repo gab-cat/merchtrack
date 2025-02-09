@@ -9,6 +9,7 @@ import PageAnimation from '@/components/public/page-animation';
 import PageTitle from '@/components/private/page-title';
 import { Button } from '@/components/ui/button';
 import ProductsGrid from '@/app/admin/inventory/(components)/products-grid';
+import { CreateCategoryModal } from '@/app/admin/inventory/(components)/create-category-modal';
 
 export const metadata = {
   title: 'Inventory | Admin Dashboard',
@@ -33,16 +34,20 @@ const Page: FC = async () => {
   })) {
     return <PermissionDenied />;
   }
+  
   return (
     <PageAnimation>
       <div className="p-6">
         <div className="mb-6 flex items-center justify-between">
           <PageTitle title='Manage Inventory' />
-          <Button asChild>
-            <Link href="/admin/inventory/new" className='text-white'>
-              <Plus className="mr-2 size-4" /> Add Product
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <CreateCategoryModal />
+            <Button asChild>
+              <Link href="/admin/inventory/new" className='text-white'>
+                <Plus className="mr-2 size-4" /> Add Product
+              </Link>
+            </Button>
+          </div>
         </div>
         <ProductsGrid />
       </div>

@@ -1,4 +1,4 @@
-// eslint-disable-next-line import/named
+ 
 import { Html, Head, Preview, Body, Container, Section, Heading, Text, Link, Button, Img } from '@react-email/components';
 import { emailStyles, emailContent } from '@/constants/';
 
