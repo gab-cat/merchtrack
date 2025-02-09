@@ -8,6 +8,17 @@ type SitemapItem = {
     priority?: number;
     images?: string[];
 };
+
+const STATIC_ROUTES = [
+  { path: '', priority: 1 },
+  { path: '/about', priority: 0.8 },
+  { path: '/contact', priority: 0.8 },
+  { path: '/faqs', priority: 0.8 },
+  { path: '/terms-of-service', priority: 0.8 },
+  { path: '/privacy-policy', priority: 0.8 },
+  { path: '/sign-in', priority: 0.8 },
+  { path: '/sign-up', priority: 0.8 },
+];
  
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://merchtrack.tech';
@@ -21,6 +32,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       slug: true,
       imageUrl: true,
       updatedAt: true 
+    },
+    orderBy: {
+      updatedAt: 'desc'
     }
   });
       
@@ -37,36 +51,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   });
       
   // Static routes
-  const staticRoutes: SitemapItem[] = [
-    '',
-    '/about',
-    '/contact',
-    '/faqs',
-    '/terms-of-service',
-    '/privacy-policy',
-    '/sign-in',
-    '/sign-up',
-  ].map(route => ({
+  const staticRoutes: SitemapItem[] = STATIC_ROUTES.map(route => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date().toISOString(),
-    changeFrequency: 'monthly',
-    priority: route === '' ? 1 : 0.8
+    changeFrequency: 'weekly',
+    priority: route.path === '/' ? 1 : 0.8
   }));
       
   // Dynamic product routes
   const productRoutes: SitemapItem[] = products.map(product => ({
     url: `${baseUrl}/products/${product.slug}`,
     lastModified: product.updatedAt.toISOString(),
-    changeFrequency: 'weekly',
+    changeFrequency: 'daily',
     priority: 0.6,
     images: product.imageUrl
   }));
       
   // Dynamic category routes
   const categoryRoutes: SitemapItem[] = categories.map(category => ({
-    url: `${baseUrl}/categories/${category.name}`,
+    url: `${baseUrl}/categories/${encodeURIComponent(category.name)}`,
     lastModified: category.updatedAt.toISOString(),
-    changeFrequency: 'weekly',
+    changeFrequency: 'daily',
     priority: 0.7
   }));
     

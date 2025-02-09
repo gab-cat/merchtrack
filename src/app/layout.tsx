@@ -35,6 +35,13 @@ export const metadata: Metadata = {
   },
   creator: SEO.author,
   manifest: SEO.manifest,
+  themeColor: SEO.theme_color,
+  category: 'e-commerce',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1.0,
+    maximumScale: 1.0,
+  }
 };
 
 export default function RootLayout({

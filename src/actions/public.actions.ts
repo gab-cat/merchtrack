@@ -4,7 +4,6 @@ import prisma from "@/lib/db";
 import { invalidateCache } from "@/lib/redis";
 import { formContactSchema, FormContactType } from "@/schema/public-contact";
 
-
 /**
  * Submits a contact form message after validation and database storage.
  *
@@ -53,7 +52,23 @@ export async function submitMessage(formData: FormContactType): Promise<ActionsR
       },
     });
 
-    await invalidateCache([`messages:customer:${sanitizedData.email}`, 'messages:all']);
+
+    const pageSizes = [10, 20, 50, 100];
+    const totalMessages = await prisma.message.count();
+    const cacheKeys = [
+      `messages:customer:${sanitizedData.email}`,
+      'messages:all',
+      'messages:total'
+    ];
+
+    for (const limit of pageSizes) {
+      const totalPages = Math.ceil(totalMessages / limit);
+      for (let page = 1; page <= totalPages + 1; page++) {
+        cacheKeys.push(`messages:${page}:${limit}`);
+      }
+    }
+
+    await invalidateCache(cacheKeys);
 
     return {
       success: true, 
@@ -67,6 +82,7 @@ export async function submitMessage(formData: FormContactType): Promise<ActionsR
         general: "An error occurred while submitting the message.",
         error
       }, 
-      data: sanitizedData };
+      data: sanitizedData 
+    };
   }
 }

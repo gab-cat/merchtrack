@@ -10,6 +10,7 @@ export const SEO = {
   site_name: "MerchTrack",
   viewport: "width=device-width, initial-scale=1.0",
   charset: "UTF-8",
+  theme_color: '#2C59DB'
 };
 
 export const SEO_OG = {
