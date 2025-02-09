@@ -26,6 +26,15 @@ const poppinsSans = Poppins({
 export const metadata: Metadata = {
   title: SEO.title,
   description: SEO.description,
+  applicationName: SEO.site_name,
+  keywords: SEO.keywords,
+  publisher: SEO.author,
+  authors: {
+    name: SEO.author,
+    url: SEO.author_url,
+  },
+  creator: SEO.author,
+  manifest: SEO.manifest,
 };
 
 export default function RootLayout({
