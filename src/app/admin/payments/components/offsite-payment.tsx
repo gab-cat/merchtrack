@@ -10,8 +10,7 @@ interface OffsitePaymentProps {
 
 export function OffsitePayment({ payments, onConfirm, onReject }: Readonly<OffsitePaymentProps>) {
   return (
-    <div className="rounded-lg border bg-white p-6">
-      <h2 className="mb-4 text-lg font-semibold">OFFSITE PAYMENT</h2>
+    <>
       {payments.length > 0 ? (
         <ScrollArea className="h-[300px] pr-4">
           <div className="space-y-2">
@@ -49,6 +48,6 @@ export function OffsitePayment({ payments, onConfirm, onReject }: Readonly<Offsi
           No offsite confirmation requests at the moment
         </div>
       )}
-    </div>
+    </>
   );
 }
