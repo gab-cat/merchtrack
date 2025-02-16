@@ -46,6 +46,7 @@ export default function MessageReplyForm({ messageId, onSuccess }: Readonly<Mess
         messageId,
         reply,
       }),
+    mutationKey: ['messages:all'],
     onSuccess: () => {
       form.reset();
       useToast({

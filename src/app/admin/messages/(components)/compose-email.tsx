@@ -81,6 +81,7 @@ export default function ComposeEmail() {
       userId: userId as string,
       formData: data
     }),
+    mutationKey: ["messages:all"],
     onSuccess: () => {
       form.reset();
       setOpen(false);

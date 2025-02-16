@@ -10,27 +10,28 @@ import ReplyEmailTemplate from "@/app/admin/messages/(components)/email-template
 import { formContactSchema } from "@/schema/public-contact";
 import { CreateMessageType } from "@/schema/messages";
 
-
-
 type ReplyToMessageParams = {
   userId: string
   messageId: string
   reply: string
 }
 
-
 export const replyToMessage = async ({userId, messageId, reply}: ReplyToMessageParams): Promise<ActionsReturnType<Message>> => {
-  const isAuthorized = await verifyPermission({
-    userId: userId,
+  const authResult = await verifyPermission({
+    userId,
     permissions: {
       dashboard: { canRead: true },
+    },
+    logDetails: {
+      actionDescription: "Reply to message",
+      userText: `Attempted to reply to message ID: ${messageId}`
     }
   });
 
-  if (!isAuthorized) {
+  if (!authResult) {
     return {
       success: false,
-      message: "You are not authorized to reply to messages."
+      message: "Unauthorized access."
     };
   }
 
@@ -58,6 +59,18 @@ export const replyToMessage = async ({userId, messageId, reply}: ReplyToMessageP
     }
   });
 
+  // Log successful reply
+  await prisma.log.create({
+    data: {
+      reason: "Message Reply Sent",
+      systemText: `Admin replied to message ID: ${messageId}`,
+      userText: `Reply sent to: ${messageToUpdate.email}`,
+      createdBy: {
+        connect: { id: userId }
+      }
+    }
+  });
+
   await invalidateCache(['messages:all', `messages:${messageId}`]);
   await sendEmail({
     to: messageToUpdate.email,
@@ -77,26 +90,27 @@ export const replyToMessage = async ({userId, messageId, reply}: ReplyToMessageP
   };
 };
 
-
-
-
 type CreateMessageParams = {
   userId: string
   formData: CreateMessageType
 }
 
 export const createMessage = async (params: CreateMessageParams): Promise<ActionsReturnType<Message>> => {
-  const isAuthorized = await verifyPermission({
+  const authResult = await verifyPermission({
     userId: params.userId,
     permissions: {
       dashboard: { canRead: true },
+    },
+    logDetails: {
+      actionDescription: "Create new message",
+      userText: `Attempted to create new message to: ${params.formData.email}`
     }
   });
 
-  if (!isAuthorized) {
+  if (!authResult) {
     return {
       success: false,
-      message: "You are not authorized to reply to messages."
+      message: "Unauthorized access."
     };
   }
 
@@ -124,6 +138,18 @@ export const createMessage = async (params: CreateMessageParams): Promise<Action
     },
     include: {
       user: true
+    }
+  });
+
+  // Log successful message creation
+  await prisma.log.create({
+    data: {
+      reason: "New Message Created",
+      systemText: `Admin created new message to: ${createdMessage.email} \nwith subject: ${createdMessage.subject} \nand message: ${createdMessage.message}`,
+      userText: `Message sent to: ${createdMessage.email}`,
+      createdBy: {
+        connect: { id: params.userId }
+      }
     }
   });
 
