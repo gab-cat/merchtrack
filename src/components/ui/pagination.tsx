@@ -1,7 +1,5 @@
 import * as React from "react";
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
-
-import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { ButtonProps, buttonVariants } from "@/components/ui/button";
 
@@ -38,16 +36,19 @@ PaginationItem.displayName = "PaginationItem";
 type PaginationLinkProps = {
   isActive?: boolean;
   href: string;
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 } & Pick<ButtonProps, "size"> &
-  Omit<React.ComponentProps<"a">, "href">
+  Omit<React.ComponentProps<"a">, "href">;
 
 const PaginationLink = ({
   className,
   isActive,
   size = "icon",
+  onClick,
+  children,
   ...props
 }: PaginationLinkProps) => (
-  <Link
+  <a
     aria-current={isActive ? "page" : undefined}
     className={cn(
       buttonVariants({
@@ -56,8 +57,18 @@ const PaginationLink = ({
       }),
       className
     )}
+    onClick={onClick}
+    onKeyDown={(e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        onClick?.(e as unknown as React.MouseEvent<HTMLAnchorElement>);
+      }
+    }}
+    role="button"
+    tabIndex={0}
     {...props}
-  />
+  >
+    {children}
+  </a>
 );
 PaginationLink.displayName = "PaginationLink";
 
