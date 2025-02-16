@@ -18,6 +18,10 @@ type VerifyPermissionParams = {
   permissions: {
     [key in ActionCode]?: RequiredPermissions;
   };
+  logDetails?: {
+    actionDescription?: string;
+    userText?: string;
+  }
 }
 
 type UserPermission = {
@@ -33,10 +37,7 @@ type UserPermission = {
 
 /**
  * Verifies if a user has the required permissions for the specified action codes.
- * @param {VerifyPermissionParams} params - The parameters for verifying permissions.
- * @param {string} params.userId - The ID of the user whose permissions are being verified.
- * @param {Object} params.permissions - An object where each key is an action code and the value is the required permissions.
- * @returns {Promise<boolean>} - A promise that resolves to a boolean indicating if the user has the required permissions.
+ * Automatically logs unauthorized access attempts.
  */
 export const verifyPermission = async (params: VerifyPermissionParams): Promise<boolean> => {
   const actionCodes = Object.keys(params.permissions) as ActionCode[];
@@ -73,7 +74,7 @@ export const verifyPermission = async (params: VerifyPermissionParams): Promise<
     userPermissions.map(up => [up.permissionId, up])
   );
 
-  return actionCodes.every(actionCode => {
+  const hasPermission = actionCodes.every(actionCode => {
     const userPermission = userPermissionMap[actionCode];
     if (!userPermission) return false;
 
@@ -82,27 +83,26 @@ export const verifyPermission = async (params: VerifyPermissionParams): Promise<
       userPermission[key as keyof typeof userPermission] === value
     );
   });
+
+  if (!hasPermission) {
+    // Log unauthorized access attempt
+    await prisma.log.create({
+      data: {
+        reason: "Unauthorized Access Attempt",
+        systemText: `User attempted to access restricted functionality: ${
+          params.logDetails?.actionDescription || Object.keys(params.permissions).join(', ')
+        }`,
+        userText: params.logDetails?.userText || "No additional details provided",
+        createdBy: {
+          connect: { id: params.userId }
+        }
+      }
+    });
+
+    return false;
+  }
+
+  return true;
 };
-
-// Usage example:
-
-// // Verify if a user has read permissions for 'logs' and write permissions for 'dashboard'
-// const userId = 'user-123';
-// const permissions = {
-//   logs: { canRead: true },
-//   dashboard: { canCreate: true }
-// };
-
-// verifyPermission({ userId, permissions })
-//   .then(permission => {
-//     if (permission) {
-//       console.log('User has the required permissions.');
-//     } else {
-//       console.log('User does not have the required permissions.');
-//     }
-//   })
-//   .catch(error => {
-//     console.error('Error verifying permissions:', error);
-//   });
 
 
