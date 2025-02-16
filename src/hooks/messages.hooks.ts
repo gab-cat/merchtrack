@@ -11,16 +11,25 @@ import { useResourceQuery } from "@/hooks/index.hooks";
 /**
  * Fetches all messages for the current user.
  *
- * This custom hook retrieves the user ID from the user store and uses React Query to fetch messages.
- * The query is enabled only if a valid user ID is available. It accepts optional query parameters via the
- * `params` argument, which are passed to the `getMessages` function to customize the data fetching behavior.
- * On failure, a toast notification is displayed and an empty paginated response is returned.
+ * This hook leverages React Query by calling `useResourceQuery` with the resource identifier "messages:all"
+ * and the provided query parameters to fetch messages asynchronously. It uses the `getMessages` fetcher to
+ * retrieve messages while applying filtering, sorting, and pagination options.
  *
- * @param params - Optional query parameters to filter or modify the messages request. Defaults to an empty object.
+ * The accepted query parameters include:
+ * - `where`: Conditions to filter the messages.
+ * - `include`: Additional related data to load with the messages.
+ * - `orderBy`: Sorting criteria for the messages.
+ * - `take`: The number of messages to retrieve (defaults to 12).
+ * - `skip`: The number of messages to skip.
+ * - `page`: The page number for pagination.
+ *
+ * On failure, the hook triggers a toast notification and returns an empty paginated response.
+ *
+ * @param params - An optional object containing query parameters to filter, sort, and paginate the messages.
  * @returns A React Query result containing the messages data on success, or an empty paginated response on failure.
  *
  * @example
- * const { data, error, isLoading } = useMessagesQuery({ limit: 20 });
+ * const { data, error, isLoading } = useMessagesQuery({ where: { isRead: false }, take: 20 });
  */
 export function useMessagesQuery(params: QueryParams = {}) {
   const { where, include, orderBy, take = 12, skip, page } = params;

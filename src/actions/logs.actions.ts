@@ -20,6 +20,23 @@ type CreateLogParams = {
   userText: string;  // User-friendly message
 }
 
+/**
+ * Creates a new log entry in the database and clears the associated cache.
+ *
+ * This asynchronous function attempts to create a log record using Prisma with the provided details.
+ * Upon successful creation, it invalidates cached log information to ensure that future queries retrieve
+ * the most up-to-date data. If an error occurs during either the log creation or cache invalidation, the error
+ * is logged to the console, and a failure response is returned.
+ *
+ * @param userId - The ID of the user for whom the log is being created.
+ * @param createdById - The ID of the user or process that is creating the log entry.
+ * @param reason - A description of the reason for the log entry.
+ * @param systemText - A message intended for system logs.
+ * @param userText - A message intended for user display.
+ *
+ * @returns An object with a `success` flag. On success, the object contains the created log entry in `data`;
+ * otherwise, it includes an error message in `message`.
+ */
 export async function createLog({
   userId,
   createdById,
@@ -57,6 +74,37 @@ export async function createLog({
   }
 }
 
+/**
+ * Retrieves paginated log entries for a user after verifying read permissions.
+ *
+ * This asynchronous function first checks if the requesting user has the required permission to view logs.
+ * If the user is unauthorized, it returns a failure response with an appropriate message.
+ * If authorized, the function attempts to retrieve log data and the total count from a Redis cache using the provided paging parameters.
+ * If the data is not cached, it performs a database transaction with Prisma to fetch the logs and count them.
+ * After fetching, the logs and total count are cached for future requests.
+ * The fetched logs are then processed to remove any fields specified in the `params.limitFields` array.
+ * The function returns a paginated response that includes the log data and metadata such as total count, current page,
+ * last page, and indicators for the presence of adjacent pages.
+ *
+ * @param userId - The unique identifier of the user making the request.
+ * @param params - Optional query parameters for log retrieval, including:
+ *   - page: The current page number.
+ *   - take: The number of logs to return per page.
+ *   - where: Filtering criteria for querying logs.
+ *   - orderBy: Sorting options for the logs.
+ *   - skip: The number of records to skip.
+ *   - limitFields: An array of field names to remove from each log entry.
+ * @returns A promise that resolves to an object indicating success and containing:
+ *   - data: When successful, an object with:
+ *       - data: An array of processed log entries.
+ *       - metadata: Pagination details including:
+ *           - total: Total number of log entries.
+ *           - page: The current page number.
+ *           - lastPage: The last available page number.
+ *           - hasNextPage: A boolean indicating if there is a subsequent page.
+ *           - hasPrevPage: A boolean indicating if there is a preceding page.
+ *   - message: An error message if the operation fails.
+ */
 export async function getLogs({userId, params = {} }: GetLogsParams): Promise<ActionsReturnType<PaginatedResponse<ExtendedLogs[]>>> {
   const isAuthorized = await verifyPermission({
     userId,

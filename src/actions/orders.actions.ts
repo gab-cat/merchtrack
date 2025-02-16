@@ -11,21 +11,24 @@ import { GetObjectByTParams } from "@/types/extended";
 /**
  * Retrieves a paginated list of orders with optional field filtering.
  *
- * This asynchronous function fetches order data for the specified user after
- * verifying that the user has permission to access the dashboard. It calculates
- * pagination parameters using the provided query parameters, attempts to fetch
- * cached orders and the total order count, and if the data is not cached, queries
- * the database while including associated payment and customer details.
+ * This asynchronous function fetches order data for the specified user after verifying
+ * that the user has permission to access the dashboard. It calculates pagination parameters
+ * (skip, take, page) based on the provided query parameters and attempts to obtain cached
+ * orders and the total order count. In case of a cache miss, it performs a database transaction
+ * to fetch orders along with associated payment, customer, and order item details (including
+ * nested variant and product information).
  *
- * Order data is processed with the `removeFields` utility to filter out specified
- * fields based on `params.limitFields`. The response includes the order data along
- * with pagination metadata such as total count, current page, last page, and
- * indicators for next and previous pages.
+ * The retrieved orders are processed with the `removeFields` utility to filter out specified
+ * fields based on `params.limitFields`. The function returns a paginated response containing the
+ * list of processed orders and metadata including total number of orders, current page, last page,
+ * and flags indicating the availability of next and previous pages.
+ *
+ * If the user lacks the necessary permissions, a failure response with an appropriate message is returned.
  *
  * @param userId - The ID of the user requesting the orders.
- * @param params - Optional query parameters for pagination and field filtering.
- * @returns A Promise that resolves to an object indicating the success status,
- *          and on success, includes a paginated response containing the list of processed orders and metadata.
+ * @param params - Optional query parameters for pagination, filtering, and inclusion of related data.
+ * @returns A Promise that resolves to an object with a `success` property. On success, the object contains
+ *          a `data` field with the paginated list of orders and corresponding metadata.
  *
  * @example
  * ```typescript

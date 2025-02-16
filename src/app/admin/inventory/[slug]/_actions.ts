@@ -9,24 +9,27 @@ import type { ExtendedProduct } from "@/types/extended";
 import { createLog } from "@/actions/logs.actions";
 
 /**
- * Updates a product in the database after verifying user permissions and cleaning the provided data.
+ * Updates a product in the database.
  *
- * This asynchronous function first checks if the user (identified by `userId`) has the necessary read permissions. 
- * It cleans the update data by removing extraneous fields (such as `_tempFiles`, `postedBy`, `category`, and `reviews`), 
- * and reformats the `variants` array to delete existing variants and create new ones with prices converted to Prisma decimals.
- * The function then verifies that the product (identified by `productId`) exists before updating it. If the product is 
- * not found or if an error occurs during the update process, an object with a failure message is returned. Upon a successful 
- * update, the function caches the updated product data and invalidates related cache entries.
+ * This asynchronous function first verifies that the user (identified by `userId`) has the required read permissions.
+ * It then checks whether the product specified by `productId` exists. If the user is not authorized or the product is not found,
+ * a log entry is created using the logging utility and an error response is returned.
+ *
+ * The provided `data` payload is cleaned by removing extraneous fields (such as `_tempFiles`, `postedBy`, `category`, and `reviews`)
+ * and processing the `variants` array. The variants are reformatted by deleting existing variants and creating new ones, with
+ * prices converted to Prisma decimals. After updating the product, the function caches the updated data and invalidates
+ * related cache entries (covering product details and paginated product lists) to ensure consistency.
  *
  * @param userId - The ID of the user making the update request.
  * @param productId - The unique identifier of the product to update.
  * @param data - The update payload containing the product details, including an array of variant objects.
- * @returns A promise that resolves to an object indicating the outcome of the operation. On success, the object contains the updated product data; on failure, it includes an error message.
+ * @returns A promise that resolves to an object indicating the outcome of the operation. On success, the object contains the updated
+ * product data; on failure, it includes an appropriate error message.
  *
  * @example
  * const result = await updateProduct('user123', 'prod456', {
  *   name: 'Updated Product Name',
- *   description: 'Updated description',
+ *   description: 'Updated product description',
  *   variants: [
  *     { variantName: 'Standard', price: 19.99, rolePricing: { regular: 19.99 } }
  *   ],
@@ -159,19 +162,21 @@ export async function updateProduct(
 
 
 /**
- * Deletes a product by its ID after verifying user permissions.
+ * Deletes a product by its ID after verifying that the user has the necessary permissions.
  *
- * This function first verifies if the user has the required permissions to delete a product.
- * It then checks whether the product with the provided ID exists. If the product is not found,
- * a failure response is returned with an appropriate error message. If the product exists,
- * it is deleted from the database along with its related entities such as category, postedBy,
- * reviews, and variants. After deletion, the function invalidates multiple cache entries related
- * to the products, ensuring cache freshness. In the event of any errors during the process,
- * a failure response containing the error message is returned.
+ * This asynchronous function performs several operations:
+ * 1. Verifies that the user (identified by `userId`) has the required dashboard read permissions.
+ * 2. Checks whether the product with the given `productId` exists in the database.
+ * 3. If permissions are insufficient or the product does not exist, logs the attempt and returns a failure response.
+ * 4. If the product exists, deletes it along with its related entities (category, postedBy, reviews, and variants).
+ * 5. Recalculates the total pages of products, invalidates cache entries related to product listings,
+ *    single product details, and total count, ensuring data consistency.
+ * 6. Logs the successful deletion or any errors encountered during the process.
  *
- * @param userId - The ID of the user attempting the deletion.
- * @param productId - The ID of the product to delete.
- * @returns A promise that resolves to an object indicating whether the deletion was successful.
+ * @param userId - The ID of the user attempting the deletion; must have valid dashboard read access.
+ * @param productId - The unique identifier of the product to be deleted.
+ * @returns A promise that resolves to an object containing a `success` flag indicating the outcome.
+ *          In case of failure, the object may also include a `message` property describing the error.
  */
 export async function deleteProductById(
   userId: string,

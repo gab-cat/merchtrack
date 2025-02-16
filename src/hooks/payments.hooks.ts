@@ -7,12 +7,20 @@ import { useResourceByIdQuery, useResourceQuery } from "@/hooks/index.hooks";
 /**
  * Retrieves a list of payments for the current user.
  *
- * This hook uses the user ID from the user store to fetch payments via the getPayments API.
- * The query is enabled only if a valid user ID is available. If the API response indicates a failure,
- * an error toast is displayed and an EMPTY_PAGINATED_RESPONSE is returned. On success, the payment data is returned.
+ * This hook fetches payment data using the current user's ID via the `getPayments` API. It only runs if a valid user ID is present. If the API call fails, an error toast is displayed and an `EMPTY_PAGINATED_RESPONSE` is returned; on success, the retrieved payment data is provided.
  *
- * @param params - Optional query parameters to filter the payment results (defaults to an empty object).
- * @returns The query object from useQuery containing the fetched payment data or an empty paginated response on error.
+ * The query parameters are merged with a default filter that excludes deleted payments (`where.isDeleted` set to `false`). Additional filtering and sorting options can be specified using the `include` and `orderBy` properties.
+ *
+ * @param params - Optional query parameters to filter the payments. By default, it applies a filter to exclude deleted payments.
+ * @returns The query object returned from `useResourceQuery`, containing the payment data or an empty paginated response in case of an error.
+ *
+ * @example
+ * // Retrieve non-deleted, completed payments along with related user and transaction details, sorted by creation date in descending order
+ * usePaymentsQuery({
+ *   where: { status: 'completed' },
+ *   include: ['user', 'transaction'],
+ *   orderBy: { createdAt: 'desc' }
+ * });
  */
 export function usePaymentsQuery(params: QueryParams = {}) {
   return useResourceQuery({
