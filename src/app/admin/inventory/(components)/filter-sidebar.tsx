@@ -4,6 +4,7 @@ import { FaPesoSign } from "react-icons/fa6";
 import { MdCategory } from "react-icons/md";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useCategoriesQuery } from "@/hooks/categories.hooks";
 import type { ExtendedProduct } from "@/types/extended";
 
 interface FilterSidebarProps {
@@ -27,8 +28,8 @@ interface FilterSidebarProps {
 
 export function FilterSidebar({ products, filters, setFilters, className = "" }: Readonly<FilterSidebarProps>) {
   const [priceRange, setPriceRange] = useState(filters.priceRange);
-
-  const allCategories = Array.from(new Set(products.map((p) => p.category?.name).filter(Boolean)));
+  const { data: categories = [] } = useCategoriesQuery();
+  
   const allTags = Array.from(new Set(products.flatMap((p) => p.tags)));
 
   const handleInventoryTypeChange = (type: "PREORDER" | "STOCK") => {
@@ -40,12 +41,12 @@ export function FilterSidebar({ products, filters, setFilters, className = "" }:
     }));
   };
 
-  const handleCategoryChange = (category: string) => {
+  const handleCategoryChange = (categoryId: string) => {
     setFilters((prev) => ({
       ...prev,
-      categories: prev.categories.includes(category)
-        ? prev.categories.filter((c) => c !== category)
-        : [...prev.categories, category],
+      categories: prev.categories.includes(categoryId)
+        ? prev.categories.filter((c) => c !== categoryId)
+        : [...prev.categories, categoryId],
     }));
   };
 
@@ -92,15 +93,15 @@ export function FilterSidebar({ products, filters, setFilters, className = "" }:
       <div>
         <h3 className="mb-2 flex items-center font-bold text-primary"><MdCategory className="mr-2"/>Category</h3>
         <div className="space-y-2">
-          {allCategories.map((category) => (
-            <div key={category} className="flex items-center">
+          {categories.map((category) => (
+            <div key={category.id} className="flex items-center">
               <Checkbox
-                id={`category-${category}`}
-                checked={filters.categories.includes(category)}
-                onCheckedChange={() => handleCategoryChange(category)}
+                id={`category-${category.id}`}
+                checked={filters.categories.includes(category.id)}
+                onCheckedChange={() => handleCategoryChange(category.id)}
               />
-              <label htmlFor={`category-${category}`} className="ml-2 text-sm">
-                {category}
+              <label htmlFor={`category-${category.id}`} className="ml-2 text-sm">
+                {category.name}
               </label>
             </div>
           ))}

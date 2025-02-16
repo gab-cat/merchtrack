@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Search, SlidersHorizontal } from 'lucide-react';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
+import { useDebounce } from 'use-debounce';
 import { ProductCard } from "./product-card";
 import { FilterSidebar } from "./filter-sidebar";
 import { useProductsQuery } from "@/hooks/products.hooks";
@@ -12,57 +13,64 @@ import { PaginationNav } from "@/components/pagination-nav";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { ExtendedProduct } from "@/types/extended";
 import type { PaginatedResponse } from "@/types/common";
+import type { ExtendedProduct } from "@/types/extended";
+
+const ITEMS_PER_PAGE = 12;
 
 export default function ProductsGrid() {
-  const [params, setParams] = useState({
-    page: 1,
-    limit: 12,
-    inventoryType: "all",
-    limitFields: ["createdAt", "updatedAt"],
-  });
-
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch] = useDebounce(searchTerm, 1000);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [inventoryType, setInventoryType] = useState("all");
   const [filters, setFilters] = useState({
     inventoryType: [] as ("PREORDER" | "STOCK")[],
     categories: [] as string[],
-    priceRange: [0, 10000] as [number, number],
+    priceRange: [0, 5000] as [number, number],
     tags: [] as string[]
   });
-
-  const [parent] = useAutoAnimate();
-  const [localSearch, setLocalSearch] = useState("");
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const [parent] = useAutoAnimate();
 
-  const { data, isLoading } = useProductsQuery(params);
+  const queryParams = useMemo(() => ({
+    take: ITEMS_PER_PAGE,
+    skip: (currentPage - 1) * ITEMS_PER_PAGE,
+    page: currentPage,
+    where: {
+      isDeleted: false,
+      ...(debouncedSearch ? {
+        OR: [
+          { title: { contains: debouncedSearch, mode: 'insensitive' } },
+          { description: { contains: debouncedSearch, mode: 'insensitive' } },
+          { tags: { has: debouncedSearch } }
+        ]
+      } : {}),
+      ...(inventoryType !== "all" ? { inventoryType } : {}),
+      ...(filters.categories.length > 0 ? { categoryId: { in: filters.categories } } : {}),
+      ...(filters.tags.length > 0 ? { tags: { hasSome: filters.tags } } : {})
+    },
+    orderBy: {
+      createdAt: 'desc' as const
+    }
+  }), [currentPage, debouncedSearch, inventoryType, filters.categories, filters.tags]);
+
+  const { data, isLoading } = useProductsQuery(queryParams);
   const products = (data as PaginatedResponse<ExtendedProduct[]>)?.data ?? [];
   const metadata = (data as PaginatedResponse<ExtendedProduct[]>)?.metadata ?? {};
-  const { total = 0, page = 1, lastPage = 1 } = metadata;
 
-  const filteredProducts = useMemo(() => {
-    return products.filter(product => {
-      const searchLower = localSearch.toLowerCase();
-      return (
-        (filters.inventoryType.length === 0 || filters.inventoryType.includes(product.inventoryType)) &&
-        (filters.categories.length === 0 || (product.category && filters.categories.includes(product.category.name))) &&
-        (filters.tags.length === 0 || filters.tags.some(tag => product.tags.includes(tag))) &&
-        (product.title.toLowerCase().includes(searchLower) || product.description?.toLowerCase().includes(searchLower))
-      );
-    });
-  }, [products, filters, localSearch]);
-
-  const handlePageChange = useCallback((newPage: number) => {
-    setParams(prev => ({ ...prev, page: newPage }));
-  }, []);
-
-  const handleFilterChange = (value: string) => {
-    setParams(prev => ({ ...prev, page: 1, inventoryType: value }));
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
   };
 
-  useEffect(() => {
-    // Reset to first page when filters change
-    setParams(prev => ({ ...prev, page: 1 }));
-  }, [filters]); //Corrected dependency
+  const handleFilterChange = (value: string) => {
+    setInventoryType(value);
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
 
   return (
     <div className="space-y-6">
@@ -72,13 +80,13 @@ export default function ProductsGrid() {
           <Input
             placeholder="Search products..."
             className="pl-8"
-            value={localSearch}
-            onChange={(e) => setLocalSearch(e.target.value)}
+            value={searchTerm}
+            onChange={handleSearchChange}
           />
         </div>
         <div className="flex gap-2">
           <Select
-            value={params.inventoryType}
+            value={inventoryType}
             onValueChange={handleFilterChange}
           >
             <SelectTrigger className="w-[180px]">
@@ -123,11 +131,11 @@ export default function ProductsGrid() {
           ) : (
             <>
               <div ref={parent} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {filteredProducts.map((product: ExtendedProduct) => (
+                {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
-              {filteredProducts.length === 0 && (
+              {products.length === 0 && (
                 <div className="py-10 text-center">
                   <h3 className="text-lg font-semibold">No products found</h3>
                   <p className="text-muted-foreground mt-2">Try adjusting your search or filter to find what you&apos;re looking for.</p>
@@ -136,13 +144,15 @@ export default function ProductsGrid() {
             </>
           )}
 
-          <PaginationNav
-            currentPage={page}
-            totalPages={lastPage}
-            totalItems={total}
-            onPageChange={handlePageChange}
-            className="mt-8"
-          />
+          {metadata && metadata.total > 0 && (
+            <PaginationNav
+              currentPage={currentPage}
+              totalPages={metadata.lastPage}
+              totalItems={metadata.total}
+              onPageChange={handlePageChange}
+              className="mt-8"
+            />
+          )}
         </div>
       </div>
     </div>

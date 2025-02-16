@@ -6,6 +6,7 @@ import { invalidateCache } from "@/lib/redis";
 import { type CreateProductType as UpdateProductType } from "@/schema/products.schema";
 import { verifyPermission } from "@/utils/permissions";
 import type { ExtendedProduct } from "@/types/extended";
+import { createLog } from "@/actions/logs.actions";
 
 /**
  * Updates a product in the database after verifying user permissions and cleaning the provided data.
@@ -49,6 +50,13 @@ export async function updateProduct(
       dashboard: { canRead: true },
     }
   })) {
+    await createLog({
+      userId,
+      createdById: userId,
+      reason: "Product Update Failed - Unauthorized",
+      systemText: `Unauthorized attempt to update product ${productId}`,
+      userText: "You are not authorized to update products."
+    });
     return {
       success: false,
       message: "You are not authorized to update products."
@@ -62,6 +70,13 @@ export async function updateProduct(
     });
 
     if (!existingProduct) {
+      await createLog({
+        userId,
+        createdById: userId,
+        reason: "Product Update Failed - Not Found",
+        systemText: `Attempted to update non-existent product ${productId}`,
+        userText: "Product not found"
+      });
       return {
         success: false,
         message: "Product not found"
@@ -114,11 +129,27 @@ export async function updateProduct(
     ];
     await invalidateCache(keysToInvalidate);
 
+    await createLog({
+      userId,
+      createdById: userId,
+      reason: "Product Updated Successfully",
+      // @ts-expect-error - data is not defined in ExtendedProduct
+      systemText: `Updated product "${product.title}" (ID: ${product.id}). Changes: ${Object.keys(data).filter(key => data[key] !== existingProduct[key]).join(', ')}`,
+      userText: `Product "${product.title}" has been updated successfully.`
+    });
+
     return {
       success: true,
       data: cacheData
     };
   } catch (error) {
+    await createLog({
+      userId,
+      createdById: userId,
+      reason: "Product Update Error",
+      systemText: `Error updating product ${productId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      userText: "An error occurred while updating the product."
+    });
     return {
       success: false,
       message: error instanceof Error ? error.message : 'Failed to update product'
@@ -152,6 +183,13 @@ export async function deleteProductById(
       dashboard: { canRead: true },
     }
   })) {
+    await createLog({
+      userId,
+      createdById: userId,
+      reason: "Product Deletion Failed - Unauthorized",
+      systemText: `Unauthorized attempt to delete product ${productId}`,
+      userText: "You are not authorized to delete products."
+    });
     return {
       success: false,
       message: "You are not authorized to delete products."
@@ -165,6 +203,13 @@ export async function deleteProductById(
     });
 
     if (!existingProduct) {
+      await createLog({
+        userId,
+        createdById: userId,
+        reason: "Product Deletion Failed - Not Found",
+        systemText: `Attempted to delete non-existent product ${productId}`,
+        userText: "Product not found"
+      });
       return {
         success: false,
         message: "Product not found"
@@ -195,10 +240,25 @@ export async function deleteProductById(
     ];
     await invalidateCache(keysToInvalidate);
 
+    await createLog({
+      userId,
+      createdById: userId,
+      reason: "Product Deleted Successfully",
+      systemText: `Deleted product "${product.title}" (ID: ${product.id})`,
+      userText: `Product "${product.title}" has been deleted successfully.`
+    });
+
     return {
       success: true,
     };
   } catch (error) {
+    await createLog({
+      userId,
+      createdById: userId,
+      reason: "Product Deletion Error",
+      systemText: `Error deleting product ${productId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      userText: "An error occurred while deleting the product."
+    });
     return {
       success: false,
       message: error instanceof Error ? error.message : 'Failed to delete product'

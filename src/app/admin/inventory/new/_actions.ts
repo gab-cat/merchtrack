@@ -8,7 +8,7 @@ import { createProductSchema, type CreateProductType } from "@/schema/products.s
 import { verifyPermission } from "@/utils/permissions";
 import type { ExtendedProduct } from "@/types/extended";
 import { uploadToR2 } from "@/lib/s3";
-
+import { createLog } from "@/actions/logs.actions";
 
 /**
  * Creates a new product with the specified details and updates the cache.
@@ -36,21 +36,35 @@ export async function createProduct(
       dashboard: { canRead: true },
     }
   })) {
+    await createLog({
+      userId,
+      createdById: userId,
+      reason: "Product Creation Failed - Unauthorized",
+      systemText: `Unauthorized attempt to create product "${data.title}"`,
+      userText: "You are not authorized to create products."
+    });
     return {
       success: false,
       message: "You are not authorized to create products."
     };
   }
 
-  const safeData = await createProductSchema.safeParseAsync(data);
-  if (!safeData.success) {
-    return {
-      success: false,
-      message: safeData.error.errors[0].message
-    };
-  }
-
   try {
+    const safeData = await createProductSchema.safeParseAsync(data);
+    if (!safeData.success) {
+      await createLog({
+        userId,
+        createdById: userId,
+        reason: "Product Creation Failed - Invalid Data",
+        systemText: `Failed to create product "${data.title}": ${safeData.error.errors[0].message}`,
+        userText: safeData.error.errors[0].message
+      });
+      return {
+        success: false,
+        message: safeData.error.errors[0].message
+      };
+    }
+
     // Generate unique slug from title
     const slug = await generateUniqueSlug(
       data.title,
@@ -63,7 +77,6 @@ export async function createProduct(
     );
 
     delete data._tempFiles;
-
     const product = await prisma.product.create({
       data: {
         ...data,
@@ -89,19 +102,34 @@ export async function createProduct(
       setCached(`product:${product.id}`, product),
       setCached(`product:${product.slug}`, product),
       setCached('products:total', null),
-      ...Array.from({ length: 10 }, (_, i) => 
+      ...Array.from({ length: 10 }, (_, i) =>
         setCached(`products:${i + 1}:*`, null)
       )
     ]);
+
+    await createLog({
+      userId,
+      createdById: userId,
+      reason: "Product Created Successfully",
+      systemText: `Created new product "${product.title}" (ID: ${product.id}) with ${product.variants.length} variants`,
+      userText: `Product "${product.title}" has been created successfully.`
+    });
 
     return {
       success: true,
       data: JSON.parse(JSON.stringify(product))
     };
   } catch (error) {
+    await createLog({
+      userId,
+      createdById: userId,
+      reason: "Product Creation Error",
+      systemText: `Error creating product "${data.title}": ${error instanceof Error ? error.message : 'Unknown error'}`,
+      userText: "An error occurred while creating the product."
+    });
     return {
       success: false,
-      message: (error as Error).message
+      message: error instanceof Error ? error.message : 'Failed to create product'
     };
   }
 }

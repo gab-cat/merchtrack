@@ -89,6 +89,7 @@ export default function UpdateProductContainer({ slug }: Readonly<UpdateProductC
       }
       return response.data;
     },
+    mutationKey: ['products:all'],
     onSuccess: () => {
       router.refresh();
       useToast({
