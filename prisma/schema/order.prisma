@@ -43,7 +43,7 @@ model OrderItem {
   updatedAt    DateTime   @updatedAt
 
   // Relations
-  order   Order   @relation("OrderItemToOrder", fields: [orderId], references: [id])
+  order   Order   @relation("OrderItemToOrder", fields: [orderId], references: [id], onDelete: Cascade)
   variant ProductVariant @relation("OrderItemToVariant", fields: [variantId], references: [id])
 
   @@index([orderId], name: "idx_orderitem_orderId")
