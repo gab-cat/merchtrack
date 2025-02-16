@@ -54,15 +54,16 @@ export async function getProducts(
   }
 
   const { skip, take, page } = calculatePagination(params);
+  const cacheKey = `products:${page}:${take}:${JSON.stringify(params.where)}:${JSON.stringify(params.orderBy)}`;
 
   try {
-    let products: Product[] | null = await getCached(`products:${page}:${take}`);
+    let products: Product[] | null = await getCached(cacheKey);
     let total: number | null = await getCached('products:total');
 
     if (!products || !total) {
       [products, total] = await prisma.$transaction([
         prisma.product.findMany({
-          where: { isDeleted: false },
+          where: params.where,
           include: {
             category: {
               select: { name: true }
@@ -99,14 +100,15 @@ export async function getProducts(
               }
             }
           },
+          orderBy: params.orderBy,
           skip,
           take
         }),
-        prisma.product.count({ where: { isDeleted: false } })
+        prisma.product.count({ where: params.where })
       ]);
       
       Promise.all([
-        await setCached(`products:${page}:*`, products),
+        await setCached(cacheKey, products),
         await setCached('products:total', total)
       ]);
     }

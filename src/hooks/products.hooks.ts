@@ -1,7 +1,8 @@
+'use client';
+
 import { getProductById, getProductBySlug, getProducts } from "@/actions/products.actions";
 import { QueryParams } from "@/types/common";
 import { useResourceByIdQuery, useResourceQuery } from "@/hooks/index.hooks";
-
 
 /**
  * Fetches a paginated list of products for the current user.
@@ -17,10 +18,22 @@ import { useResourceByIdQuery, useResourceQuery } from "@/hooks/index.hooks";
  * const { data, error, status } = useProductsQuery({ page: 1, limit: 10 });
  */
 export function useProductsQuery(params: QueryParams = {}) {
+  const { where, include, orderBy, take = 12, skip, page } = params;
+  
   return useResourceQuery({
-    resource: "products", 
-    fetcher: getProducts, 
-    params
+    resource: "products",
+    fetcher: (userId: string, params: QueryParams) => getProducts(userId, params),
+    params: {
+      where: {
+        isDeleted: false,
+        ...where
+      },
+      include,
+      orderBy,
+      take,
+      skip,
+      page
+    }
   });
 }
 

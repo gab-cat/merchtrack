@@ -91,12 +91,16 @@ export const getMessages = async (
   const { skip, take, page } = calculatePagination(params);
 
   try {
-    let messages: Message[] | null = await getCached(`messages:${page}:${take}`);
-    let total = await getCached('messages:total');
+    const cacheKey = `messages:${page}:${take}:${userId}:${JSON.stringify(params.where)}`;
+    let messages: Message[] | null = await getCached(cacheKey);
+    let total = await getCached(`messages:total:${userId}:${JSON.stringify(params.where)}`);
 
     if (!messages || !total) {
       [messages, total] = await prisma.$transaction([
         prisma.message.findMany({
+          where: {
+            ...params.where,
+          },
           skip,
           take,
           include: {
@@ -111,13 +115,17 @@ export const getMessages = async (
               }
             },
           },
-          orderBy: { createdAt: 'desc' }
+          orderBy: params.orderBy ?? { createdAt: 'desc' }
         }),
-        prisma.message.count()
+        prisma.message.count({ 
+          where: {
+            ...params.where,
+          } 
+        })
       ]);
 
-      await setCached(`messages:${page}:${take}`, messages);
-      await setCached('messages:total', total);
+      await setCached(cacheKey, messages);
+      await setCached(`messages:total:${userId}:${JSON.stringify(params.where)}`, total);
     }
 
     const lastPage = Math.ceil(total as number / take);

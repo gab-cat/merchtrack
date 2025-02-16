@@ -1,5 +1,5 @@
 'use client';
-;
+
 import { getOrderById, getOrders } from "@/actions/orders.actions";
 import { QueryParams } from "@/types/common";
 import { useResourceByIdQuery, useResourceQuery } from "@/hooks/index.hooks";
@@ -12,14 +12,25 @@ import { useResourceByIdQuery, useResourceQuery } from "@/hooks/index.hooks";
  * If the API call fails, an error toast is displayed and an `EMPTY_PAGINATED_RESPONSE` is returned. Otherwise,
  * it returns the fetched orders data.
  *
- * @param params - Optional query parameters for fetching orders; defaults to an empty object.
+ * @param options - Optional query parameters for fetching orders.
+ * @param options.where - Optional where clause for filtering orders.
+ * @param options.include - Optional include clause for related data.
+ * @param options.orderBy - Optional orderBy clause for sorting.
+ * @param options.params - Additional query parameters.
  * @returns The react-query result object containing the orders data, error status, and query state.
  */
-export function useOrdersQuery(params: QueryParams = {}) {
+export function useOrdersQuery(params:QueryParams = {}) {
   return useResourceQuery({
     resource: "orders",
     fetcher: getOrders,
-    params
+    params: {
+      where: {
+        isDeleted: false,
+        ...params.where
+      },
+      include: params.include,
+      orderBy: params.orderBy,
+    }
   });
 }
 
@@ -32,12 +43,17 @@ export function useOrdersQuery(params: QueryParams = {}) {
  * The query is enabled only when a valid `orderId` is provided.
  *
  * @param orderId - The unique identifier of the order, or null if no order is selected.
+ * @param options - Optional query parameters for fetching the order.
+ * @param options.include - Optional include clause for related data.
+ * @param options.params - Additional query parameters.
  * @returns The react-query result object containing the order data on success, or null otherwise.
  */
-export function useOrderQuery(orderId: string | null) {
+export function useOrderQuery(orderId: string, limitFields: string[] = []) {
   return useResourceByIdQuery({
     resource: "orders",
-    fetcher: (userId: string, id: string) => getOrderById({ userId, orderId: id }),
-    identifier: orderId as string
+    fetcher: (userId: string, id: string) => 
+      getOrderById({ userId, orderId: id, limitFields }),
+    identifier: orderId as string,
+
   });
 }

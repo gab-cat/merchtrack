@@ -18,7 +18,14 @@ export function usePaymentsQuery(params: QueryParams = {}) {
   return useResourceQuery({
     resource: "payments",
     fetcher: getPayments,
-    params
+    params: {
+      where: {
+        isDeleted: false,
+        ...params.where
+      },
+      include: params.include,
+      orderBy: params.orderBy,
+    }
   });
 }
 

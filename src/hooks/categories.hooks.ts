@@ -30,6 +30,7 @@ export function useCategoriesQuery () {
         return [];
       }
       return response.success ? response.data : [];
-    }
+    },
+    staleTime: Infinity
   });
 }

@@ -23,10 +23,18 @@ import { useResourceQuery } from "@/hooks/index.hooks";
  * const { data, error, isLoading } = useMessagesQuery({ limit: 20 });
  */
 export function useMessagesQuery(params: QueryParams = {}) {
+  const { where, include, orderBy, take = 12, skip, page } = params;
   return useResourceQuery({
-    resource: "messages", 
+    resource: "messages:all", 
     fetcher: getMessages, 
-    params
+    params: {
+      where,
+      include,
+      orderBy,
+      take,
+      skip,
+      page
+    }
   });
 }
 

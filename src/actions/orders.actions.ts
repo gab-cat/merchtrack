@@ -58,26 +58,42 @@ export async function getOrders(
 
   const { skip, take, page } = calculatePagination(params);
 
-  let orders: ExtendedOrder[] | null = await getCached(`orders:${page}:${take}`);
-  let total = await getCached('orders:total');
+  // Create cache key that includes the where conditions
+  const cacheKey = `orders:${page}:${take}:${JSON.stringify(params)}`;
+  let orders: ExtendedOrder[] | null = await getCached(cacheKey);
+  let total = await getCached(`orders:total:${JSON.stringify(params)}`);
 
-  if (!orders) {
+  if (!orders || !total) {
     [orders, total] = await prisma.$transaction([
       prisma.order.findMany({
-        where: { isDeleted: false },
-        include: { payments: true, customer: true },
+        where: params.where,
+        include: {
+          ...params.include,
+          customer: true,
+          payments: true,
+          orderItems: {
+            include: {
+              variant: {
+                include: {
+                  product: true
+                }
+              }
+            }
+          }
+        },
+        orderBy: params.orderBy,
         skip,
         take,
       }),
-      prisma.order.count({ where: { isDeleted: false } })
+      prisma.order.count()
     ]);
 
-    await setCached(`orders:${page}:${take}`, orders);
-    await setCached('orders:total', total);
+    await setCached(cacheKey, orders);
+    await setCached(`orders:total:${JSON.stringify(params)}`, total);
   }
 
   const lastPage = Math.ceil(total as number / take);
-  const processedOrders = orders.map(order => 
+  const processedOrders = orders?.map(order => 
     removeFields(order, params.limitFields)
   );
 
@@ -95,7 +111,6 @@ export async function getOrders(
     }
   };
 }
-
 
 /**
  * Retrieves an order by its ID after verifying user permissions and applying field filtering.
@@ -155,6 +170,15 @@ export async function getOrderById({userId, orderId, limitFields}: GetObjectByTP
       include: {
         payments: true,
         customer: true,
+        orderItems: {
+          include: {
+            variant: {
+              include: {
+                product: true
+              }
+            }
+          }
+        }
       }
     });
 

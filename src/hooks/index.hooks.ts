@@ -12,9 +12,12 @@ interface ResourceQueryParams<T> {
 
 export function useResourceQuery<T>({ resource, fetcher, params = {} }: ResourceQueryParams<T>) {
   const { userId } = useUserStore();
+  
   return useQuery({
     enabled: !!userId,
     queryKey: [`${resource}:all`, params],
+    staleTime: resource === "categories" ? Infinity : 0,
+    gcTime: resource === "categories" ? 24 * 60 * 60 * 1000 : 5 * 60 * 1000,
     queryFn: async () => {
       const response = await fetcher(userId as string, params);
       if (!response.success) {
