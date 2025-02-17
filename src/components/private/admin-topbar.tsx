@@ -2,6 +2,7 @@
 
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
+import Link from 'next/link';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -50,10 +51,12 @@ export function AdminTopbar() {
             aria-label="Search orders"
             onChange={handleSearchDebounced}
           />
-          <Button className="text-white">
-            <Plus className="mr-2 size-4" />
+          <Link href='/admin/orders/new'>
+            <Button className="text-white">
+              <Plus className="mr-2 size-4" />
             Add Order
-          </Button>
+            </Button>
+          </Link>
         </div>
       </div>
     </div>

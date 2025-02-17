@@ -3,7 +3,14 @@ export type PaginationParams = {
   limit?: number;
 };
 
-export type QueryParams = PaginationParams & {
+export interface SearchParams {
+  search?: string;
+  filters?: {
+    [key: string]: string | number | boolean;
+  };
+}
+
+export type QueryParams = PaginationParams & SearchParams & {
   limitFields?: string[];
 };
 
