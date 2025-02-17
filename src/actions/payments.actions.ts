@@ -327,6 +327,49 @@ export async function getPaymentsByOrderId({ userId, orderId, limitFields }: Get
   };
 }
 
+/**
+ * Processes a payment for a specified order.
+ *
+ * This function verifies the user's permission to process payments, retrieves the associated order from the database,
+ * and validates that the new payment amount does not exceed the order total. If the order is valid and the amount is acceptable,
+ * a new payment record is created and associated with the order. The function also updates the order's payment status
+ * (and order status if the order becomes fully paid), logs the operation, and invalidates related caches.
+ *
+ * @param userId - The ID of the user processing the payment.
+ * @param orderId - The ID of the order to which the payment is applied.
+ * @param amount - The payment amount.
+ * @param paymentMethod - The method used for the payment.
+ * @param paymentSite - The site or point from which the payment is processed.
+ * @param paymentStatus - The status of the payment (e.g., pending, completed).
+ * @param referenceNo - (Optional) A reference number for the payment.
+ * @param memo - (Optional) A memo or note for the payment.
+ * @param transactionId - (Optional) A unique transaction identifier.
+ * @param paymentProvider - (Optional) The provider handling the payment.
+ * @param limitFields - (Optional) An array of field names to remove from the returned payment object.
+ *
+ * @returns A Promise that resolves to an object containing:
+ *  - success: A boolean indicating whether the payment processing was successful.
+ *  - data: The processed Payment object with sensitive fields removed if `limitFields` is provided (on success).
+ *  - message: An error message if the operation fails.
+ *  - errors: (Optional) Additional error details.
+ *
+ * @example
+ * const result = await processPayment({
+ *   userId: "user123",
+ *   orderId: "order456",
+ *   amount: 1000,
+ *   paymentMethod: PaymentMethod.CREDIT_CARD,
+ *   paymentSite: PaymentSite.ONLINE,
+ *   paymentStatus: PaymentStatus.COMPLETED,
+ *   transactionId: "txn789"
+ * });
+ *
+ * if (result.success) {
+ *   console.log("Payment processed:", result.data);
+ * } else {
+ *   console.error("Payment failed:", result.message);
+ * }
+ */
 export async function processPayment({ 
   userId, 
   orderId,
@@ -478,6 +521,25 @@ export async function processPayment({
   }
 }
 
+/**
+ * Refunds a payment and updates the corresponding order's payment status.
+ *
+ * This asynchronous function processes a payment refund by first verifying the user's permissions. It retrieves
+ * the payment record from the database and ensures that the refund amount does not exceed the original payment amount.
+ * If the conditions are met, a refund record is created with a negative amount to signify the refund. The function also
+ * aggregates the remaining payments for the order to determine and update the order's payment status (e.g., marking the order
+ * as fully refunded if no payment remains, or as a downpayment otherwise). Throughout the process, the function logs
+ * relevant events (such as unauthorized access, non-existent payments, and errors) and invalidates caches to ensure data integrity.
+ *
+ * @param userId - The ID of the user initiating the refund.
+ * @param paymentId - The unique identifier of the payment to refund.
+ * @param amount - The refund amount, which must not exceed the original payment amount.
+ * @param reason - The reason provided for initiating the refund.
+ *
+ * @returns A Promise that resolves to an object indicating the result of the refund operation. On success, the object contains
+ * a `data` property with the newly created refund payment record. On failure, it includes a `message` explaining the error and
+ * may also include an `errors` object with additional error details.
+ */
 export async function refundPayment(
   userId: string,
   paymentId: string,
@@ -615,6 +677,28 @@ export async function refundPayment(
   }
 }
 
+/**
+ * Validates a payment for an order by verifying permissions, checking for duplicate transactions, creating a payment record, and updating the order status accordingly.
+ *
+ * This function performs the following steps:
+ * - Verifies that the user has the necessary dashboard read permissions.
+ * - Retrieves the order by its identifier and ensures it exists.
+ * - Checks for an existing verified payment with the same transaction ID to avoid duplicate processing.
+ * - Creates a validated payment record in the database.
+ * - Updates the order's payment status to either PAID (if fully paid) or DOWNPAYMENT based on the total amount paid.
+ * - Logs the outcome for auditing and invalidates related cache entries.
+ *
+ * @param userId - The ID of the user performing the payment validation.
+ * @param orderId - The identifier of the order for which the payment is being validated.
+ * @param amount - The payment amount to be validated.
+ * @param transactionDetails - An object containing payment transaction details:
+ *   - transactionId: The unique transaction identifier.
+ *   - referenceNo: The payment reference number.
+ *   - paymentMethod: The method used for the payment.
+ *   - paymentSite: The site where the payment was made.
+ *
+ * @returns A promise that resolves to an ActionsReturnType object. On success, it contains a flag indicating true; on failure, it includes a relevant error message.
+ */
 export async function validatePayment(
   userId: string,
   orderId: string,
@@ -759,6 +843,29 @@ export async function validatePayment(
   }
 }
 
+/**
+ * Rejects a payment for a specified order by updating the payment's status to "DECLINED" and logging the rejection.
+ *
+ * This function first verifies that the user has the necessary permissions to reject payments. It then attempts
+ * to find the associated order. If the order exists, it updates an existing payment record or creates a new one
+ * with a "DECLINED" status and a memo containing the rejection reason. The function logs the rejection action,
+ * invalidates cache entries related to the order and its payments, and returns a success status. In case of a 
+ * permission failure, an order not found, or any other error, it logs the error and returns a failure status with
+ * an appropriate message.
+ *
+ * @param userId - ID of the user initiating the rejection.
+ * @param orderId - ID of the order associated with the payment.
+ * @param paymentId - ID of the payment to be rejected.
+ * @param rejectionReason - Explanation for why the payment is being rejected.
+ *
+ * @returns A promise resolving to an object indicating the success status and an optional error message.
+ *
+ * @example
+ * const result = await rejectPayment("user123", "order456", "payment789", "Payment method declined by bank");
+ * if (!result.success) {
+ *   console.error(result.message);
+ * }
+ */
 export async function rejectPayment(
   userId: string,
   orderId: string,

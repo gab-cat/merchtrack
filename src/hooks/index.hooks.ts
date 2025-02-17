@@ -10,6 +10,27 @@ interface ResourceQueryParams<T> {
   params?: QueryParams;
 }
 
+/**
+ * Fetches resource data using a custom query hook with caching and error handling.
+ *
+ * This custom hook retrieves the current user ID from the user store and uses `useQuery` from React Query
+ * to fetch data for the specified resource. The query is only enabled if a valid user ID is available.
+ *
+ * The hook configures caching parameters dynamically:
+ * - For the "categories" resource, the data is considered fresh indefinitely (staleTime = Infinity)
+ *   and garbage collected after 24 hours.
+ * - For other resources, the data becomes stale immediately (staleTime = 0) and is available for garbage
+ *   collection after 5 minutes.
+ *
+ * The provided fetcher function is called with the user ID and additional query parameters. If the fetcher
+ * returns a response indicating failure, an error toast is displayed and an empty paginated response is returned.
+ *
+ * @param params - An object containing:
+ *   - resource: The name of the resource to fetch.
+ *   - fetcher: A function that fetches the resource data.
+ *   - params: (Optional) Additional query parameters.
+ * @returns The result object from `useQuery`, which includes the resource data or a fallback response on error.
+ */
 export function useResourceQuery<T>({ resource, fetcher, params = {} }: ResourceQueryParams<T>) {
   const { userId } = useUserStore();
   

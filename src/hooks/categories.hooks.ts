@@ -5,16 +5,18 @@ import useToast from "@/hooks/use-toast";
 /**
  * Custom React hook for fetching category data.
  *
- * This hook leverages the `useQuery` hook from `@tanstack/react-query` to perform an asynchronous fetch of
- * category data via the `getCategories` API call. The query is uniquely identified by the key `['categories']`.
+ * This hook utilizes `useQuery` from `@tanstack/react-query` to asynchronously retrieve category data using the
+ * `getCategories` API call. The query is uniquely identified by the key `['categories:all']`.
  *
- * The asynchronous query function checks the response from `getCategories`. If the response indicates failure
- * (i.e., `response.success` is false), it displays an error toast using `useToast` with an appropriate error message
- * and title, and returns an empty array. If the response is successful, it returns the fetched category data.
+ * The query function checks the API response; if `response.success` is false, it triggers an error toast via `useToast`
+ * (displaying the error message with the title "Error fetching categories") and returns an empty array. If the response
+ * is successful, it returns the fetched category data.
+ *
+ * The `staleTime` is set to `Infinity`, ensuring that the fetched data remains fresh indefinitely without automatic refetching.
  *
  * @returns A query result object from `useQuery` containing:
- * - `data`: The fetched category data if the fetch is successful, or an empty array if not.
- * - Other properties and methods provided by `useQuery` for further query handling.
+ * - `data`: The fetched category data if successful, or an empty array upon failure.
+ * - Additional properties and methods from `useQuery` for managing and interacting with the query state.
  */
 export function useCategoriesQuery () {
   return useQuery({

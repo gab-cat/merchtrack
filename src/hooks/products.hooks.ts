@@ -5,17 +5,25 @@ import { QueryParams } from "@/types/common";
 import { useResourceByIdQuery, useResourceQuery } from "@/hooks/index.hooks";
 
 /**
- * Fetches a paginated list of products for the current user.
+ * Retrieves a paginated list of products for the authenticated user.
  *
- * This hook retrieves the current user's ID from the store and uses React Query to perform an asynchronous fetch
- * via the `getProducts` API call. The query is enabled only if a valid user ID exists. If the fetch fails, an error
- * toast notification is displayed and a predefined empty paginated response is returned.
+ * This hook uses React Query to fetch products via the `getProducts` API. It retrieves the current user’s
+ * ID from the store and triggers the API call only if a valid user ID exists. The hook supports optional
+ * query parameters for filtering, including a `where` clause that filters out deleted products by enforcing
+ * `isDeleted: false`, as well as pagination and sorting options.
  *
- * @param params - Optional query parameters for filtering or paginating the products. Defaults to an empty object.
- * @returns An object containing the query state including `data`, `error`, and `status` from React Query.
+ * @param params - Optional parameters for customizing the query. Supported properties include:
+ *                 - where: Additional filtering conditions.
+ *                 - include: Related data to include.
+ *                 - orderBy: Sorting criteria.
+ *                 - take: Number of items to fetch per page (defaults to 12).
+ *                 - skip: Number of items to skip for pagination.
+ *                 - page: Specific page number.
+ *                 Defaults to an empty object.
+ * @returns An object containing React Query state, including properties such as `data`, `error`, and `status`.
  *
  * @example
- * const { data, error, status } = useProductsQuery({ page: 1, limit: 10 });
+ * const { data, error, status } = useProductsQuery({ page: 1, take: 10, orderBy: { createdAt: "desc" } });
  */
 export function useProductsQuery(params: QueryParams = {}) {
   const { where, include, orderBy, take = 12, skip, page } = params;

@@ -12,24 +12,35 @@ import { calculatePagination, removeFields } from "@/utils/query.utils";
 /**
  * Retrieves a paginated list of products.
  *
- * This asynchronous function verifies that the provided user has permission to read products,
- * then calculates pagination details, and attempts to retrieve cached products and the total
- * product count. If the cache is empty, it fetches the products and count from the database
- * within a single transaction, caches the results, processes the products to remove restricted
- * fields based on the provided parameters, and finally returns a paginated response with metadata.
+ * This asynchronous function first verifies that the user identified by `userId` has the required
+ * permissions to read product data. It then calculates pagination parameters (such as skip, take,
+ * and the current page) and generates a dynamic cache key based on the page number, page size,
+ * filtering conditions (`params.where`), and sorting options (`params.orderBy`). The function attempts
+ * to retrieve the products and the total product count from the cache; if the cached data is unavailable,
+ * it executes a single transaction to fetch the data from the database and caches the results.
  *
- * @param userId - The unique identifier of the user. The user must have read permissions for products.
- * @param params - Optional query parameters for pagination (e.g., page, skip, take) and for limiting fields.
+ * After fetching, each product is processed by removing any fields specified in `params.limitFields`.
+ * On success, the function returns a promise that resolves to an object containing:
+ *  - `data`: An array of processed products.
+ *  - `metadata`: Pagination details including the total number of products, current page, last page,
+ *                and flags indicating whether there are previous or next pages.
+ * On failure, it returns an object with a `false` success flag and an error message.
  *
- * @returns A promise that resolves to an object indicating the operation's success. On success, it returns:
- *  - data: An array of processed products (ExtendedProduct) with fields removed as specified.
- *  - metadata: Pagination details including total number of products, current page, last page, and flags
- *              indicating if there are previous or next pages.
- *  On failure (e.g., if the user is unauthorized or an error occurs during data retrieval), it returns
- *  an object with a false success flag and an error message.
+ * @param userId - The unique identifier of the user. The user must have permissions to read products.
+ * @param params - Optional query parameters for pagination (e.g., page, skip, take), filtering (`where`),
+ *                 sorting (`orderBy`), and field restrictions (`limitFields`).
+ *
+ * @returns A promise that resolves to an object indicating the operation's success. If successful, the
+ *          object contains the processed products and pagination metadata; otherwise, it contains an error
+ *          message.
  *
  * @example
- * const response = await getProducts("user123", { page: 2, limitFields: ['sensitiveField'] });
+ * const response = await getProducts("user123", {
+ *   page: 2,
+ *   limitFields: ["sensitiveField"],
+ *   where: { isActive: true },
+ *   orderBy: { name: "asc" }
+ * });
  * if (response.success) {
  *   console.log("Products:", response.data.data);
  *   console.log("Metadata:", response.data.metadata);
