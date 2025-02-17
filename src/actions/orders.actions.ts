@@ -88,7 +88,7 @@ export async function getOrders(
         skip,
         take,
       }),
-      prisma.order.count()
+      prisma.order.count({ where: params.where })
     ]);
 
     await setCached(cacheKey, orders);
