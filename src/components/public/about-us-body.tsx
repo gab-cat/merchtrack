@@ -89,14 +89,14 @@ function AboutUsBody() {
                   <div key={index} className="group text-center">
                     <div className="mb-4 overflow-hidden rounded-xl transition-all duration-300 group-hover:ring-4 group-hover:ring-indigo-200">
                       <Image
-                        src={developer.img} // Dynamic image source
-                        alt={`${developer.first_name} ${developer.surname}'s Profile Picture`}
+                        src={developer.image} // Dynamic image source
+                        alt={`${developer.name}'s Profile Picture`}
                         height={300}
                         width={300}
                         className="aspect-square w-full object-cover transition-transform duration-300 group-hover:scale-110"
                       />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-800">{developer.first_name}<br/>{developer.surname}</h3>
+                    <h3 className="text-lg font-semibold text-gray-800">{developer.name}</h3>
                     <p className="text-sm text-gray-600">{developer.role}</p>
                   </div>
                 ))}

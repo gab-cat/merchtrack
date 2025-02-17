@@ -58,13 +58,13 @@ const Footer = () => {
           <div>
             <h3 className="mb-4 text-lg font-semibold">Newsletter</h3>
             <p className="mb-4 text-sm">Stay updated with our latest offers and products.</p>
-            <form className="flex w-full gap-2">
+            <form className="flex w-full">
               <Input
                 type="email"
                 placeholder="Enter your email"
-                className="rounded-r-none"
+                className="rounded-r-none bg-neutral-2 text-neutral-7"
               />
-              <Button type="submit" className="rounded-l-none">
+              <Button type="button" className="rounded-l-none">
         Subscribe
               </Button>
             </form>

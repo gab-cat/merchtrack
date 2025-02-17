@@ -1,106 +1,110 @@
-'use client';
+"use client";
 
-import React, { useState, useCallback } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { SignInButton, SignUpButton, useUser } from '@clerk/nextjs';
-import { usePathname } from 'next/navigation';
-import HeaderLinks from './header-links';
-import { cn } from '@/lib/utils';
+import React, { useState, useEffect } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import Link from "next/link";
+import { SignInButton, SignUpButton } from "@clerk/nextjs";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-const HeaderLP = React.memo(() => {
-  const { isSignedIn } = useUser();
-  const pathname = usePathname();
-  const [showNav, setShowNav] = useState(false);
+const HeaderLP = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const { scrollY } = useScroll();
+  
+  const headerBackground = useTransform(
+    scrollY,
+    [0, 50],
+    ["rgba(255,255,255,0)", "rgba(255,255,255,0.9)"]
+  );
 
-  const handleNavPress = useCallback(() => {
-    setShowNav((prevShowNav) => !prevShowNav);
-  }, [pathname]);
+  const headerBorder = useTransform(
+    scrollY,
+    [0, 50],
+    ["rgba(255,255,255,0)", "rgba(0,0,0,0.1)"]
+  );
+
+  useEffect(() => {
+    const updateScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+
+    window.addEventListener("scroll", updateScroll);
+    return () => window.removeEventListener("scroll", updateScroll);
+  }, []);
 
   return (
-    <nav className='border-b'>
-      <div className="mx-auto flex max-w-screen-lg flex-row flex-wrap items-center justify-between p-2 py-4">
-        <Link href="/" className="group flex items-center space-x-3 rtl:space-x-reverse">
-          <div className="relative">
-            <Image
-              src="/img/merch-track-logo.png"
-              width={40}
-              height={40}
-              alt="MerchTrack Logo"
-              className="transition-transform duration-300 group-hover:scale-110 group-active:scale-95"
-            />
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400 to-primary-400 opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-75 group-active:opacity-100"></div>
-          </div>
-          <span className="relative self-center whitespace-nowrap text-2xl font-bold tracking-tighter text-neutral-7 transition-colors duration-300 group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-primary-400 group-hover:bg-clip-text group-hover:text-transparent group-active:from-blue-600 group-active:to-primary-600 dark:text-neutral-1">
-            MerchTrack<span className="absolute bottom-0 left-0 h-0.5 w-full origin-left scale-x-0 bg-gradient-to-r from-blue-400 to-primary-400 transition-transform duration-300 group-hover:scale-x-100 group-active:scale-x-100 group-active:from-blue-600 group-active:to-primary-600"></span>
-          </span>
-        </Link>
-        <div className="flex space-x-3 md:order-2">
-          <SignInButton 
-            mode={isSignedIn ? 'redirect' : 'modal'} 
-            forceRedirectUrl='/dashboard'
+    <motion.header
+      style={{
+        backgroundColor: headerBackground,
+        borderBottom: `1px solid`,
+        borderColor: headerBorder,
+        backdropFilter: "blur(8px)",
+      }}
+      className={cn(
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full",
+        isScrolled ? "py-4" : "py-6"
+      )}
+    >
+      <div className="mx-auto max-w-[800px] px-4 sm:px-6">
+        <nav className="flex items-center justify-between">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
           >
-            <button
-              type='button'
-              className="focus:ring-accent-7 hidden rounded-lg bg-neutral-1 px-6 py-2 text-sm font-medium text-primary outline outline-1 outline-primary transition-all duration-300 ease-in-out hover:scale-105 hover:bg-primary-400 hover:text-neutral-1 hover:shadow-lg focus:outline-none focus:ring-4 md:inline-block"
-            >
-              Sign In
-            </button>
-          </SignInButton>
-          <SignUpButton mode={ isSignedIn ? 'redirect' : 'modal'} forceRedirectUrl='/dashboard'>
-            <button
-              type="button"
-              className="hover:bg-accent-7 focus:ring-accent-7 hidden rounded-lg bg-primary px-6 py-2 text-sm font-medium text-neutral-1 transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-4 md:inline-block"
-            >
-                      Sign Up
-            </button>
-          </SignUpButton>
-          <button 
-            data-collapse-toggle="navbar-cta" 
-            onClick={handleNavPress} 
-            type="button" 
-            className="inline-flex size-10 items-center justify-center rounded-lg border p-2 text-sm text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 md:hidden" 
-            aria-controls="navbar-cta" 
-            aria-expanded={showNav} 
-            aria-label='Toggle navigation menu'
-          >
-            <span className="sr-only">Open main menu</span>
-            <svg className="size-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
-              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 1h15M1 7h15M1 13h15" />
-            </svg>
-          </button>
-        </div>
-        <div 
-          className={cn(
-            'mx-auto w-full items-center justify-between md:order-1 md:flex md:w-auto md:justify-center transition-all duration-300 ease-in-out',
-            showNav ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0',
-            'md:max-h-screen md:opacity-100' // Ensure visibility on large screens
-          )}
-          id="navbar-cta"
-        >
-          <ul className="mx-auto mt-4 flex w-full flex-col rounded-lg bg-gray-50 p-4 text-center font-medium md:mt-0 md:flex-row md:space-x-8 md:border-0 md:bg-transparent md:p-0">
-            <li className="md:hidden">
-              <SignInButton forceRedirectUrl='/admin/orders'>
-                <button type='button' className="focus:ring-accent-7 my-1 w-1/2 rounded-lg bg-neutral-1 px-4 py-2 text-center text-sm font-medium text-primary outline outline-1 outline-primary hover:opacity-70 focus:outline-none focus:ring-4">
-                        Sign In
-                </button>
-              </SignInButton>
-            </li>
-            <li className="md:hidden">
-              <SignUpButton forceRedirectUrl='/admin/orders'>
-                <button type='button' className="focus:ring-accent-7 w-1/2 rounded-lg bg-primary px-4 py-2 text-center text-sm font-medium text-neutral-1 hover:opacity-90 focus:outline-none focus:ring-4">
-                        Sign Up
-                </button>
-              </SignUpButton>
-            </li>
-            <hr className='m-2' />
-            <HeaderLinks pathname={pathname}/>
-          </ul>
-        </div>
-      </div>
-    </nav>
-  );
-});
+            <Link href="/" className="flex items-center gap-2">
+              <Image
+                src="/img/logo.svg"
+                alt="MerchTrack Logo"
+                width={32}
+                height={32}
+                className="size-8"
+              />
+              <span className="text-xl font-bold">MerchTrack</span>
+            </Link>
+          </motion.div>
 
-HeaderLP.displayName = 'HeaderLP';
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="flex items-center gap-4"
+          >
+            <div className="mr-4 hidden items-center gap-6 sm:flex">
+              {["Products", "Categories", "About", "Contact"].map((item) => (
+                <motion.div
+                  key={item}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ y: 0 }}
+                >
+                  <Link
+                    href={`/${item.toLowerCase()}`}
+                    className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"
+                  >
+                    {item}
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <SignInButton mode="modal">
+                <Button variant="outline" size="sm" className="font-semibold">
+                  Sign In
+                </Button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <Button size="sm" className="font-semibold text-neutral-2">
+                  Sign Up
+                </Button>
+              </SignUpButton>
+            </div>
+          </motion.div>
+        </nav>
+      </div>
+    </motion.header>
+  );
+};
+
 export default HeaderLP;

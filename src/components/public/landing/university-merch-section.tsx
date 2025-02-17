@@ -1,49 +1,101 @@
 "use client";
 
+import React from "react";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
-const merchItems = [
-  { name: "University Hoodie", price: 49.99, image: "/placeholder.svg?height=300&width=300&text=University+Hoodie" },
-  { name: "Campus Mug", price: 14.99, image: "/placeholder.svg?height=300&width=300&text=Campus+Mug" },
-  { name: "Branded Backpack", price: 59.99, image: "/placeholder.svg?height=300&width=300&text=Branded+Backpack" },
-  { name: "Alumni T-Shirt", price: 24.99, image: "/placeholder.svg?height=300&width=300&text=Alumni+T-Shirt" },
-];
+const UniversityMerchSection = () => {
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+      },
+    },
+  };
 
-export default function UniversityMerchSection() {
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut",
+      },
+    },
+  };
+
   return (
-    <section className="py-16">
-      <div className="container mx-auto px-4">
-        <h2 className="mb-8 text-center text-3xl font-bold">University Merchandise</h2>
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
-          {merchItems.map((item, index) => (
+    <motion.section
+      variants={containerVariants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-100px" }}
+      className="w-full py-24"
+    >
+      <div className="w-full">
+        <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-2">
+          <motion.div variants={itemVariants} className="relative aspect-square">
+            <div className="absolute inset-0 overflow-hidden rounded-2xl">
+              <Image
+                src="/img/merch-track-logo.png"
+                alt="University Merchandise"
+                fill
+                className="object-cover"
+              />
+            </div>
             <motion.div
-              key={item.name}
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 1, delay: 0.5 }}
+              className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-primary/20 to-transparent"
+            />
+          </motion.div>
+
+          <motion.div variants={itemVariants} className="flex flex-col gap-6">
+            <h2 className="text-3xl font-bold tracking-tight text-primary md:text-4xl">
+              Personalize Your
+              <br />
+              University Experience
+            </h2>
+            <p className="text-muted-foreground text-lg">
+              Express your school pride with our exclusive collection of customizable university merchandise. From classic hoodies to unique accessories, find everything you need to show your spirit.
+            </p>
+            <ul className="space-y-4">
+              {[
+                "Premium quality materials",
+                "Custom designs for every school",
+                "Fast and reliable shipping",
+                "Student-friendly prices"
+              ].map((feature, index) => (
+                <motion.li
+                  key={index}
+                  variants={itemVariants}
+                  className="flex items-center gap-3"
+                >
+                  <div className="size-2 rounded-full bg-primary" />
+                  {feature}
+                </motion.li>
+              ))}
+            </ul>
+            <motion.div
+              variants={itemVariants}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
-              <Card>
-                <CardContent className="p-4">
-                  <img
-                    src={item.image || "/placeholder.svg"}
-                    alt={item.name}
-                    className="mb-4 h-48 w-full rounded-md object-cover"
-                  />
-                  <h3 className="mb-2 text-lg font-semibold">{item.name}</h3>
-                  <Badge variant="secondary">${item.price.toFixed(2)}</Badge>
-                </CardContent>
-                <CardFooter>
-                  <Button className="w-full">Add to Cart</Button>
-                </CardFooter>
-              </Card>
+              <Button size="lg" className="text-neutral-2">
+                Explore Collection
+              </Button>
             </motion.div>
-          ))}
+          </motion.div>
         </div>
       </div>
-    </section>
+    </motion.section>
   );
-}
+};
+
+export default UniversityMerchSection;
 

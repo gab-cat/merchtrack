@@ -1,19 +1,79 @@
+import { type HTMLAttributes } from "react";
 import * as React from "react";
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
-
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { ButtonProps, buttonVariants } from "@/components/ui/button";
+import { Button , ButtonProps, buttonVariants } from "@/components/ui/button";
 
-const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
-  <nav
-    role="navigation"
-    aria-label="pagination"
-    className={cn("mx-auto flex w-full justify-center", className)}
-    {...props}
-  />
-);
-Pagination.displayName = "Pagination";
+
+
+type PaginationProps = {
+  page: number;
+  total: number;
+  onChange: (page: number) => void;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+  className?: string;
+} & Omit<HTMLAttributes<HTMLDivElement>, 'onChange'>;
+
+export function Pagination({
+  page,
+  total,
+  onChange,
+  hasNextPage,
+  hasPrevPage,
+  className = "",
+  ...props
+}: Readonly<PaginationProps>) {
+  const goToPage = (newPage: number) => {
+    if (newPage >= 1 && newPage <= total) {
+      onChange(newPage);
+    }
+  };
+
+  return (
+    <div 
+      className={cn("flex items-center justify-center gap-1", className)}
+      {...props}
+    >
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => goToPage(1)}
+        disabled={!hasPrevPage}
+      >
+        First
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => goToPage(page - 1)}
+        disabled={!hasPrevPage}
+      >
+        Previous
+      </Button>
+      <span className="mx-2 text-sm">
+        Page {page} of {total}
+      </span>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => goToPage(page + 1)}
+        disabled={!hasNextPage}
+      >
+        Next
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => goToPage(total)}
+        disabled={!hasNextPage}
+      >
+        Last
+      </Button>
+    </div>
+  );
+}
 
 const PaginationContent = React.forwardRef<
   HTMLUListElement,
@@ -38,7 +98,7 @@ PaginationItem.displayName = "PaginationItem";
 type PaginationLinkProps = {
   isActive?: boolean;
   href: string;
-} & Pick<ButtonProps, "size"> &
+} & Pick<ButtonProps, "size"> & 
   Omit<React.ComponentProps<"a">, "href">
 
 const PaginationLink = ({
@@ -55,7 +115,7 @@ const PaginationLink = ({
         size,
       }),
       className
-    )}
+    )} 
     {...props}
   />
 );
@@ -109,7 +169,6 @@ const PaginationEllipsis = ({
 PaginationEllipsis.displayName = "PaginationEllipsis";
 
 export {
-  Pagination,
   PaginationContent,
   PaginationLink,
   PaginationItem,

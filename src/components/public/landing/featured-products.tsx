@@ -1,50 +1,137 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import React, { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { ArrowRight, ShoppingCart } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 const products = [
-  { id: 1, name: "Smart Watch", price: 199.99, image: "/placeholder.svg?height=300&width=300" },
-  { id: 2, name: "Wireless Earbuds", price: 149.99, image: "/placeholder.svg?height=300&width=300" },
-  { id: 3, name: "Portable Charger", price: 49.99, image: "/placeholder.svg?height=300&width=300" },
+  {
+    id: 1,
+    name: "Classic University Hoodie",
+    price: 49.99,
+    image: "/img/placeholder.jpg",
+    badge: "Best Seller",
+  },
+  {
+    id: 2,
+    name: "Campus Backpack",
+    price: 39.99,
+    image: "/img/placeholder.jpg",
+    badge: "New Arrival",
+  },
+  {
+    id: 3,
+    name: "Vintage College Tee",
+    price: 24.99,
+    image: "/img/placeholder.jpg",
+    badge: "Popular",
+  },
+  {
+    id: 4,
+    name: "Student Essentials Bundle",
+    price: 79.99,
+    image: "/img/placeholder.jpg",
+    badge: "Limited Edition",
+  },
 ];
 
-export default function FeaturedProducts() {
+const FeaturedProducts = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"],
+  });
+
+  const y = useTransform(scrollYProgress, [0, 1], [100, -100]);
+
   return (
-    <section className="bg-gray-50 py-16">
-      <div className="container mx-auto px-4">
-        <h2 className="mb-8 text-center text-3xl font-bold">Featured Products</h2>
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+    <section ref={containerRef} className="w-full overflow-hidden py-24">
+      <motion.div
+        style={{ y }}
+        className="w-full"
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mb-12 text-center"
+        >
+          <h2 className="mb-4 text-3xl font-bold tracking-tight text-primary">
+            Featured Products
+          </h2>
+          <p className="text-muted-foreground mx-auto max-w-2xl">
+            Check out our most popular university merchandise
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
           {products.map((product, index) => (
             <motion.div
               key={product.id}
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
             >
-              <Card>
-                <CardHeader>
-                  <CardTitle>{product.name}</CardTitle>
-                  <Badge variant="secondary">${product.price}</Badge>
+              <Card className="group overflow-hidden">
+                <CardHeader className="p-0">
+                  <div className="relative aspect-square">
+                    <Image
+                      src={product.image}
+                      alt={product.name}
+                      fill
+                      className="object-cover transition-transform group-hover:scale-105"
+                    />
+                    <div className="absolute left-2 top-2">
+                      <Badge className="font-medium text-neutral-2">
+                        {product.badge}
+                      </Badge>
+                    </div>
+                  </div>
                 </CardHeader>
-                <CardContent>
-                  <img
-                    src={product.image || "/placeholder.svg"}
-                    alt={product.name}
-                    className="h-48 w-full rounded-md object-cover"
-                  />
+                <CardContent className="p-4">
+                  <h3 className="truncate font-semibold">{product.name}</h3>
+                  <p className="text-muted-foreground">
+                    ${product.price.toFixed(2)}
+                  </p>
                 </CardContent>
-                <CardFooter>
-                  <Button className="w-full">Add to Cart</Button>
+                <CardFooter className="p-4 pt-0">
+                  <Button 
+                    className="group w-full text-neutral-2"
+                  >
+                    Add to Cart
+                    <ShoppingCart className="ml-2 size-4 transition-transform group-hover:translate-x-1" />
+                  </Button>
                 </CardFooter>
               </Card>
             </motion.div>
           ))}
         </div>
-      </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mt-12 flex justify-center"
+        >
+          <Button size="lg" variant="outline" className="group">
+            View All Products
+            <ArrowRight className="ml-2 size-4 transition-transform group-hover:translate-x-1" />
+          </Button>
+        </motion.div>
+      </motion.div>
     </section>
   );
-}
+};
+
+export default FeaturedProducts;
 

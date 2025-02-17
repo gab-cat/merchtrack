@@ -1,185 +1,127 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ShoppingCart, Star } from "lucide-react";
-import { nanoid } from "nanoid";
+import React, { useEffect, useState } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { ArrowRight } from "lucide-react";
+import BackgroundAnimation from "./background-animation";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
-
-const featuredProducts = [
-  {
-    name: "University Hoodie",
-    description: "Stay cozy with our official university hoodie",
-    price: 49.99,
-    discount: "10% OFF",
-    image: "/placeholder.svg?height=600&width=600&text=University+Hoodie",
-  },
-  {
-    name: "Textbook Bundle",
-    description: "Get all your required textbooks in one package",
-    price: 299.99,
-    discount: "15% OFF",
-    image: "/placeholder.svg?height=600&width=600&text=Textbook+Bundle",
-  },
-  {
-    name: "Laptop Package",
-    description: "Special student discount on laptops",
-    price: 799.99,
-    discount: "20% OFF",
-    image: "/placeholder.svg?height=600&width=600&text=Laptop+Package",
-  },
-  {
-    name: "Dorm Essentials Kit",
-    description: "Everything you need for your dorm room",
-    price: 149.99,
-    discount: "25% OFF",
-    image: "/placeholder.svg?height=600&width=600&text=Dorm+Essentials+Kit",
-  },
-  {
-    name: "Campus Bike",
-    description: "Get around campus quickly and easily",
-    price: 249.99,
-    discount: "5% OFF",
-    image: "/placeholder.svg?height=600&width=600&text=Campus+Bike",
-  },
-];
-
-const ColorCircle = React.memo(({ delay }: { delay: number }) => (
-  <motion.circle
-    r={Math.random() * 100 + 50}
-    cx={Math.random() * 100 + "%"}
-    cy={Math.random() * 100 + "%"}
-    fill={`hsl(227, 70%, ${Math.random() * 50 + 25}%)`}
-    initial={{ opacity: 0 }}
-    animate={{
-      opacity: [0.7, 0.3, 0.7],
-      scale: [1, 1.2, 1],
-      x: [0, Math.random() * 100 - 50, 0],
-      y: [0, Math.random() * 100 - 50, 0],
-    }}
-    transition={{
-      duration: 10,
-      repeat: Number.POSITIVE_INFINITY,
-      delay,
-    }}
-  />
-));
-
-ColorCircle.displayName = "ColorCircle";
 
 const HeroSection = () => {
-  const [currentProductIndex, setCurrentProductIndex] = useState(0);
+  const { scrollYProgress } = useScroll();
+  const y = useTransform(scrollYProgress, [0, 1], [0, 300]);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentProductIndex((prevIndex) => (prevIndex === featuredProducts.length - 1 ? 0 : prevIndex + 1));
-    }, 10000);
+    const handleMouseMove = (e: MouseEvent) => {
+      const { clientX, clientY } = e;
+      const x = (clientX / window.innerWidth - 0.5) * 20;
+      const y = (clientY / window.innerHeight - 0.5) * 20;
+      setMousePosition({ x, y });
+    };
 
-    return () => clearInterval(interval);
-  }, []);
-
-  const currentProduct = useMemo(() => featuredProducts[currentProductIndex], [currentProductIndex]);
-
-  const renderStars = useCallback(() => {
-    return [...Array(5)].map(() => <Star key={nanoid()} className="size-5 fill-current text-yellow-400" />);
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
   return (
-    <section className="relative flex min-h-screen items-center justify-center overflow-hidden">
-      {/* Animated background with dispersed color circles */}
-      <div className="absolute inset-0 z-0">
-        <svg className="size-full" xmlns="http://www.w3.org/2000/svg">
-          <rect width="100%" height="100%" fill="#f8f9fa" />
-          <ColorCircle delay={0} />
-          <ColorCircle delay={2} />
-          <ColorCircle delay={4} />
-          <ColorCircle delay={6} />
-          <ColorCircle delay={8} />
-        </svg>
-      </div>
+    <>
+      <BackgroundAnimation />
 
-      {/* Frosted glass overlay */}
-      <div className="absolute inset-0 z-10 backdrop-blur-xl"></div>
+      <motion.section
+        initial="hidden"
+        animate="visible"
+        className="relative flex min-h-screen items-center justify-center overflow-hidden pt-20"
+      >
+        {/* Content */}
+        <motion.div
+          style={{ y }}
+          className="relative z-10 w-full"
+        >
+          <div className="flex flex-col items-center gap-8 text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              style={{
+                x: mousePosition.x,
+                y: mousePosition.y,
+              }}
+            >
+              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+                <motion.span
+                  className="inline-block bg-gradient-to-r from-primary to-primary bg-clip-text leading-normal text-transparent"
+                  animate={{
+                    backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                  }}
+                  transition={{ duration: 5, repeat: Infinity }}
+                  style={{ backgroundSize: "200% auto" }}
+                >
+                  Your University Merch
+                </motion.span>
+                <br />
+                <motion.span
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3, duration: 0.8 }}
+                  className="inline-block"
+                >
+                  All in One Place
+                </motion.span>
+              </h1>
+            </motion.div>
 
-      <div className="container z-20 mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            className="rounded-xl bg-white/30 p-8 shadow-lg backdrop-blur-lg"
-          >
-            <Badge variant="secondary" className="mb-4">
-              Campus Essentials
-            </Badge>
-            <h1 className="mb-6 text-4xl font-bold leading-tight text-gray-800 md:text-6xl">
-              Your One-Stop Shop for <span className="text-primary">University Life</span>
-            </h1>
-            <p className="mb-8 text-xl text-gray-700 md:text-2xl">
-              From textbooks to tech, find everything you need for a successful academic year.
-            </p>
-            <div className="flex flex-col gap-4 sm:flex-row">
-              <Button size="lg" className="text-primary-foreground animate-pulse bg-primary hover:bg-primary/90">
-                Shop Now <ArrowRight className="ml-2" />
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="hover:text-primary-foreground border-primary text-primary hover:bg-primary"
-              >
-                View Catalog <ShoppingCart className="ml-2" />
-              </Button>
-            </div>
-            <div className="mt-8 flex items-center">
-              <div className="flex">
-                {renderStars()}
-              </div>
-              <span className="ml-2 text-sm text-gray-600">4.9 out of 5 stars from 1,000+ student reviews</span>
-            </div>
-          </motion.div>
-          <div className="relative h-[600px]">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentProductIndex}
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -50 }}
-                transition={{ duration: 0.5 }}
-                className="absolute inset-0"
-              >
-                <div className="relative z-10 h-full">
-                  <img
-                    src={currentProduct.image || "/placeholder.svg"}
-                    alt={currentProduct.name}
-                    className="size-full rounded-lg object-cover shadow-2xl"
-                    style={{ filter: "hue-rotate(-50deg) saturate(1.5)" }}
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5, duration: 0.8 }}
+              className="text-muted-foreground max-w-2xl text-lg sm:text-xl"
+            >
+              Discover, customize, and order your university merchandise with ease.
+              Express your school spirit with our curated collection.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7, duration: 0.8 }}
+              className="mt-4 flex flex-col gap-4 sm:flex-row"
+            >
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button size="lg" className="group relative overflow-hidden text-neutral-2">
+                  <motion.span
+                    className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent"
+                    animate={{
+                      x: ["-100%", "100%"],
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
                   />
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2, duration: 0.5 }}
-                    className="absolute inset-x-4 bottom-4 rounded-lg bg-black/70 p-4 text-white backdrop-blur-md"
-                  >
-                    <h3 className="mb-2 text-lg font-semibold">{currentProduct.name}</h3>
-                    <p className="mb-2 text-sm">{currentProduct.description}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-2xl font-bold">
-                        ${currentProduct.price.toFixed(2)}
-                      </span>
-                      <Badge variant="secondary" className="bg-white text-primary">
-                        {currentProduct.discount}
-                      </Badge>
-                    </div>
-                  </motion.div>
-                </div>
+                  <span className="relative">Start Shopping</span>
+                  <ArrowRight className="relative ml-2 size-4 transition-transform group-hover:translate-x-1" />
+                </Button>
               </motion.div>
-            </AnimatePresence>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button size="lg" variant="outline" className="backdrop-blur-sm">
+                  Learn More
+                </Button>
+              </motion.div>
+            </motion.div>
           </div>
-        </div>
-      </div>
-    </section>
+        </motion.div>
+
+        {/* Bottom Gradient */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 0.5 }}
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_500px_at_50%_200px,rgba(var(--primary-rgb),0.15),transparent)]"
+        />
+      </motion.section>
+    </>
   );
 };
 
