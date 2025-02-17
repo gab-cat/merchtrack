@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter, Poppins } from 'next/font/google';
 import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
@@ -35,13 +35,14 @@ export const metadata: Metadata = {
   },
   creator: SEO.author,
   manifest: SEO.manifest,
-  themeColor: SEO.theme_color,
   category: 'e-commerce',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1.0,
-    maximumScale: 1.0,
-  }
+};
+
+export const viewport: Viewport = {
+  themeColor: SEO.theme_color,
+  width: 'device-width',
+  initialScale: 1.0,
+  maximumScale: 1.0,
 };
 
 export default function RootLayout({

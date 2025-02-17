@@ -1,38 +1,60 @@
 "use client";
 
+import React from "react";
 import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
-export default function CallToAction() {
+const CallToAction = () => {
   return (
-    <section 
-      className="text-primary-foreground  py-16"
-      aria-label="Newsletter subscription"
+    <motion.section
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true }}
+      className="relative w-full overflow-hidden py-24"
     >
-      <div className="container mx-auto px-4">
+      <motion.div
+        className="absolute inset-0 blur-3xl"
+        initial={{ opacity: 0, scale: 0.8 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 1 }}
+      >
+        <div className="absolute inset-0 mb-8 rounded bg-primary/10 [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]" />
+      </motion.div>
+
+      <div className="relative z-10 w-full">
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-center"
+          className="flex flex-col items-center gap-8 text-center"
+          variants={{
+            hidden: { opacity: 0, y: 20 },
+            visible: { opacity: 1, y: 0 }
+          }}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
         >
-          <h2 className="mb-4 text-3xl font-bold" id="newsletter-heading">Stay Updated</h2>
-          <p className="mb-8 text-xl">Subscribe to our newsletter for exclusive deals and updates</p>
-          <form 
-            className="mx-auto flex max-w-md flex-col gap-4 sm:flex-row"
-            aria-labelledby="newsletter-heading"
+          <h2 className="text-4xl font-bold tracking-tight text-primary md:text-5xl">
+            Ready to Get Started?
+          </h2>
+          <p className="text-muted-foreground max-w-2xl text-xl">
+            Join thousands of students and alumni who trust us for their university merchandise needs.
+          </p>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
-            <Input
-              type="email"
-              placeholder="Enter your email"
-              className="bg-primary-foreground grow text-primary"
-            />
-            <Button variant="secondary">Subscribe</Button>
-          </form>
+            <Button size="lg" className="group text-neutral-2">
+              Shop Now
+              <ArrowRight className="ml-2 size-4 transition-transform group-hover:translate-x-1" />
+            </Button>
+          </motion.div>
         </motion.div>
       </div>
-    </section>
+    </motion.section>
   );
-}
+};
+
+export default CallToAction;
 

@@ -1,4 +1,5 @@
-import { getUser, getUsers } from "@/actions/users.action";
+import { useQuery } from "@tanstack/react-query";
+import { getClerkUserImageUrl, getClerkUserPublicData, getUser, getUsers } from "@/actions/users.action";
 import { useResourceByIdQuery, useResourceQuery } from "@/hooks/index.hooks";
 import { QueryParams } from "@/types/common";
 
@@ -41,6 +42,7 @@ export function useUsersQuery(params: QueryParams = {}) {
 }
 
 /**
+<<<<<<< HEAD
  * Retrieves detailed data for a specific user.
  *
  * This hook leverages the useResourceByIdQuery hook with a custom fetcher that
@@ -60,5 +62,41 @@ export function useUserQuery(userId: string, limitFields: string[] = []) {
       getUser({ userId, userLookupId: id, limitFields: params.limitFields }),
     identifier: userId,
     params: { limitFields }
+  });
+}
+
+
+/**
+ * Custom hook for fetching a user's public data from Clerk.
+ * 
+ * @param userId - The Clerk user ID to fetch data for
+ * @returns A query object containing the user's public data
+ * 
+ * @example
+ * const { data, isLoading } = useClerkUserPublicData('user_123');
+ */
+export function useClerkUserPublicData(userId: string | null) {
+  return useQuery({
+    queryKey: ['clerk-user', userId],
+    queryFn: () => getClerkUserPublicData(userId as string),
+    enabled: !!userId
+  });
+}
+
+/**
+ * Custom hook for fetching a user's profile image URL from Clerk.
+ * The image URL is cached for 30 minutes.
+ * 
+ * @param userId - The Clerk user ID to fetch the image URL for
+ * @returns A query object containing the user's image URL
+ * 
+ * @example
+ * const { data, isLoading } = useClerkUserImageUrl('user_123');
+ */
+export function useClerkUserImageUrl(userId: string | null) {
+  return useQuery({
+    queryKey: ['clerk-user-image', userId],
+    queryFn: () => getClerkUserImageUrl(userId as string),
+    enabled: !!userId
   });
 }

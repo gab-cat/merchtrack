@@ -55,71 +55,69 @@ export function OnsitePayment({ onPaymentComplete }: OnsitePaymentProps) {
         </div>
 
         {selectedOrder && (
-          <>
-            <div className="space-y-4">
-              <div className="text-sm font-medium">Items</div>
-              <div className="space-y-2">
-                {selectedOrder.items.map((item) => (
-                  <div key={item.id} className="flex items-center gap-3 py-2">
-                    <div className="flex size-8 items-center justify-center rounded bg-gray-100">
-                      <FaBox className="size-4 text-gray-500" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-sm">{item.itemName}</div>
-                      <div className="text-xs text-gray-500">{item.quantity}pcs</div>
-                    </div>
-                    <div className="text-sm">₱{item.price.toFixed(2)}</div>
+          <div className="space-y-4">
+            <div className="text-sm font-medium">Items</div>
+            <div className="space-y-2">
+              {selectedOrder.items.map((item) => (
+                <div key={item.id} className="flex items-center gap-3 py-2">
+                  <div className="flex size-8 items-center justify-center rounded bg-gray-100">
+                    <FaBox className="size-4 text-gray-500" />
                   </div>
-                ))}
-              </div>
+                  <div className="flex-1">
+                    <div className="text-sm">{item.itemName}</div>
+                    <div className="text-xs text-gray-500">{item.quantity}pcs</div>
+                  </div>
+                  <div className="text-sm">₱{item.price.toFixed(2)}</div>
+                </div>
+              ))}
+            </div>
 
-              <div className="space-y-1 border-t pt-2 text-sm">
-                <div className="flex justify-between">
-                  <span>Subtotal</span>
-                  <span>₱{(selectedOrder.total - selectedOrder.otherFees).toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Other Fees</span>
-                  <span>₱{selectedOrder.otherFees.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between font-medium">
-                  <span>TOTAL</span>
-                  <span>₱{selectedOrder.total.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between font-medium text-red-500">
-                  <span>Balance</span>
-                  <span>₱{selectedOrder.balance.toFixed(2)}</span>
-                </div>
+            <div className="space-y-1 border-t pt-2 text-sm">
+              <div className="flex justify-between">
+                <span>Subtotal</span>
+                <span>₱{(selectedOrder.total - selectedOrder.otherFees).toFixed(2)}</span>
               </div>
-
-              <div className="space-y-3 pt-4">
-                <Input
-                  placeholder="Payment"
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  max={selectedOrder.balance}
-                  className="bg-white"
-                />
-                <Select value={paymentOption} onValueChange={setPaymentOption}>
-                  <SelectTrigger className="bg-white">
-                    <SelectValue placeholder="Payment Option" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="onsite">Onsite</SelectItem>
-                    <SelectItem value="offsite">Offsite</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button
-                  onClick={handleConfirm}
-                  disabled={!amount || !paymentOption}
-                  className="w-full bg-emerald-500 text-white hover:bg-emerald-600"
-                >
-                  Confirm
-                </Button>
+              <div className="flex justify-between">
+                <span>Other Fees</span>
+                <span>₱{selectedOrder.otherFees.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between font-medium">
+                <span>TOTAL</span>
+                <span>₱{selectedOrder.total.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between font-medium text-red-500">
+                <span>Balance</span>
+                <span>₱{selectedOrder.balance.toFixed(2)}</span>
               </div>
             </div>
-          </>
+
+            <div className="space-y-3 pt-4">
+              <Input
+                placeholder="Payment"
+                type="number"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                max={selectedOrder.balance}
+                className="bg-white"
+              />
+              <Select value={paymentOption} onValueChange={setPaymentOption}>
+                <SelectTrigger className="bg-white">
+                  <SelectValue defaultValue='onsite' placeholder="Payment Option" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="onsite">Onsite</SelectItem>
+                  <SelectItem value="offsite">Offsite</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                onClick={handleConfirm}
+                disabled={!amount || !paymentOption}
+                className="w-full bg-emerald-500 text-white hover:bg-emerald-600"
+              >
+                  Confirm
+              </Button>
+            </div>
+          </div>
         )}
       </div>
     </div>

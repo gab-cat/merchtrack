@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from "next/cache";
 import prisma from "@/lib/db";
 import { verifyPermission } from "@/utils/permissions";
 import { ExtendedOrder } from "@/types/orders";
@@ -7,6 +8,7 @@ import { getCached, setCached } from "@/lib/redis";
 import { QueryParams, PaginatedResponse } from "@/types/common";
 import { calculatePagination, removeFields } from "@/utils/query.utils";
 import { GetObjectByTParams } from "@/types/extended";
+import { createOrderSchema, CreateOrderType } from "@/schema/orders.schema";
 
 /**
  * Retrieves a paginated list of orders with optional field filtering.
@@ -93,6 +95,14 @@ export async function getOrders(
 
     await setCached(cacheKey, orders);
     await setCached(`orders:total:${JSON.stringify(params)}`, total);
+  }
+
+
+  if (!orders) {
+    return {
+      success: false,
+      message: "No orders found."
+    };
   }
 
   const lastPage = Math.ceil(total as number / take);
@@ -199,4 +209,104 @@ export async function getOrderById({userId, orderId, limitFields}: GetObjectByTP
     success: true,
     data: JSON.parse(JSON.stringify(removeFields(order, limitFields)))
   };
+}
+
+/**
+ * Creates a new order after validating the input data and verifying user permissions.
+ *
+ * This function first checks if the user identified by `userId` has permission to create orders.
+ * If the authorization check fails, it immediately returns a failure response. Otherwise, it validates
+ * the input data against the `createOrderSchema` and attempts to create a new order in the database.
+ * The newly created order is then cached, and the total order count is updated in the cache.
+ * The cache for the orders list is invalidated to ensure the new order is included in subsequent queries.
+ *
+ * @param userId - The unique identifier of the user creating the order.
+ * @param data - The input data for the new order, which will be validated against the `createOrderSchema`.
+ * @returns A promise that resolves to an object with:
+ *   - success: Boolean indicating whether the operation was successful.
+ *   - data: The newly created order data, if successful.
+ *   - message: A failure message if the user is unauthorized or the input data is invalid.
+ *
+ * @example
+ * ```typescript
+ * const result = await createOrder('user123', {
+ *   customerId: 'customer456',
+ *   processedById: 'user123',
+ *   totalAmount: 100,
+ *   discountAmount: 10,
+ *   estimatedDelivery: new Date(),
+ *   orderItems: [
+ *     { variantId: 'variant789', quantity: 2, customerNote: 'Please deliver ASAP', size: 'M' }
+ *   ]
+ * });
+ *
+ * if (result.success) {
+ *   console.log('Order created:', result.data);
+ * } else {
+ *   console.error('Error:', result.message);
+ * }
+ * ```
+ */
+export async function createOrder(userId: string, data: CreateOrderType): Promise<ActionsReturnType<CreateOrderType>> {
+  if (!await verifyPermission({
+    userId,
+    permissions: {
+      dashboard: { canRead: true }
+    }
+  })) {
+    return {
+      success: false,
+      message: "You do not have permission to create orders"
+    };
+  }
+
+  try {
+    const validatedData = createOrderSchema.parse(data);
+    
+    const order = await prisma.order.create({
+      data: {
+        customerId: validatedData.customerId,
+        processedById: validatedData.processedById,
+        totalAmount: validatedData.totalAmount,
+        discountAmount: validatedData.discountAmount,
+        estimatedDelivery: validatedData.estimatedDelivery,
+        orderItems: {
+          createMany: {
+            data: validatedData.orderItems.map(item => ({
+              variantId: item.variantId,
+              quantity: item.quantity,
+              customerNote: item.customerNote,
+              size: item.size,
+              price: 0, // This will be updated based on the variant price
+            }))
+          }
+        }
+      },
+      include: {
+        orderItems: true,
+        customer: true,
+        processedBy: true
+      }
+    });
+
+    // Invalidate cache
+    await Promise.all([
+      setCached(`order:${order.id}`, order),
+      getCached('orders:total').then(total => 
+        setCached('orders:total', (typeof total === 'number' ? total : 0) + 1)
+      )
+    ]);
+
+    revalidatePath('/admin/orders');
+    
+    return {
+      success: true,
+      data: order as CreateOrderType
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: (error as Error).message
+    };
+  }
 }

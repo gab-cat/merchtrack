@@ -23,7 +23,7 @@ interface OrdersTableRowsProps {
 
 export function OrdersTableRows({ orders, updateOrder }: OrdersTableRowsProps) {
   return (
-    orders.map((order) => (
+    orders?.map((order) => (
       <TableRow key={order.id}>
         <TableCell>
           <Checkbox className="text-white" />
