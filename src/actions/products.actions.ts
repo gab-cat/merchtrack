@@ -113,7 +113,7 @@ export async function getProducts(
           },
           orderBy: params.orderBy,
           skip,
-          take
+          take,
         }),
         prisma.product.count({ where: params.where })
       ]);

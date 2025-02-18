@@ -8,6 +8,7 @@ import { QueryParams, PaginatedResponse } from "@/types/common";
 import { calculatePagination, removeFields } from "@/utils/query.utils";
 import { GetObjectByTParams } from "@/types/extended";
 import { createLog } from '@/actions/logs.actions';
+import { sendPaymentStatusEmail } from "@/lib/email-service";
 
 /**
  * Retrieves a paginated list of payments for the specified user.
@@ -437,7 +438,7 @@ export async function processPayment({
       };
     }
 
-    const totalPaid = order.payments.reduce((sum, payment) => sum + Number(payment.amount), 0) + amount;
+    const totalPaid = order.payments.filter(payment => payment.paymentStatus === 'VERIFIED').reduce((sum, payment) => sum + Number(payment.amount), 0) + amount;
     if (totalPaid > Number(order.totalAmount)) {
       await createLog({
         userId: order.customerId,
@@ -461,7 +462,7 @@ export async function processPayment({
         paymentMethod,
         paymentSite,
         paymentStatus,
-        referenceNo: referenceNo || "",
+        referenceNo: referenceNo ?? "",
         memo,
         transactionId,
         paymentProvider
@@ -619,7 +620,17 @@ export async function refundPayment(
         paymentProvider: payment.paymentProvider
       },
       include: {
-        order: true,
+        order: {
+          include: {
+            customer: {
+              select: { 
+                email: true,
+                firstName: true,
+                lastName: true
+              }
+            }
+          }
+        },
         user: true
       }
     });
@@ -649,6 +660,16 @@ export async function refundPayment(
       systemText: `Refunded ₱${amount} from payment ${paymentId} for order ${payment.orderId}. Reason: ${reason}`,
       userText: `Refund of ₱${amount} has been processed successfully. Reason: ${reason}`
     });
+
+    // Send refund notification email
+    await sendPaymentStatusEmail(
+      refund.order.id,
+      `${refund.order.customer.firstName} ${refund.order.customer.lastName}`,
+      refund.order.customer.email,
+      Number(refund.amount),
+      'refunded',
+      reason
+    );
 
     // Invalidate caches
     await Promise.all([
@@ -775,7 +796,7 @@ export async function validatePayment(
     }
 
     // Create validated payment record
-    await prisma.payment.create({
+    const verifiedPayment = await prisma.payment.create({
       data: {
         orderId,
         userId: order.customerId,
@@ -787,6 +808,19 @@ export async function validatePayment(
         transactionId: transactionDetails.transactionId,
         referenceNo: transactionDetails.referenceNo,
         memo: `Payment validated by ${userId}`
+      },
+      include: {
+        order: {
+          include: {
+            customer: {
+              select: {
+                email: true,
+                firstName: true,
+                lastName: true,
+              }
+            }
+          }
+        }
       }
     });
 
@@ -798,7 +832,7 @@ export async function validatePayment(
         data: {
           paymentStatus: OrderPaymentStatus.PAID,
           status: order.status === OrderStatus.PENDING ? OrderStatus.PROCESSING : order.status
-        }
+        },
       });
     } else {
       await prisma.order.update({
@@ -817,6 +851,15 @@ export async function validatePayment(
       systemText: `Validated payment of ₱${amount} for order ${orderId}. Transaction ID: ${transactionDetails.transactionId}`,
       userText: "Payment has been validated successfully."
     });
+
+    // Send payment verification email
+    await sendPaymentStatusEmail(
+      verifiedPayment.order.id,
+      `${verifiedPayment.order.customer.firstName} ${verifiedPayment.order.customer.lastName}`,
+      verifiedPayment.order.customer.email,
+      Number(verifiedPayment.amount),
+      'verified'
+    );
 
     // Invalidate caches
     await Promise.all([

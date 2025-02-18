@@ -9,6 +9,7 @@ import { QueryParams, PaginatedResponse } from "@/types/common";
 import { calculatePagination, removeFields } from "@/utils/query.utils";
 import { GetObjectByTParams } from "@/types/extended";
 import { createOrderSchema, CreateOrderType } from "@/schema/orders.schema";
+import { sendOrderConfirmationEmail, sendOrderStatusEmail } from "@/lib/email-service";
 
 /**
  * Retrieves a paginated list of orders with optional field filtering.
@@ -159,56 +160,64 @@ export async function getOrders(
  * }
  * ```
  */
-export async function getOrderById({userId, orderId, limitFields}: GetObjectByTParams<'orderId'>): Promise<ActionsReturnType<ExtendedOrder>> {
-  const isAuthorized = await verifyPermission({
-    userId: userId,
-    permissions: {
-      dashboard: { canRead: true },
+
+export async function getOrderById({ userId, orderId, limitFields }: GetObjectByTParams<"orderId">): Promise<ActionsReturnType<ExtendedOrder | null>> {
+  try {
+    const hasPermission = await verifyPermission({
+      userId,
+      permissions: {
+        orders: { canRead: true }
+      }
+    });
+
+    if (!hasPermission) {
+      return {
+        success: false,
+        message: "You do not have permission to view orders."
+      };
     }
-  });
 
-  if (!isAuthorized) {
-    return {
-      success: false,
-      message: "You are not authorized to view orders."
-    };
-  }
-
-  let order: ExtendedOrder | null = await getCached(`orders:${orderId}`);
-  if (!order) {
-    order = await prisma.order.findFirst({
-      where: {
-        id: orderId
-      },
-      include: {
-        payments: true,
-        customer: true,
-        orderItems: {
-          include: {
-            variant: {
-              include: {
-                product: true
+    let order = await getCached(`order:${orderId}`);
+    if (!order) {
+      order = await prisma.order.findUnique({
+        where: { id: orderId },
+        include: {
+          customer: true,
+          processedBy: true,
+          payments: true,
+          orderItems: {
+            include: {
+              variant: {
+                include: {
+                  product: true
+                }
               }
             }
           }
         }
-      }
-    });
+      });
 
-    if (!order) {
-      return {
-        success: false,
-        message: "Order not found."
-      };
+      if (!order) {
+        return {
+          success: false,
+          message: "Order not found"
+        };
+      }
+
+      await setCached(`order:${orderId}`, order);
     }
 
-    await setCached(`orders:${orderId}`, order);
+    return {
+      success: true,
+      data: JSON.parse(JSON.stringify(removeFields(order as ExtendedOrder, limitFields)))
+    };
+  } catch (error) {
+    console.error("Failed to fetch order:", error);
+    return {
+      success: false,
+      message: (error as Error).message
+    };
   }
-
-  return {
-    success: true,
-    data: JSON.parse(JSON.stringify(removeFields(order, limitFields)))
-  };
 }
 
 /**
@@ -283,11 +292,27 @@ export async function createOrder(userId: string, data: CreateOrderType): Promis
         }
       },
       include: {
-        orderItems: true,
+        orderItems: {
+          include: {
+            variant: {
+              include: {
+                product: true
+              }
+            }
+          }
+        },
         customer: true,
-        processedBy: true
+        processedBy: true,
+        payments: true
       }
     });
+
+    // Send order confirmation email
+    await sendOrderConfirmationEmail(
+      order,
+      `${order.customer.firstName} ${order.customer.lastName}`,
+      order.customer.email
+    );
 
     // Invalidate cache
     await Promise.all([
@@ -310,3 +335,36 @@ export async function createOrder(userId: string, data: CreateOrderType): Promis
     };
   }
 }
+
+export async function updateOrderPaymentStatus(){
+  throw new Error('Not implemented');
+};
+
+export async function updateOrderStatus(params: UpdateOrderStatusParams): Promise<ActionsReturnType<Order>> {
+  // ...existing code...
+
+  const updatedOrder = await prisma.order.update({
+    where: { id: params.orderId },
+    data: { status: params.newStatus },
+    include: {
+      customer: true
+    }
+  });
+
+  // Send status update email
+  if (['processing', 'ready', 'completed'].includes(params.newStatus)) {
+    const surveyLink = params.newStatus === 'completed' 
+      ? `${process.env.NEXT_PUBLIC_APP_URL}/survey/${updatedOrder.id}`
+      : undefined;
+
+    await sendOrderStatusEmail(
+      updatedOrder.orderNumber,
+      updatedOrder.customer.name,
+      updatedOrder.customer.email,
+      params.newStatus as 'processing' | 'ready' | 'completed',
+      surveyLink
+    );
+  }
+
+  // ...existing code...
+};

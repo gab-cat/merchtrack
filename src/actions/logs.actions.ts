@@ -55,11 +55,8 @@ export async function createLog({
       }
     });
     
-    // Invalidate logs cache
-    await Promise.all([
-      setCached('logs:total', null),
-      setCached('logs:*', null) // Clear all paginated logs cache
-    ]);
+    // Invalidate all logs cache since we use dynamic cache keys
+    await setCached('logs:*', null);
 
     return {
       success: true,
@@ -103,7 +100,6 @@ export async function createLog({
  *           - lastPage: The last available page number.
  *           - hasNextPage: A boolean indicating if there is a subsequent page.
  *           - hasPrevPage: A boolean indicating if there is a preceding page.
- *   - message: An error message if the operation fails.
  */
 export async function getLogs({userId, params = {} }: GetLogsParams): Promise<ActionsReturnType<PaginatedResponse<ExtendedLogs[]>>> {
   const isAuthorized = await verifyPermission({
@@ -121,11 +117,16 @@ export async function getLogs({userId, params = {} }: GetLogsParams): Promise<Ac
   }
 
   try {
-    let logs: ExtendedLogs[] | null = await getCached(`logs:${params.page}:${params.take}`);
-    let total: number | null = await getCached('logs:total');
+    const take = params.take ?? 10;
+    const skip = params.skip ?? 0;
+    const page = Math.floor(skip / take) + 1;
+    
+    const cacheKey = `logs:${JSON.stringify(params)}`;
+    let logs: ExtendedLogs[] | null = await getCached(cacheKey);
+    let total: number | null = await getCached(`${cacheKey}:total`);
   
     if (!logs) {
-      [logs, total] = await prisma.$transaction([
+      const [rawLogs, count] = await prisma.$transaction([
         prisma.log.findMany({
           where: params.where,
           include: {
@@ -147,21 +148,26 @@ export async function getLogs({userId, params = {} }: GetLogsParams): Promise<Ac
             },
           },
           orderBy: params.orderBy,
-          skip: params.skip,
-          take: params.take,
+          skip,
+          take,
         }),
-        prisma.log.count( { where: params.where } ),
+        prisma.log.count({ where: params.where }),
       ]);
 
-      Promise.all([
-        await setCached(`logs:${params.page}:${params.take}`, logs),
-        await setCached('logs:total', total),
+      logs = rawLogs as ExtendedLogs[];
+      total = count;
+
+      await Promise.all([
+        setCached(cacheKey, logs),
+        setCached(`${cacheKey}:total`, total),
       ]);
     }
 
-    const lastPage = Math.ceil(total as number / (params.take ?? 1));
-    const processedLogs = logs.map(log => {
-      return removeFields(log, params.limitFields);
+    const lastPage = Math.ceil((total as number) / take);
+    const processedLogs = logs?.map(log => {
+      if (!params.limitFields) return log;
+      const plainLog = { ...log } as Record<string, unknown>;
+      return { ...removeFields(plainLog, params.limitFields) } as ExtendedLogs;
     });
     
     return {
@@ -170,10 +176,10 @@ export async function getLogs({userId, params = {} }: GetLogsParams): Promise<Ac
         data: JSON.parse(JSON.stringify(processedLogs)),
         metadata: {
           total: total as number,
-          page: params.page!,
-          lastPage: lastPage,
-          hasNextPage: params.page! < lastPage,
-          hasPrevPage: params.page! > 1
+          page,
+          lastPage,
+          hasNextPage: page < lastPage,
+          hasPrevPage: page > 1
         }
       }
     };
