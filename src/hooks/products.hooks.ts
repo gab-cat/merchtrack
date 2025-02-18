@@ -26,7 +26,7 @@ import { useResourceByIdQuery, useResourceQuery } from "@/hooks/index.hooks";
  * const { data, error, status } = useProductsQuery({ page: 1, take: 10, orderBy: { createdAt: "desc" } });
  */
 export function useProductsQuery(params: QueryParams = {}) {
-  const { where, include, orderBy, take = 12, skip, page } = params;
+  const { where, include, orderBy, take = 12, skip, page, limit } = params;
   
   return useResourceQuery({
     resource: "products",
@@ -40,7 +40,8 @@ export function useProductsQuery(params: QueryParams = {}) {
       orderBy,
       take,
       skip,
-      page
+      page,
+      limit
     }
   });
 }

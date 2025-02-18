@@ -62,11 +62,11 @@ interface OrderPaymentModalProps {
   order: ExtendedOrder | null;
 }
 
-export function OrderPaymentModal({ open, onOpenChange, order }: OrderPaymentModalProps) {
+export function OrderPaymentModal({ open, onOpenChange, order }: Readonly<OrderPaymentModalProps>) {
   const { userId } = useUserStore();
   const queryClient = useQueryClient();
   
-  const remaining = Number(order?.totalAmount) - (order?.payments?.reduce((acc, payment) => acc + Number(payment.amount), 0) || 0);
+  const remaining = Number(order?.totalAmount) - (order?.payments?.filter(payment => payment.paymentStatus === 'VERIFIED').reduce((acc, payment) => acc + Number(payment.amount), 0) ?? 0);
   
   const form = useForm<PaymentFormValues>({
     resolver: zodResolver(paymentFormSchema(remaining)),
@@ -83,11 +83,10 @@ export function OrderPaymentModal({ open, onOpenChange, order }: OrderPaymentMod
   });
 
   const { mutate: submitPayment, isPending } = useMutation({
+    mutationKey: ['payments:all', 'orders:all'], 
     mutationFn: async (data: PaymentFormValues) => {
       if (!userId || !order) throw new Error("Missing required data");
-      
-      const remaining = Number(order.totalAmount) - (order.payments?.reduce((acc, payment) => acc + Number(payment.amount), 0) || 0);
-      
+    
       if (data.amount > remaining) {
         throw new Error(`Payment amount (₱${data.amount.toFixed(2)}) cannot exceed remaining balance (₱${remaining.toFixed(2)})`);
       }
@@ -125,8 +124,6 @@ export function OrderPaymentModal({ open, onOpenChange, order }: OrderPaymentMod
   });
 
   if (!order) return null;
-
-  // const remaining = Number(order.totalAmount) - (order.payments?.reduce((acc, payment) => acc + Number(payment.amount), 0) || 0);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

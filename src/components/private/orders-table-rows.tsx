@@ -1,6 +1,7 @@
 import * as React from "react";
 import { FaRegEdit } from "react-icons/fa";
 import { Role } from "@prisma/client";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { StatusDropdown } from "./status-dropdown";
 import {
   TableRow,
@@ -8,7 +9,6 @@ import {
 } from "@/components/ui/table";
 import { OrderStatus, PaymentStatus, PaymentMethod, CustomerType } from "@/types/Misc";
 import { paymentStatusOptions, orderStatusOptions } from "@/constants";
-import { Dialog, DialogHeader, DialogTrigger, DialogContent, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ExtendedOrder } from "@/types/orders";
 import { manilaTime } from "@/utils/formatTime";
@@ -19,9 +19,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 interface OrdersTableRowsProps {
   orders: ExtendedOrder[];
   updateOrder: (id: string, field: keyof ExtendedOrder, value: OrderStatus | PaymentStatus | PaymentMethod | CustomerType) => void;
+  router: AppRouterInstance;
 }
 
-export function OrdersTableRows({ orders, updateOrder }: OrdersTableRowsProps) {
+export function OrdersTableRows({ orders, updateOrder, router }: OrdersTableRowsProps) {
   return (
     orders?.map((order) => (
       <TableRow key={order.id}>
@@ -29,31 +30,12 @@ export function OrdersTableRows({ orders, updateOrder }: OrdersTableRowsProps) {
           <Checkbox className="text-white" />
         </TableCell>
         <TableCell className="flex cursor-pointer flex-row items-center font-bold text-primary-700 underline">
-          <Dialog>
-            <DialogTrigger>
-              <div className="flex items-center">
-                <FaRegEdit className="mr-2"/>
-                {order.id}
-              </div>
-            </DialogTrigger> 
-            <DialogContent className="bg-neutral-2">
-              <DialogHeader>
-                <DialogTitle>Are you absolutely sure?</DialogTitle>
-                <DialogDescription className="py-4 text-neutral-6">
-                  This action cannot be undone. This will permanently delete your account
-                  and remove your data from our servers.
-                </DialogDescription>
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button className="cursor-pointer" variant="outline" asChild>
-                      <div>Cancel</div>
-                    </Button>
-                  </DialogClose>
-                  <Button className="bg-accent-destructive text-neutral-2">Delete</Button>
-                </DialogFooter>
-              </DialogHeader>
-            </DialogContent>
-          </Dialog>
+          <Button variant='outline'
+            onClick={() => router.push(`/admin/orders/${order.id}`)}
+            className="flex items-center">
+            <FaRegEdit className="mr-2"/>
+            {order.id}
+          </Button>
         </TableCell>
         <TableCell>{manilaTime.dateTime(order.createdAt)}</TableCell>
         <TableCell>{order.customer.firstName} {order.customer.lastName}</TableCell>

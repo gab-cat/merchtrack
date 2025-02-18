@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 import { OrdersTableSkeleton } from "./orders-table-skeleton";
 import { OrdersTableRows } from "./orders-table-rows";
 import { OrdersTableHeader } from "./orders-table-header";
@@ -33,22 +34,28 @@ export function OrdersTable() {
     paymentStatus: "",
     customerType: ""
   });
+  const router = useRouter();
   
   const debouncedSearch = useDebouncedValue(searchTerm, 500);
+  const debouncedFilters = useDebouncedValue(filters, 500);
 
   const { data: orders, isLoading } = useOrdersQuery({
     page: currentPage,
     limit: ITEMS_PER_PAGE,
-    search: debouncedSearch || undefined,
-    filters: {
-      ...(filters.orderStatus && { status: filters.orderStatus }),
-      ...(filters.paymentStatus && { paymentStatus: filters.paymentStatus }),
-      ...(filters.customerType && { customerType: filters.customerType })
+    orderBy: {
+      createdAt: "desc"
+    },
+    where: {
+      ...(debouncedSearch && { search: debouncedSearch }),
+      ...(debouncedFilters.orderStatus && { status: debouncedFilters.orderStatus }),
+      ...(debouncedFilters.paymentStatus && { paymentStatus: debouncedFilters.paymentStatus }),
+      ...(debouncedFilters.customerType && { customer: { role: debouncedFilters.customerType } })
     }
   });
 
   const handleFilterChange = (key: keyof OrderFilters, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));
+    setCurrentPage(1); // Reset to first page when filters change
   };
 
   const handleOrderUpdate = (id: string, field: keyof ExtendedOrder, value: OrderStatus | PaymentStatus | PaymentMethod | CustomerType) => {
@@ -64,6 +71,7 @@ export function OrdersTable() {
       customerType: ""
     });
     setSearchTerm("");
+    setCurrentPage(1); // Reset to first page when filters are reset
   };
 
   const totalPages = orders?.metadata ? Math.ceil(orders.metadata.total / ITEMS_PER_PAGE) : 0;
@@ -97,7 +105,7 @@ export function OrdersTable() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
               transition={{ duration: 0.3 }}>
-              <OrdersTableRows orders={orders?.data as ExtendedOrder[]} updateOrder={handleOrderUpdate} />
+              <OrdersTableRows router={router} orders={orders?.data as ExtendedOrder[]} updateOrder={handleOrderUpdate} />
             </motion.tbody>
           )}
         </Table>

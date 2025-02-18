@@ -9,7 +9,7 @@ import { FilterSidebar } from "./filter-sidebar";
 import { useProductsQuery } from "@/hooks/products.hooks";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PaginationNav } from "@/components/pagination-nav";
+import { Pagination } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -33,6 +33,7 @@ export default function ProductsGrid() {
   const [parent] = useAutoAnimate();
 
   const queryParams = useMemo(() => ({
+    limit: 12,
     take: ITEMS_PER_PAGE,
     skip: (currentPage - 1) * ITEMS_PER_PAGE,
     page: currentPage,
@@ -56,7 +57,13 @@ export default function ProductsGrid() {
 
   const { data, isLoading } = useProductsQuery(queryParams);
   const products = (data as PaginatedResponse<ExtendedProduct[]>)?.data ?? [];
-  const metadata = (data as PaginatedResponse<ExtendedProduct[]>)?.metadata ?? {};
+  const metadata = (data as PaginatedResponse<ExtendedProduct[]>)?.metadata ?? {
+    total: 0,
+    page: 1,
+    lastPage: 1,
+    hasNextPage: false,
+    hasPrevPage: false
+  };
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
@@ -141,17 +148,23 @@ export default function ProductsGrid() {
                   <p className="text-muted-foreground mt-2">Try adjusting your search or filter to find what you&apos;re looking for.</p>
                 </div>
               )}
-            </>
-          )}
 
-          {metadata && metadata.total > 0 && (
-            <PaginationNav
-              currentPage={currentPage}
-              totalPages={metadata.lastPage}
-              totalItems={metadata.total}
-              onPageChange={handlePageChange}
-              className="mt-8"
-            />
+              {!isLoading && metadata.total > 0 && (
+                <div className="mt-8 flex items-center justify-between px-2">
+                  <div className="text-muted-foreground text-sm">
+                    Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}-
+                    {Math.min(currentPage * ITEMS_PER_PAGE, metadata.total)} of {metadata.total} entries
+                  </div>
+                  <Pagination
+                    page={currentPage}
+                    total={metadata.lastPage}
+                    onChange={handlePageChange}
+                    hasNextPage={currentPage < metadata.lastPage}
+                    hasPrevPage={currentPage > 1}
+                  />
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

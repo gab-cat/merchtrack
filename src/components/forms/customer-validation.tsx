@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useUserByEmailQuery } from "@/hooks/users.hooks";
+import { useUserQuery } from "@/hooks/users.hooks";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
@@ -17,7 +17,7 @@ type CustomerValidationProps = {
 export function CustomerValidation({ onCustomerValidated, disabled }: Readonly<CustomerValidationProps>) {
   const [email, setEmail] = useState("");
   const [validatedEmail, setValidatedEmail] = useState<string | null>(null);
-  const { data: userData, isLoading, error } = useUserByEmailQuery(validatedEmail);
+  const { data: userData, isLoading, error } = useUserQuery(validatedEmail as string);
 
   const handleSuccess = useCallback(() => {
     if (userData?.id) {

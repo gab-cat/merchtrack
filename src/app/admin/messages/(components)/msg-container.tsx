@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useMessagesQuery } from "@/hooks/messages.hooks";
 import type { QueryParams } from "@/types/common";
-import { PaginationNav } from "@/components/pagination-nav";
+import { Pagination } from "@/components/ui/pagination";
 
 const ITEMS_PER_PAGE = 20;
 
@@ -173,13 +173,12 @@ export default function MessagesContainer() {
               Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}-
               {Math.min(currentPage * ITEMS_PER_PAGE, total)} of {total} entries
             </div>
-            <PaginationNav
-              currentPage={currentPage}
-              totalPages={lastPage}
-              totalItems={total}
-              onPageChange={setCurrentPage}
-              disabled={isRefetching}
-              showTotalItems={false}
+            <Pagination
+              page={currentPage}
+              total={lastPage}
+              onChange={setCurrentPage}
+              hasNextPage={currentPage < lastPage}
+              hasPrevPage={currentPage > 1}
             />
           </div>
         )}

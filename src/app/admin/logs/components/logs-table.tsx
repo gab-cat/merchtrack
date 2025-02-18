@@ -19,7 +19,7 @@ interface LogsTableProps {
   onLogClick: (log: ExtendedLogs) => void;
 }
 
-export function LogsTable({ logs, isLoading, onLogClick }: LogsTableProps) {
+export function LogsTable({ logs, isLoading, onLogClick }: Readonly<LogsTableProps>) {
   const [parent] = useAutoAnimate();
 
   if (isLoading) {

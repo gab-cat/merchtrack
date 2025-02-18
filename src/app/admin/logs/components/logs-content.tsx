@@ -9,7 +9,7 @@ import { LogDetailsModal } from "./log-details-modal";
 import { Input } from "@/components/ui/input";
 import { useLogsQuery } from "@/hooks/logs.hooks";
 import { DatePicker } from "@/components/ui/date-picker";
-import { PaginationNav } from "@/components/pagination-nav";
+import { Pagination } from "@/components/ui/pagination";
 import {
   Select,
   SelectContent,
@@ -37,7 +37,6 @@ export function LogsContent() {
     const params: QueryParams = {
       take: ITEMS_PER_PAGE,
       skip: (currentPage - 1) * ITEMS_PER_PAGE,
-      page: currentPage,
       where: {
         createdDate: {},
       },
@@ -86,6 +85,11 @@ export function LogsContent() {
 
     return params;
   }, [currentPage, debouncedSearch, startDate, endDate, sortBy]);
+
+  // Reset page when search or filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, startDate, endDate, sortBy]);
 
   React.useEffect(() => {
     const handleStartDateChange = (e: Event) => {
@@ -187,15 +191,15 @@ export function LogsContent() {
       {metadata && metadata.total > 0 && (
         <div className="flex items-center justify-between px-2">
           <div className="text-muted-foreground text-sm">
-            Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}-
+            Showing {Math.min((currentPage - 1) * ITEMS_PER_PAGE + 1, metadata.total)}-
             {Math.min(currentPage * ITEMS_PER_PAGE, metadata.total)} of {metadata.total} entries
           </div>
-          <PaginationNav
-            currentPage={currentPage}
-            totalPages={metadata.lastPage}
-            totalItems={metadata.total}
-            onPageChange={setCurrentPage}
-            showTotalItems={false}
+          <Pagination
+            page={metadata.page}
+            total={metadata.lastPage}
+            onChange={setCurrentPage}
+            hasNextPage={metadata.hasNextPage}
+            hasPrevPage={metadata.hasPrevPage}
           />
         </div>
       )}

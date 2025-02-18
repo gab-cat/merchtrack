@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const ORDER_STATUSES = ['PENDING', 'PROCESSING', 'COMPLETED', 'CANCELLED'] as const;
 const PAYMENT_STATUSES = ['PENDING', 'PAID', 'REFUNDED', 'FAILED'] as const;
-const CUSTOMER_TYPES = ['STUDENT', 'TEACHER', 'STAFF', 'GUEST'] as const;
+const CUSTOMER_TYPES = ['PLAYER', 'STUDENT', 'STAFF_FACULTY', 'ALUMNI', 'OTHERS'] as const;
 
 type OrdersTableFiltersProps = {
   filters: {
@@ -26,7 +26,6 @@ export function OrdersTableFilters({ filters, onFilterChange, onReset }: Readonl
           <SelectValue defaultValue="PENDING" placeholder="Order Status" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All Statuses</SelectItem>
           {ORDER_STATUSES.map((status) => (
             <SelectItem key={status} value={status}>
               {status}
@@ -40,7 +39,6 @@ export function OrdersTableFilters({ filters, onFilterChange, onReset }: Readonl
           <SelectValue defaultValue="PENDING" placeholder="Payment Status" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All Payments</SelectItem>
           {PAYMENT_STATUSES.map((status) => (
             <SelectItem key={status} value={status}>
               {status}
@@ -51,10 +49,9 @@ export function OrdersTableFilters({ filters, onFilterChange, onReset }: Readonl
 
       <Select value={filters.customerType} onValueChange={(value) => onFilterChange('customerType', value)}>
         <SelectTrigger className="w-[140px]">
-          <SelectValue defaultValue="STUDENT" placeholder="Customer Type" />
+          <SelectValue placeholder="Customer Type" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All Types</SelectItem>
           {CUSTOMER_TYPES.map((type) => (
             <SelectItem key={type} value={type}>
               {type}

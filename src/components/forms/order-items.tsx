@@ -40,7 +40,10 @@ export function OrderItems({ onItemsChange, disabled }: Readonly<OrderItemsProps
   const [note, setNote] = useState("");
   const showToast = useToast;
 
-  const { data: productsData, isLoading } = useProductsQuery();
+  const { data: productsData, isLoading } = useProductsQuery({
+    take: 50,
+    limit: 50
+  });
   const products = (productsData?.data || []);
   
   const productOptions = products.map((p) => ({
