@@ -40,7 +40,7 @@ const AdminOrdersPage: FC = async () => {
       <div className="p-6">
         <AdminTopbar />
         <div className="space-y-4">
-          <div className="my-4 rounded-lg border">
+          <div className="my-4 rounded-lg">
             <OrdersTable />
           </div>
           <div className="flex items-center justify-end gap-2">

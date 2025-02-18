@@ -44,7 +44,7 @@ export async function createOrder({ params }: { params: CreateOrderParams }): Pr
 
     return {
       success: true,
-      data: order as ExtendedOrder
+      data: JSON.parse(JSON.stringify(order)),
     };
   } catch (error) {
     return {
