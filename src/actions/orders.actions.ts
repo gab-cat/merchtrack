@@ -14,24 +14,21 @@ import { sendOrderConfirmationEmail } from "@/lib/email-service";
 /**
  * Retrieves a paginated list of orders with optional field filtering.
  *
- * This asynchronous function fetches order data for the specified user after verifying
- * that the user has permission to access the dashboard. It calculates pagination parameters
- * (skip, take, page) based on the provided query parameters and attempts to obtain cached
- * orders and the total order count. In case of a cache miss, it performs a database transaction
- * to fetch orders along with associated payment, customer, and order item details (including
- * nested variant and product information).
+ * This asynchronous function fetches a paginated list of orders for a specified user after verifying
+ * that the user has permission to access the dashboard. It calculates pagination parameters (skip, take, page)
+ * based on the provided query parameters. The function first attempts to retrieve orders and the total count
+ * from cache; if the cache is missing these values, it performs a Prisma database transaction to fetch the orders
+ * along with related details (including customer, payments, and order items with nested variant and product data).
  *
- * The retrieved orders are processed with the `removeFields` utility to filter out specified
- * fields based on `params.limitFields`. The function returns a paginated response containing the
- * list of processed orders and metadata including total number of orders, current page, last page,
- * and flags indicating the availability of next and previous pages.
+ * The resulting orders are processed using the `removeFields` utility to filter out fields as specified in
+ * `params.limitFields`, and pagination metadata is computed (total orders, current page, last page, and flags for
+ * the availability of next and previous pages). If no orders are found or if the user lacks the required permissions,
+ * the function returns a failure response with an appropriate message.
  *
- * If the user lacks the necessary permissions, a failure response with an appropriate message is returned.
- *
- * @param userId - The ID of the user requesting the orders.
- * @param params - Optional query parameters for pagination, filtering, and inclusion of related data.
- * @returns A Promise that resolves to an object with a `success` property. On success, the object contains
- *          a `data` field with the paginated list of orders and corresponding metadata.
+ * @param userId - The ID of the user requesting orders.
+ * @param params - Optional query parameters for filtering, pagination, inclusion of related data, and field removal.
+ * @returns A Promise that resolves to an object indicating success. On success, the object contains a `data` field
+ *          with the processed list of orders and pagination metadata; on failure, an error message is provided.
  *
  * @example
  * ```typescript
@@ -127,23 +124,26 @@ export async function getOrders(
 }
 
 /**
- * Retrieves an order by its ID after verifying user permissions and applying field filtering.
+ * Retrieves an order by its ID after verifying that the user has permission to view orders
+ * and applying field filtering to the returned data.
  *
- * This function first checks if the user identified by `userId` has read access to the dashboard.
- * If the authorization check fails, it immediately returns a failure response. Otherwise, it attempts
- * to load the order data from the cache using the key `orders:${orderId}`. If the order is not found in
- * the cache, it queries the database for the order, including related `payments` and `customer` data.
- * If no order is found, a failure message is returned. Upon successfully retrieving the order, it caches
- * the order data and processes it through a field-limiting utility before returning the sanitized result.
+ * This function first verifies that the user, identified by `userId`, has the necessary read access
+ * to orders. If the permission check fails, it returns a failure response immediately. It then attempts
+ * to load the order data from the cache using the key `order:${orderId}`. If the order is not found in
+ * the cache, the function queries the database for the order, including related customer, processedBy,
+ * payments, and detailed order items data. In the event that no order is found, a failure message is returned.
+ *
+ * Upon retrieving the order, the function caches the order data, applies a field-limiting utility to remove
+ * any fields specified in `limitFields`, and returns the sanitized order data.
  *
  * @param param0 - Object containing the following properties:
  *   - userId: The unique identifier of the user requesting the order.
  *   - orderId: The unique identifier of the order to retrieve.
- *   - limitFields: Array of field names to be excluded from the returned order data.
+ *   - limitFields: An array of field names to be excluded from the returned order data.
  * @returns A promise that resolves to an object with:
- *   - success: Boolean indicating whether the operation was successful.
- *   - data: The order data with specified fields removed, if successful.
- *   - message: A failure message if the user is unauthorized or the order is not found.
+ *   - success: A boolean indicating whether the operation was successful.
+ *   - data: The order data with specified fields removed if the operation is successful.
+ *   - message: A failure message if the user lacks permission, the order is not found, or an error occurs.
  *
  * @example
  * ```typescript
