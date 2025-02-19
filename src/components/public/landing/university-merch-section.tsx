@@ -44,6 +44,9 @@ const UniversityMerchSection = () => {
                 src="/img/merch-track-logo.png"
                 alt="University Merchandise"
                 fill
+                priority
+                sizes="(max-width: 768px) 100vw, 50vw"
+                quality={90}
                 className="object-cover"
               />
             </div>
@@ -51,7 +54,7 @@ const UniversityMerchSection = () => {
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               transition={{ duration: 1, delay: 0.5 }}
-              className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-primary/20 to-transparent"
+              className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-primary/20 via-primary/10 to-transparent"
             />
           </motion.div>
 

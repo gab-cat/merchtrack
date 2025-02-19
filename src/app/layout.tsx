@@ -42,7 +42,7 @@ export const viewport: Viewport = {
   themeColor: SEO.theme_color,
   width: 'device-width',
   initialScale: 1.0,
-  maximumScale: 1.0,
+  maximumScale: 5.0,
 };
 
 export default function RootLayout({

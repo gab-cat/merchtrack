@@ -111,7 +111,7 @@ export const PaymentsTable: FC<PaymentsTableProps> = ({ payments, orderId, userI
                 </Badge>
               </TableCell>
               <TableCell className="font-medium">
-                {formatCurrency(Number(payment.amount))}
+                {formatCurrency(Number(payment.amount) || 0)}
               </TableCell>
               <TableCell>
                 <div className={cn(

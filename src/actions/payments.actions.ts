@@ -496,13 +496,22 @@ export async function processPayment({
     });
 
     // Send payment notification email
-    await sendPaymentStatusEmail({
-      orderNumber: orderId,
-      customerName: `${order.customer.firstName} ${order.customer.lastName}`,
-      customerEmail: order.customer.email,
-      amount,
-      status: 'verified'
-    });
+    try {
+      await sendPaymentStatusEmail({
+        orderNumber: orderId,
+        customerName: `${order.customer.firstName} ${order.customer.lastName}`,
+        customerEmail: order.customer.email,
+        amount,
+        status: 'verified'
+      });
+    } catch (emailError) {
+      // Log email error but don't fail the transaction
+      logger.error('Failed to send payment status email', {
+        error: emailError,
+        orderId,
+        customerEmail: order.customer.email
+      });
+    }
 
     // Invalidate caches
     await Promise.all([

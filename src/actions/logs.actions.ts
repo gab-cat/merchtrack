@@ -117,8 +117,8 @@ export async function getLogs({userId, params = {} }: GetLogsParams): Promise<Ac
   }
 
   try {
-    const take = params.take ?? 10;
-    const skip = params.skip ?? 0;
+    const take = Math.max(1, Math.min(params.take ?? 10, 100)); // Limit max items
+    const skip = Math.max(0, params.skip ?? 0);
     const page = Math.floor(skip / take) + 1;
     
     const cacheKey = `logs:${JSON.stringify(params)}`;

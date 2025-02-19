@@ -65,10 +65,10 @@ export const OrderItemsTable: FC<OrderItemsTableProps> = ({ items = [] }) => {
                 </Badge>
               </TableCell>
               <TableCell className="tabular-nums">
-                {formatCurrency(Number(item.price))}
+                {formatCurrency(Number(item.price) || 0)}
               </TableCell>
               <TableCell className="font-medium tabular-nums">
-                {formatCurrency(Number(item.price) * item.quantity)}
+                {formatCurrency((Number(item.price) || 0) * (item.quantity || 1))}
               </TableCell>
             </TableRow>
           ))}
