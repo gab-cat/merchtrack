@@ -7,20 +7,20 @@ import { useResourceByIdQuery, useResourceQuery } from "@/hooks/index.hooks";
 /**
  * Retrieves a paginated list of products for the authenticated user.
  *
- * This hook uses React Query to fetch products via the `getProducts` API. It retrieves the current user’s
- * ID from the store and triggers the API call only if a valid user ID exists. The hook supports optional
- * query parameters for filtering, including a `where` clause that filters out deleted products by enforcing
- * `isDeleted: false`, as well as pagination and sorting options.
+ * This hook uses React Query to fetch products by calling the `getProducts` API. It automatically retrieves the current user's ID
+ * from the store and initiates the API call only when a valid user ID is present. The hook supports a configurable set of query parameters
+ * to customize filtering, pagination, and sorting. It also ensures that only products not marked as deleted (i.e. `isDeleted: false`) are fetched.
  *
- * @param params - Optional parameters for customizing the query. Supported properties include:
+ * @param params - Optional parameters for the product query. Supported properties include:
  *                 - where: Additional filtering conditions.
- *                 - include: Related data to include.
- *                 - orderBy: Sorting criteria.
+ *                 - include: Related data to include in the response.
+ *                 - orderBy: Criteria for sorting the results.
  *                 - take: Number of items to fetch per page (defaults to 12).
  *                 - skip: Number of items to skip for pagination.
- *                 - page: Specific page number.
+ *                 - page: Specific page number to retrieve.
+ *                 - limit: Maximum number of products to fetch.
  *                 Defaults to an empty object.
- * @returns An object containing React Query state, including properties such as `data`, `error`, and `status`.
+ * @returns An object representing the React Query state, including properties such as `data`, `error`, and `status`.
  *
  * @example
  * const { data, error, status } = useProductsQuery({ page: 1, take: 10, orderBy: { createdAt: "desc" } });

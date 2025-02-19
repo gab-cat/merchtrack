@@ -331,10 +331,13 @@ export async function getPaymentsByOrderId({ userId, orderId, limitFields }: Get
 /**
  * Processes a payment for a specified order.
  *
- * This function verifies the user's permission to process payments, retrieves the associated order from the database,
- * and validates that the new payment amount does not exceed the order total. If the order is valid and the amount is acceptable,
- * a new payment record is created and associated with the order. The function also updates the order's payment status
- * (and order status if the order becomes fully paid), logs the operation, and invalidates related caches.
+ * This function verifies that the user has permission to process payments, retrieves the associated order from
+ * the database (including its payments and customer details), and calculates the new total paid by summing only the
+ * payments with a 'VERIFIED' status along with the new payment amount. If the order exists and the total paid does
+ * not exceed the order's total amount, a new payment record is created. The order's payment status is then updated
+ * (and, if the order becomes fully paid while initially pending, its status is changed to 'PROCESSING'). The function
+ * logs the operation, attempts to send a payment status notification email with relevant order and customer details
+ * (logging any email errors without affecting the payment process), and invalidates related caches.
  *
  * @param userId - The ID of the user processing the payment.
  * @param orderId - The ID of the order to which the payment is applied.
@@ -348,9 +351,9 @@ export async function getPaymentsByOrderId({ userId, orderId, limitFields }: Get
  * @param paymentProvider - (Optional) The provider handling the payment.
  * @param limitFields - (Optional) An array of field names to remove from the returned payment object.
  *
- * @returns A Promise that resolves to an object containing:
+ * @returns A Promise resolving to an object containing:
  *  - success: A boolean indicating whether the payment processing was successful.
- *  - data: The processed Payment object with sensitive fields removed if `limitFields` is provided (on success).
+ *  - data: The processed Payment object with sensitive fields removed (if `limitFields` is provided) on success.
  *  - message: An error message if the operation fails.
  *  - errors: (Optional) Additional error details.
  *
@@ -543,21 +546,20 @@ export async function processPayment({
 /**
  * Refunds a payment and updates the corresponding order's payment status.
  *
- * This asynchronous function processes a payment refund by first verifying the user's permissions. It retrieves
- * the payment record from the database and ensures that the refund amount does not exceed the original payment amount.
- * If the conditions are met, a refund record is created with a negative amount to signify the refund. The function also
- * aggregates the remaining payments for the order to determine and update the order's payment status (e.g., marking the order
- * as fully refunded if no payment remains, or as a downpayment otherwise). Throughout the process, the function logs
- * relevant events (such as unauthorized access, non-existent payments, and errors) and invalidates caches to ensure data integrity.
+ * This asynchronous function processes a payment refund by first verifying the user's permissions. It retrieves the payment
+ * record from the database and ensures that the refund amount does not exceed the original payment amount. If the conditions are met,
+ * a refund record is created with a negative amount to indicate the refund. The function then aggregates the remaining payments for the order
+ * to determine and update the order's payment status (e.g., marking the order as fully refunded if no payments remain, or as a downpayment otherwise).
+ * Additionally, the function logs key events (such as unauthorized access, non-existent payments, invalid amounts, and errors), sends a refund
+ * notification email with order and customer details, and invalidates related caches to ensure data integrity.
  *
  * @param userId - The ID of the user initiating the refund.
  * @param paymentId - The unique identifier of the payment to refund.
  * @param amount - The refund amount, which must not exceed the original payment amount.
- * @param reason - The reason provided for initiating the refund.
+ * @param reason - The reason for initiating the refund.
  *
- * @returns A Promise that resolves to an object indicating the result of the refund operation. On success, the object contains
- * a `data` property with the newly created refund payment record. On failure, it includes a `message` explaining the error and
- * may also include an `errors` object with additional error details.
+ * @returns A Promise that resolves to an object indicating the result of the refund operation. On success, the object contains a `data` property
+ * with the newly created refund payment record; on failure, it includes a `message` explaining the error and may also include an `errors` object with additional details.
  */
 export async function refundPayment(
   userId: string,
@@ -717,15 +719,17 @@ export async function refundPayment(
 }
 
 /**
- * Validates a payment for an order by verifying permissions, checking for duplicate transactions, creating a payment record, and updating the order status accordingly.
+ * Validates a payment for an order by verifying user permissions, checking for duplicate transactions, creating a payment record, updating the order status, sending a verification email, and invalidating caches.
  *
  * This function performs the following steps:
  * - Verifies that the user has the necessary dashboard read permissions.
  * - Retrieves the order by its identifier and ensures it exists.
- * - Checks for an existing verified payment with the same transaction ID to avoid duplicate processing.
+ * - Checks for an existing verified payment with the same transaction ID to prevent duplicate processing.
  * - Creates a validated payment record in the database.
- * - Updates the order's payment status to either PAID (if fully paid) or DOWNPAYMENT based on the total amount paid.
- * - Logs the outcome for auditing and invalidates related cache entries.
+ * - Calculates the total paid amount and updates the order's payment status to either PAID (if fully paid) or DOWNPAYMENT.
+ * - Logs the outcome for auditing purposes.
+ * - Sends a payment verification email to the customer with order and payment details.
+ * - Invalidates related cache entries.
  *
  * @param userId - The ID of the user performing the payment validation.
  * @param orderId - The identifier of the order for which the payment is being validated.
@@ -736,7 +740,7 @@ export async function refundPayment(
  *   - paymentMethod: The method used for the payment.
  *   - paymentSite: The site where the payment was made.
  *
- * @returns A promise that resolves to an ActionsReturnType object. On success, it contains a flag indicating true; on failure, it includes a relevant error message.
+ * @returns A promise that resolves to an ActionsReturnType object. On success, the object indicates success; on failure, it contains an error message.
  */
 export async function validatePayment(
   userId: string,
