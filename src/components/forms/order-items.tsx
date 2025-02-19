@@ -1,7 +1,7 @@
 'use client';
 
-import { ProductSize } from "@prisma/client";
-import { useState } from "react";
+import { Prisma, ProductSize } from "@prisma/client";
+import { useMemo, useState } from "react";
 import { FiPackage, FiTag, FiDollarSign, FiHash, FiEdit3, FiTrash2, FiPlus } from "react-icons/fi";
 import { FormSection } from "./form-section";
 import { Button } from "@/components/ui/button";
@@ -13,11 +13,30 @@ import { Combobox } from "@/components/ui/combobox";
 import { Badge } from "@/components/ui/badge";
 import useToast from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
+import { useUserQuery } from "@/hooks/users.hooks";
 
-type OrderItemDisplay = {
-  productName: string;
-  variantName: string;
-  price: number;
+// Define types for role-based pricing
+type RolePricing = {
+  ALUMNI?: number;
+  OTHERS: number;
+  PLAYER?: number;
+  STUDENT?: number;
+  STAFF_FACULTY?: number;
+  [key: string]: number | undefined;
+};
+
+type ProductWithVariants = {
+  id: string;
+  title: string;
+  postedBy: {
+    college: string;
+  };
+  variants: Array<{
+    id: string;
+    variantName: string;
+    price: Prisma.Decimal | number;  // Support both Decimal and number
+    rolePricing: RolePricing;
+  }>;
 };
 
 export type OrderItem = {
@@ -25,14 +44,73 @@ export type OrderItem = {
   quantity: number;
   customerNote?: string;
   size?: ProductSize;
-} & OrderItemDisplay;
+  price: number;
+  originalPrice: number;
+  appliedRole: string;
+  productName: string;  // For display purposes
+  variantName: string;  // For display purposes
+};
 
 type OrderItemsProps = {
   onItemsChange: (items: OrderItem[]) => void;
   disabled?: boolean;
+  customerId?: string;
 };
 
-export function OrderItems({ onItemsChange, disabled }: Readonly<OrderItemsProps>) {
+// Update pricing function with proper types
+const getRolePricingDetails = (
+  product: ProductWithVariants,
+  variant: ProductWithVariants["variants"][0],
+  customerRole: string | undefined | null,
+  customerCollege: string | undefined | null
+) => {
+  try {
+    const rolePricing = variant.rolePricing;
+    
+    // Ensure we have a valid rolePricing object with OTHERS price
+    if (!rolePricing || typeof rolePricing.OTHERS !== 'number') {
+      return {
+        price: Number(variant.price) || 0,
+        appliedRole: "OTHERS"
+      };
+    }
+
+    // If no customer role or college is provided, default to OTHERS
+    if (!customerRole || !customerCollege) {
+      return {
+        price: rolePricing.OTHERS,
+        appliedRole: "OTHERS"
+      };
+    }
+
+    const isFromSameCollege = product.postedBy?.college === customerCollege && 
+                             customerCollege !== "NOT_APPLICABLE";
+
+    // Check if customer has a role-specific price and is from the same college
+    if (isFromSameCollege && 
+        typeof rolePricing[customerRole] === 'number' && 
+        rolePricing[customerRole] !== undefined) {
+      return {
+        price: rolePricing[customerRole],
+        appliedRole: customerRole
+      };
+    }
+
+    // Default to OTHERS price
+    return {
+      price: rolePricing.OTHERS,
+      appliedRole: "OTHERS"
+    };
+  } catch (error) {
+    console.error(`Error processing role pricing for variant ${variant.id}:`, error);
+    return {
+      price: Number(variant.price) || 0,
+      appliedRole: "OTHERS"
+    };
+  }
+};
+
+export function OrderItems({ onItemsChange, disabled, customerId }: Readonly<OrderItemsProps>) {
   const [selectedProduct, setSelectedProduct] = useState<string>("");
   const [selectedVariant, setSelectedVariant] = useState<string>("");
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
@@ -40,22 +118,85 @@ export function OrderItems({ onItemsChange, disabled }: Readonly<OrderItemsProps
   const [note, setNote] = useState("");
   const showToast = useToast;
 
+  // Fetch customer data to get their role and college
+  const { data: customerData } = useUserQuery(customerId ?? "");
+  
   const { data: productsData, isLoading } = useProductsQuery({
     take: 50,
-    limit: 50
+    limit: 50,
+    include: {
+      variants: {
+        select: {
+          id: true,
+          variantName: true,
+          price: true,
+          rolePricing: true
+        }
+      },
+      postedBy: {
+        select: {
+          college: true
+        }
+      }
+    },
+    where: {
+      isDeleted: false
+    }
   });
-  const products = (productsData?.data || []);
+
+  const products = useMemo(() => {
+    return (productsData?.data || []).map(product => ({
+      ...product,
+      variants: product.variants.map(variant => ({
+        ...variant,
+        price: Number(variant.price)
+      }))
+    }));
+  }, [productsData?.data]);
   
-  const productOptions = products.map((p) => ({
+  const productOptions = useMemo(() => products.map((p) => ({
     label: p.title,
     value: p.id
-  }));
+  })), [products]);
 
-  const selectedProductData = products.find((p) => p.id === selectedProduct);
-  const variantOptions = selectedProductData?.variants.map((v) => ({
-    label: `${v.variantName} - $${v.price}`,
-    value: v.id
-  })) || [];
+  const selectedProductData = useMemo(() => 
+    products.find((p) => p.id === selectedProduct),
+  [products, selectedProduct]
+  );
+
+  const variantOptions = useMemo(() => {
+    if (!selectedProductData?.variants) {
+      return [];
+    }
+    
+    if (!Array.isArray(selectedProductData.variants)) {
+      console.error('Variants data is not in the expected format');
+      return [];
+    }
+    
+    return selectedProductData.variants
+      .filter(v => v.variantName && v.rolePricing) 
+      .map((v) => {
+        try {
+          const pricingDetails = getRolePricingDetails(
+            // @ts-expect-error - selectedProductData is not null
+            selectedProductData,
+            v,
+            customerData?.role ?? "OTHERS",
+            customerData?.college ?? "NOT_APPLICABLE"
+          );
+          
+          return {
+            label: `${v.variantName} - $${pricingDetails.price} (${pricingDetails.appliedRole})`,
+            value: v.id
+          };
+        } catch (error) {
+          console.error('Error processing variant:', error);
+          return null;
+        }
+      })
+      .filter(Boolean); // Remove any null entries from errors
+  }, [selectedProductData, customerData]);
 
   const validateSelection = () => {
     if (!selectedProduct || !selectedVariant) {
@@ -107,6 +248,18 @@ export function OrderItems({ onItemsChange, disabled }: Readonly<OrderItemsProps
     if (!validateQuantity()) return;
 
     const { product, variant } = selection;
+    
+    // Get role-based pricing
+    const pricingDetails = getRolePricingDetails(
+      // @ts-expect-error - product and variant are not null
+      product, 
+      variant, 
+      customerData?.role ?? "OTHERS",
+      customerData?.college ?? "NOT_APPLICABLE"
+    );
+
+    // Ensure price is properly converted to a number and has 2 decimal places
+    const price = Number(parseFloat(pricingDetails.price.toString()).toFixed(2));
 
     const newItem: OrderItem = {
       variantId: variant.id,
@@ -114,7 +267,9 @@ export function OrderItems({ onItemsChange, disabled }: Readonly<OrderItemsProps
       customerNote: note || undefined,
       productName: product.title,
       variantName: variant.variantName,
-      price: Number(variant.price)
+      price,
+      originalPrice: price, // Set originalPrice same as price
+      appliedRole: pricingDetails.appliedRole
     };
 
     const newItems = [...orderItems, newItem];
@@ -162,7 +317,7 @@ export function OrderItems({ onItemsChange, disabled }: Readonly<OrderItemsProps
                   </Label>
                   <div className="mt-1.5">
                     <Combobox
-                      options={variantOptions}
+                      options={variantOptions as { label: string; value: string }[]}
                       value={selectedVariant}
                       onSelect={setSelectedVariant}
                       placeholder="Choose variant..."
@@ -255,15 +410,20 @@ export function OrderItems({ onItemsChange, disabled }: Readonly<OrderItemsProps
                       {item.size && (
                         <Badge variant="secondary" className="text-xs">Size: {item.size}</Badge>
                       )}
+                      <Badge variant="secondary" className="text-xs">Role: {item.appliedRole}</Badge>
                     </div>
                     <div className="text-muted-foreground flex items-center gap-3 text-xs">
                       <span className="flex items-center gap-1">
                         <FiHash className="size-3" />
                         Qty: {item.quantity}
                       </span>
+                      <span className="flex items-center gap-1">
+                        <FiDollarSign className="size-3" />
+                        Price: ${item.price}/unit
+                      </span>
                       <span className="flex items-center gap-1 font-medium text-primary">
                         <FiDollarSign className="size-3" />
-                        ${(item.price * item.quantity).toFixed(2)}
+                        Total: ${(item.price * item.quantity).toFixed(2)}
                       </span>
                     </div>
                     {item.customerNote && (

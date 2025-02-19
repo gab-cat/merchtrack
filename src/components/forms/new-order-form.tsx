@@ -7,6 +7,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { FiCheckCircle, FiPackage, FiShoppingBag } from "react-icons/fi";
 import Link from "next/link";
+import { User } from "@prisma/client";
 import { CustomerValidation } from "./customer-validation";
 import { OrderItems, type OrderItem } from "./order-items";
 import { OrderSummary } from "./order-summary";
@@ -20,7 +21,7 @@ import { Button } from "@/components/ui/button";
 export function NewOrderForm() {
   const { userId } = useUserStore();
   const router = useRouter();
-  const [customerId, setCustomerId] = useState<string>('');
+  const [customer, setCustomer] = useState<User | null>(null);
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [date, setDate] = useState<Date>(new Date());
   const showToast = useToast;
@@ -38,9 +39,20 @@ export function NewOrderForm() {
     }
   });
 
+  React.useEffect(() => {
+    form.setValue('processedById', userId as string);
+  }, [userId, form]);
+
   const calculateTotalAmount = (items: OrderItem[], discountAmount: number = 0) => {
-    const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    return Math.max(0, subtotal - discountAmount);
+    // Calculate subtotal with proper decimal handling
+    const subtotal = items.reduce((sum, item) => {
+      // Ensure price and quantity are properly multiplied and rounded to 2 decimals
+      const itemTotal = Number((item.price * item.quantity).toFixed(2));
+      return sum + itemTotal;
+    }, 0);
+
+    // Ensure final amount is rounded to 2 decimals
+    return Number((Math.max(0, subtotal - discountAmount)).toFixed(2));
   };
 
   // Update total amount whenever order items or discount changes
@@ -52,13 +64,13 @@ export function NewOrderForm() {
 
   // Update form values when customerId changes
   React.useEffect(() => {
-    if (customerId) {
-      form.setValue('customerId', customerId, {
+    if (customer?.id) {
+      form.setValue('customerId', customer.id, {
         shouldValidate: true,
         shouldDirty: true,
       });
     }
-  }, [customerId, form]);
+  }, [customer, form]);
 
   // Update form values when date changes
   React.useEffect(() => {
@@ -74,7 +86,10 @@ export function NewOrderForm() {
       variantId: item.variantId,
       quantity: item.quantity,
       customerNote: item.customerNote,
-      size: item.size
+      size: item.size,
+      price: Number(item.price),
+      originalPrice: Number(item.price),
+      appliedRole: item.appliedRole
     }));
     
     form.setValue('orderItems', formattedItems, {
@@ -86,13 +101,22 @@ export function NewOrderForm() {
 
   const mutation = useMutation({
     mutationFn: (data: CreateOrderType) => createOrder(userId!, data),
-    onSuccess: () => {
-      showToast({
-        type: "success",
-        title: "Order Created",
-        message: "The order has been created successfully."
-      });
-      router.push('/admin/orders');
+    onSuccess: (data) => {
+      if (!data.success) {
+        showToast({
+          type: "error",
+          title: "Error creating order",
+          message: data.message ?? "Failed to create order. Please try again."
+        });
+      } else {
+        showToast({
+          type: "success",
+          title: "Order Created",
+          message: "The order has been created successfully."
+        });
+        // @ts-expect-error - data is not null
+        router.push(`/admin/orders/${data.data?.id}`);
+      }
     },
     onError: (error) => {
       showToast({
@@ -104,7 +128,7 @@ export function NewOrderForm() {
   });
 
   const handleSubmit = async (data: CreateOrderType) => {
-    if (!customerId) {
+    if (!customer?.id) {
       showToast({
         type: "error",
         title: "Error",
@@ -122,18 +146,10 @@ export function NewOrderForm() {
       return;
     }
 
-    const formattedItems = orderItems.map(item => ({
-      variantId: item.variantId,
-      quantity: item.quantity,
-      customerNote: item.customerNote,
-      size: item.size
-    }));
-
     try {
       mutation.mutate({
         ...data,
-        customerId,
-        orderItems: formattedItems,
+        customerId: customer.id,
         totalAmount: calculateTotalAmount(orderItems, data.discountAmount),
         estimatedDelivery: date,
       });
@@ -155,7 +171,7 @@ export function NewOrderForm() {
 
   // Calculate current step
   const getCurrentStep = () => {
-    if (!customerId) return 1;
+    if (!customer?.id) return 1;
     if (orderItems.length === 0) return 2;
     return 3;
   };
@@ -201,16 +217,17 @@ export function NewOrderForm() {
       <div className="grid gap-6">
         <div className="mx-auto w-full max-w-3xl">
           <CustomerValidation 
-            onCustomerValidated={setCustomerId}
+            onCustomerValidated={setCustomer}
             disabled={mutation.isPending}
           />
         </div>
 
-        {customerId && (
+        {customer?.id && (
           <div className="mx-auto w-full">
             <OrderItems
               onItemsChange={setOrderItems}
               disabled={mutation.isPending}
+              customerId={customer.email}
             />
           </div>
         )}

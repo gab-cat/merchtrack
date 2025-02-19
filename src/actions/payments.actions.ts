@@ -495,6 +495,15 @@ export async function processPayment({
       userText: `Payment of ₱${amount} has been processed successfully${isFullyPaid ? '. Your order is now fully paid.' : '.'}`
     });
 
+    // Send payment notification email
+    await sendPaymentStatusEmail({
+      orderNumber: orderId,
+      customerName: `${order.customer.firstName} ${order.customer.lastName}`,
+      customerEmail: order.customer.email,
+      amount,
+      status: 'verified'
+    });
+
     // Invalidate caches
     await Promise.all([
       setCached(`payments:order:${orderId}`, null),
@@ -662,14 +671,14 @@ export async function refundPayment(
     });
 
     // Send refund notification email
-    await sendPaymentStatusEmail(
-      refund.order.id,
-      `${refund.order.customer.firstName} ${refund.order.customer.lastName}`,
-      refund.order.customer.email,
-      Number(refund.amount),
-      'refunded',
-      reason
-    );
+    await sendPaymentStatusEmail({
+      orderNumber: refund.order.id,
+      customerName: `${refund.order.customer.firstName} ${refund.order.customer.lastName}`,
+      customerEmail: refund.order.customer.email,
+      amount: Number(refund.amount),
+      status: 'refunded',
+      refundReason: reason
+    });
 
     // Invalidate caches
     await Promise.all([
@@ -853,13 +862,13 @@ export async function validatePayment(
     });
 
     // Send payment verification email
-    await sendPaymentStatusEmail(
-      verifiedPayment.order.id,
-      `${verifiedPayment.order.customer.firstName} ${verifiedPayment.order.customer.lastName}`,
-      verifiedPayment.order.customer.email,
-      Number(verifiedPayment.amount),
-      'verified'
-    );
+    await sendPaymentStatusEmail({
+      orderNumber: verifiedPayment.order.id,
+      customerName: `${verifiedPayment.order.customer.firstName} ${verifiedPayment.order.customer.lastName}`,
+      customerEmail: verifiedPayment.order.customer.email,
+      amount: Number(verifiedPayment.amount),
+      status: 'verified'
+    });
 
     // Invalidate caches
     await Promise.all([

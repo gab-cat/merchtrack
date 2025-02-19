@@ -1,5 +1,6 @@
 import { BiPackage, BiCheckCircle, BiMoney } from "react-icons/bi";
 import { FC } from "react";
+import Link from "next/link";
 import { OrderStatus, OrderPaymentStatus } from "@/types/orders";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -8,18 +9,16 @@ interface OrderActionButtonsProps {
   status: OrderStatus;
   paymentStatus: OrderPaymentStatus;
   isUpdatingStatus: boolean;
-  isUpdatingPayment: boolean;
   onUpdateStatus: (status: OrderStatus) => void;
-  onUpdatePayment: (status: OrderPaymentStatus) => void;
+  orderId: string;
 }
 
 export const OrderActionButtons: FC<OrderActionButtonsProps> = ({
   status,
   paymentStatus,
   isUpdatingStatus,
-  isUpdatingPayment,
   onUpdateStatus,
-  onUpdatePayment
+  orderId
 }) => {
   const renderProcessingButton = () => (
     <AlertDialog>
@@ -84,40 +83,21 @@ export const OrderActionButtons: FC<OrderActionButtonsProps> = ({
   );
 
   const renderPendingPaymentButton = () => (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button 
-          variant="outline"
-          disabled={isUpdatingPayment}
-        >
-          <BiMoney className="mr-2 size-4" />
-          {isUpdatingPayment ? "Updating..." : "Mark as Paid"}
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Mark Payment as Paid?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This action will mark the payment as completed. Please ensure you have received and verified the payment.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={() => onUpdatePayment(OrderPaymentStatus.PAID)}
-          >
-            Continue
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <Link href={`/admin/payments?orderId=${orderId}`} passHref>
+      <Button
+        variant='outline' >
+        <BiMoney className="mr-2 size-4" />
+        Make Payment for Order
+      </Button>
+    </Link>
+
   );
 
   return (
     <div className="flex items-center gap-4">
       {status === OrderStatus.PROCESSING && renderProcessingButton()}
       {status === OrderStatus.READY && renderReadyButton()}
-      {paymentStatus === OrderPaymentStatus.PENDING && renderPendingPaymentButton()}
+      {(paymentStatus === OrderPaymentStatus.PENDING || paymentStatus === OrderPaymentStatus.DOWNPAYMENT) && renderPendingPaymentButton()}
     </div>
   );
 };

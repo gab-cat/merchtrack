@@ -4,6 +4,7 @@ import React from "react";
 import { PaymentStatus } from "@prisma/client";
 import { BiSearch } from "react-icons/bi";
 import { FaMoneyBill } from "react-icons/fa";
+import { useSearchParams, useRouter } from "next/navigation";
 import { OrdersPaymentTable } from "./orders-payment-table";
 import { OffsitePayment } from "./offsite-payment";
 import { TransactionHistory } from "@/app/admin/payments/components/transaction-history";
@@ -17,7 +18,12 @@ export function PaymentsContent() {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [searchField, setSearchField] = React.useState("orderNo");
   const [currentPage, setCurrentPage] = React.useState(1);
+  const [selectedOrderId, setSelectedOrderId] = React.useState<string | null>(null);
   const itemsPerPage = 10;
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const orderId = searchParams.get('orderId');
 
   const { data: orders, isLoading } = useOrdersQuery({
     where: {
@@ -37,7 +43,25 @@ export function PaymentsContent() {
     }
   });
 
-  const totalPages = Math.ceil((orders?.data.length || 0) / itemsPerPage);
+  // Effect to handle URL orderId parameter
+  React.useEffect(() => {
+    if (orderId && orders?.data) {
+      const order = orders.data.find(o => o.id === orderId);
+      if (order) {
+        setSelectedOrderId(orderId);
+      }
+    }
+  }, [orderId, orders?.data]);
+
+  // Cleanup effect when modal is closed
+  const handleModalClose = () => {
+    setSelectedOrderId(null);
+    // Remove orderId from URL without page refresh
+    const newUrl = window.location.pathname;
+    router.replace(newUrl);
+  };
+
+  const totalPages = Math.ceil((orders?.data.length ?? 0) / itemsPerPage);
 
   const filteredOrders = React.useMemo(() => {
     if (!orders?.data || !searchQuery) return orders?.data;
@@ -92,6 +116,9 @@ export function PaymentsContent() {
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={setCurrentPage}
+            selectedOrderId={selectedOrderId}
+            onOrderSelect={setSelectedOrderId}
+            onModalClose={handleModalClose}
           />
         </div>
       </div>

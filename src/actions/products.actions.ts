@@ -84,7 +84,9 @@ export async function getProducts(
                 firstName: true,
                 lastName: true,
                 clerkId: true,
-                email: true
+                email: true,
+                college: true,  // Add college field
+                role: true     // Add role field
               }
             },
             reviews: {
@@ -107,7 +109,9 @@ export async function getProducts(
                 id: true,
                 variantName: true,
                 price: true,
-                rolePricing: true
+                rolePricing: true,
+                createdAt: true,
+                updatedAt: true
               }
             }
           },

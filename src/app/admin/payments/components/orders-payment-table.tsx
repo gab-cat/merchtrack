@@ -24,6 +24,9 @@ interface OrdersPaymentTableProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  selectedOrderId: string | null;
+  onOrderSelect: (orderId: string) => void;
+  onModalClose: () => void;
 }
 
 export function OrdersPaymentTable({ 
@@ -31,15 +34,17 @@ export function OrdersPaymentTable({
   isLoading,
   currentPage,
   totalPages,
-  onPageChange 
+  onPageChange,
+  selectedOrderId,
+  onOrderSelect,
+  onModalClose
 }: OrdersPaymentTableProps) {
-  const [selectedOrder, setSelectedOrder] = React.useState<ExtendedOrder | null>(null);
-  const [modalOpen, setModalOpen] = React.useState(false);
   const [parent] = useAutoAnimate();
 
+  const selectedOrder = selectedOrderId ? orders?.find(o => o.id === selectedOrderId) || null : null;
+
   const handleOrderClick = (order: ExtendedOrder) => {
-    setSelectedOrder(order);
-    setModalOpen(true);
+    onOrderSelect(order.id);
   };
 
   if (isLoading) {
@@ -130,8 +135,10 @@ export function OrdersPaymentTable({
 
       <OrderPaymentModal
         order={selectedOrder}
-        open={modalOpen}
-        onOpenChange={setModalOpen}
+        open={!!selectedOrderId}
+        onOpenChange={(open) => {
+          if (!open) onModalClose();
+        }}
       />
     </>
   );

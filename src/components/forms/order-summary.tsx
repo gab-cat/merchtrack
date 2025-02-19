@@ -236,6 +236,7 @@ export function OrderSummary({
 }: Readonly<OrderSummaryProps>) {
   const { watch, setValue, formState: { errors } } = form;
   const showToast = useToast;
+  console.log(errors);
 
   const totalAmount = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const discountAmount = watch('discountAmount') || 0;

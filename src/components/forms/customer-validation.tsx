@@ -1,5 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { FiLoader, FiMail, FiPhone, FiUser, FiUsers, FiBookOpen, FiTag } from "react-icons/fi";
+import { User } from "@prisma/client";
 import { FormSection } from "./form-section";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
 type CustomerValidationProps = {
-  onCustomerValidated: (customerId: string) => void;
+  onCustomerValidated: (customer: User | null) => void;
   disabled?: boolean;
 };
 
@@ -19,9 +20,10 @@ export function CustomerValidation({ onCustomerValidated, disabled }: Readonly<C
   const [validatedEmail, setValidatedEmail] = useState<string | null>(null);
   const { data: userData, isLoading, error } = useUserQuery(validatedEmail as string);
 
-  const handleSuccess = useCallback(() => {
-    if (userData?.id) {
-      onCustomerValidated(userData.id);
+  // Move success handler into an effect
+  useEffect(() => {
+    if (userData?.email) {
+      onCustomerValidated(userData);
     }
   }, [userData, onCustomerValidated]);
 
@@ -34,7 +36,7 @@ export function CustomerValidation({ onCustomerValidated, disabled }: Readonly<C
   const handleReset = () => {
     setEmail("");
     setValidatedEmail(null);
-    onCustomerValidated("");
+    onCustomerValidated(null);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -71,9 +73,6 @@ export function CustomerValidation({ onCustomerValidated, disabled }: Readonly<C
   }
 
   if (userData && validatedEmail) {
-    // If we have data, trigger success callback
-    handleSuccess();
-
     return (
       <FormSection title="Customer Information">
         <Card className="border-border bg-card/50 backdrop-blur-sm">

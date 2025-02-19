@@ -46,10 +46,23 @@ export function OrdersTable() {
       createdAt: "desc"
     },
     where: {
-      ...(debouncedSearch && { search: debouncedSearch }),
-      ...(debouncedFilters.orderStatus && { status: debouncedFilters.orderStatus }),
-      ...(debouncedFilters.paymentStatus && { paymentStatus: debouncedFilters.paymentStatus }),
-      ...(debouncedFilters.customerType && { customer: { role: debouncedFilters.customerType } })
+      AND: [
+        ...(debouncedSearch ? [{
+          OR: [
+            { id: { contains: debouncedSearch, mode: 'insensitive' } },
+            { customer: { 
+              OR: [
+                { firstName: { contains: debouncedSearch, mode: 'insensitive' } },
+                { lastName: { contains: debouncedSearch, mode: 'insensitive' } },
+                { email: { contains: debouncedSearch, mode: 'insensitive' } }
+              ]
+            }},
+          ]
+        }] : []),
+        ...(debouncedFilters.orderStatus ? [{ status: debouncedFilters.orderStatus }] : []),
+        ...(debouncedFilters.paymentStatus ? [{ paymentStatus: debouncedFilters.paymentStatus }] : []),
+        ...(debouncedFilters.customerType ? [{ customer: { role: debouncedFilters.customerType } }] : [])
+      ]
     }
   });
 

@@ -9,7 +9,7 @@ import { QueryParams, PaginatedResponse } from "@/types/common";
 import { calculatePagination, removeFields } from "@/utils/query.utils";
 import { GetObjectByTParams } from "@/types/extended";
 import { createOrderSchema, CreateOrderType } from "@/schema/orders.schema";
-import { sendOrderConfirmationEmail, sendOrderStatusEmail } from "@/lib/email-service";
+import { sendOrderConfirmationEmail } from "@/lib/email-service";
 
 /**
  * Retrieves a paginated list of orders with optional field filtering.
@@ -286,7 +286,9 @@ export async function createOrder(userId: string, data: CreateOrderType): Promis
               quantity: item.quantity,
               customerNote: item.customerNote,
               size: item.size,
-              price: 0, // This will be updated based on the variant price
+              price: item.price,
+              originalPrice: item.originalPrice,
+              appliedRole: item.appliedRole
             }))
           }
         }
@@ -308,11 +310,11 @@ export async function createOrder(userId: string, data: CreateOrderType): Promis
     });
 
     // Send order confirmation email
-    await sendOrderConfirmationEmail(
+    await sendOrderConfirmationEmail({
       order,
-      `${order.customer.firstName} ${order.customer.lastName}`,
-      order.customer.email
-    );
+      customerName: `${order.customer.firstName} ${order.customer.lastName}`,
+      customerEmail: order.customer.email
+    });
 
     // Invalidate cache
     await Promise.all([
@@ -326,7 +328,7 @@ export async function createOrder(userId: string, data: CreateOrderType): Promis
     
     return {
       success: true,
-      data: order as CreateOrderType
+      data: JSON.parse(JSON.stringify(order))
     };
   } catch (error) {
     return {
@@ -335,36 +337,3 @@ export async function createOrder(userId: string, data: CreateOrderType): Promis
     };
   }
 }
-
-export async function updateOrderPaymentStatus(){
-  throw new Error('Not implemented');
-};
-
-export async function updateOrderStatus(params: UpdateOrderStatusParams): Promise<ActionsReturnType<Order>> {
-  // ...existing code...
-
-  const updatedOrder = await prisma.order.update({
-    where: { id: params.orderId },
-    data: { status: params.newStatus },
-    include: {
-      customer: true
-    }
-  });
-
-  // Send status update email
-  if (['processing', 'ready', 'completed'].includes(params.newStatus)) {
-    const surveyLink = params.newStatus === 'completed' 
-      ? `${process.env.NEXT_PUBLIC_APP_URL}/survey/${updatedOrder.id}`
-      : undefined;
-
-    await sendOrderStatusEmail(
-      updatedOrder.orderNumber,
-      updatedOrder.customer.name,
-      updatedOrder.customer.email,
-      params.newStatus as 'processing' | 'ready' | 'completed',
-      surveyLink
-    );
-  }
-
-  // ...existing code...
-};

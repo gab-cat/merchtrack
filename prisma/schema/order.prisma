@@ -37,6 +37,8 @@ model OrderItem {
   variantId    String
   quantity     Int
   price        Decimal    @default(0)
+  originalPrice Decimal   @default(0)
+  appliedRole  String    @default("OTHERS")
   customerNote String?
   size         ProductSize?
   createdAt    DateTime   @default(now())

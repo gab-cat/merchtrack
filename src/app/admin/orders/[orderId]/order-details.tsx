@@ -7,11 +7,12 @@ import { useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { FaBoxes } from "react-icons/fa";
 import { MdPayments } from "react-icons/md";
+import Link from "next/link";
 import { OrderStatusCard } from "./order-status-card";
 import { OrderActionButtons } from "./order-action-buttons";
 import { OrderItemsTable } from "./order-items-table";
 import { PaymentsTable } from "./payments-table";
-import { updateOrderStatus, updateOrderPaymentStatus } from "./_actions";
+import { updateOrderStatus } from "./_actions";
 import { OrderStatus, OrderPaymentStatus } from "@/types/orders";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -56,22 +57,6 @@ export const OrderDetails: FC<OrderDetailsProps> = ({ orderId, userId }) => {
     }
   });
 
-  const { mutate: updatePayment, isPending: isUpdatingPayment } = useMutation({
-    mutationFn: async (newStatus: OrderPaymentStatus) => {
-      const result = await updateOrderPaymentStatus(orderId, newStatus, userId);
-      if (!result.success) {
-        throw new Error(result.message);
-      }
-      return result.data;
-    },
-    onSuccess: () => {
-      toast.success("Payment status updated successfully");
-      refetch();
-    },
-    onError: (error) => {
-      toast.error(error.message || "Failed to update payment status");
-    }
-  });
 
   if (isLoading) {
     return (
@@ -106,9 +91,8 @@ export const OrderDetails: FC<OrderDetailsProps> = ({ orderId, userId }) => {
             status={order.status as OrderStatus}
             paymentStatus={order.paymentStatus as OrderPaymentStatus}
             isUpdatingStatus={isUpdatingStatus}
-            isUpdatingPayment={isUpdatingPayment}
             onUpdateStatus={updateStatus}
-            onUpdatePayment={updatePayment}
+            orderId={orderId}
           />
         </div>
       </div>
@@ -129,7 +113,11 @@ export const OrderDetails: FC<OrderDetailsProps> = ({ orderId, userId }) => {
                   <span className="font-semibold text-neutral-7">Name:</span>
                   <span>{order.customer.firstName} {order.customer.lastName}</span>
                   <span className="font-semibold text-neutral-7">Email:</span>
-                  <span className="break-all">{order.customer.email}</span>
+                  <span className="break-all text-primary underline">
+                    <Link href={`/admin/users/${order.customer.email}`} passHref>
+                      {order.customer.email}
+                    </Link>
+                  </span>
                   <span className="font-semibold text-neutral-7">Phone:</span>
                   <span>{order.customer.phone || '—'}</span>
                 </div>
@@ -141,11 +129,11 @@ export const OrderDetails: FC<OrderDetailsProps> = ({ orderId, userId }) => {
                 <h3 className="mb-2 font-semibold text-neutral-7">Payment Details</h3>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <span className="font-semibold text-neutral-7">Subtotal:</span>
-                  <span>{formatCurrency(Number(order.totalAmount))}</span>
+                  <span>{formatCurrency(Number(order.totalAmount + order.discountAmount))}</span>
                   <span className="font-semibold text-neutral-7">Discount:</span>
                   <span>- {formatCurrency(Number(order.discountAmount))}</span>
                   <span className="font-semibold text-accent-destructive">Total:</span>
-                  <span className="font-semibold text-accent-destructive">{formatCurrency(Number(order.totalAmount - order.discountAmount))}</span>
+                  <span className="font-semibold text-accent-destructive">{formatCurrency(Number(order.totalAmount))}</span>
                 </div>
               </div>
             </div>

@@ -1,4 +1,4 @@
-import { ProductSize } from "@prisma/client";
+import { ProductSize, User } from "@prisma/client";
 
 export type ExtendedProductVariant = {
   id: string;
@@ -33,4 +33,5 @@ export type ExtendedProduct = {
   createdAt: Date;
   updatedAt: Date;
   variants: ExtendedProductVariant[];
+  postedBy: User;
 };

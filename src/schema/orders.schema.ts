@@ -38,6 +38,19 @@ export const orderItemSchema = z.object({
     .max(100, "Maximum quantity per item is 100"),
   customerNote: z.string().max(500, "Note cannot exceed 500 characters").optional(),
   size: z.nativeEnum(ProductSize).optional(),
+  price: z.number({
+    required_error: "Price is required",
+    invalid_type_error: "Price must be a number",
+  })
+    .nonnegative("Price cannot be negative"),
+  originalPrice: z.number({
+    required_error: "Original price is required",
+    invalid_type_error: "Original price must be a number",
+  })
+    .nonnegative("Original price cannot be negative"),
+  appliedRole: z.string({
+    required_error: "Applied role is required",
+  }),
 });
 
 // Schema for creating orders

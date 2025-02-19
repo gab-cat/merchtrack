@@ -6,6 +6,9 @@ import PageAnimation from "@/components/public/page-animation";
 import PermissionDenied from "@/components/private/permission-denied";
 import "@/components/ui/alert-dialog";
 import PageTitle from "@/components/private/page-title";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { RiArrowGoBackFill } from "react-icons/ri";
 
 interface Props {
   params: Promise<{
@@ -37,6 +40,12 @@ export default async function OrderDetailPage({ params }: Readonly<Props>) {
     <PageAnimation>
       <div className="p-6">
         <PageTitle title="Order Details" />
+        <Link href="/admin/orders" className="flex w-full justify-end pr-4">
+          <Button variant="outline" className="flex items-center">
+            <RiArrowGoBackFill />
+            Back to Orders
+          </Button>
+        </Link>
         <OrderDetails orderId={orderId} userId={userId} />
       </div>
     </PageAnimation>

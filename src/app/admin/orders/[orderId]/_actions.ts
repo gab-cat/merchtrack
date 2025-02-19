@@ -40,13 +40,13 @@ export async function updateOrderStatus(
       }
     });
 
-    await sendOrderStatusEmail(
-      updatedOrder.id,
-      updatedOrder.customer.firstName as string,
-      updatedOrder.customer.email,
+    await sendOrderStatusEmail({
+      orderNumber: updatedOrder.id,
+      customerName: `${updatedOrder.customer.firstName} ${updatedOrder.customer.lastName}`,
+      customerEmail: updatedOrder.customer.email,
       newStatus,
-      'sample/link'
-    );
+      surveyLink: 'https://example.com/survey'
+    });
 
     revalidatePath(`/admin/orders/${orderId}`);
     revalidatePath('/admin/orders');

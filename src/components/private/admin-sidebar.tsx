@@ -61,12 +61,12 @@ export default function AdminSidebar() {
       {/* User Info and Logout */}
       <div className="mt-auto px-10 py-8">
         <div className="flex items-center gap-2 py-4">
-          <div className="relative size-12">
+          <div className="relative size-12" suppressHydrationWarning>
             <UserButton appearance={{ 
               elements: {
-                userButtonAvatarBox: "w-12 h-12", // Custom width and height
-                userButtonPopoverCard: "bg-blue-100", // Custom background for the popover card
-                userButtonPopoverActionButton: "text-neutral-600", // Custom text color for action buttons
+                userButtonAvatarBox: "w-12 h-12",
+                userButtonPopoverCard: "bg-blue-100", 
+                userButtonPopoverActionButton: "text-neutral-600",
               }
             }} 
             />
