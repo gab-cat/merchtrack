@@ -6,10 +6,11 @@ import { revalidatePath } from "next/cache";
 import { getCached, setCached } from "@/lib/redis";
 import { PaginatedResponse, QueryParams } from "@/types/common";
 import { verifyPermission } from "@/utils/permissions";
-import { calculatePagination, removeFields } from "@/utils/query.utils";
+import { calculatePagination } from "@/utils/query.utils";
 import prisma from "@/lib/db";
 import { GetObjectByTParams } from "@/types/extended";
 import { ExtendedUser } from "@/types/users";
+import { processActionReturnData } from "@/utils";
 
 export const getClerkUserPublicData = async (userId: string): Promise<ActionsReturnType<User>> => {
   const user = await (await clerkClient()).users.getUser(userId);
@@ -130,14 +131,11 @@ export async function getUsers({userId, params}: GetUsersParams): Promise<Action
     }
 
     const lastPage = Math.ceil(total/ take);
-    const processedUsers = users.map(user => {
-      return removeFields(user, params.limitFields);
-    });
 
     return {
       success: true,
       data: {
-        data: JSON.parse(JSON.stringify(processedUsers)),
+        data: processActionReturnData(users, params.limitFields) as PrismaUser[],
         metadata: {
           total: total,
           page: page,
@@ -231,7 +229,7 @@ export async function getUser({userId, limitFields, userLookupId}: GetObjectByTP
 
     return {
       success: true,
-      data: JSON.parse(JSON.stringify(removeFields(user, limitFields) as ExtendedUser))
+      data: processActionReturnData(user, limitFields) as ExtendedUser
     };
   } catch (error) {
     return {
@@ -311,7 +309,7 @@ export async function updateUserRole({ userId, currentUserId, role }: UpdateUser
 
     return {
       success: true,
-      data: updatedUser
+      data: processActionReturnData(updatedUser, []) as PrismaUser
     };
   } catch (error) {
     return {

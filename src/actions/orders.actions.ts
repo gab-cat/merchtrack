@@ -2,14 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import prisma from "@/lib/db";
-import { verifyPermission } from "@/utils/permissions";
 import { ExtendedOrder } from "@/types/orders";
 import { getCached, setCached } from "@/lib/redis";
 import { QueryParams, PaginatedResponse } from "@/types/common";
-import { calculatePagination, removeFields } from "@/utils/query.utils";
 import { GetObjectByTParams } from "@/types/extended";
 import { createOrderSchema, CreateOrderType } from "@/schema/orders.schema";
 import { sendOrderConfirmationEmail } from "@/lib/email-service";
+import { verifyPermission, calculatePagination, processActionReturnData } from "@/utils";
+
 
 /**
  * Retrieves a paginated list of orders with optional field filtering.
@@ -104,14 +104,11 @@ export async function getOrders(
   }
 
   const lastPage = Math.ceil(total as number / take);
-  const processedOrders = orders?.map(order => 
-    removeFields(order, params.limitFields)
-  );
 
   return {
     success: true,
     data: {
-      data: JSON.parse(JSON.stringify(processedOrders)),
+      data: processActionReturnData(orders, params.limitFields) as ExtendedOrder[],
       metadata: {
         total: total as number,
         page,
@@ -209,7 +206,7 @@ export async function getOrderById({ userId, orderId, limitFields }: GetObjectBy
 
     return {
       success: true,
-      data: JSON.parse(JSON.stringify(removeFields(order as ExtendedOrder, limitFields)))
+      data: processActionReturnData(order, limitFields) as ExtendedOrder
     };
   } catch (error) {
     console.error("Failed to fetch order:", error);
@@ -328,7 +325,7 @@ export async function createOrder(userId: string, data: CreateOrderType): Promis
     
     return {
       success: true,
-      data: JSON.parse(JSON.stringify(order))
+      data: processActionReturnData(order) as CreateOrderType
     };
   } catch (error) {
     return {

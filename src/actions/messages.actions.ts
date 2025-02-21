@@ -3,17 +3,13 @@
 import { Message } from "@prisma/client";
 import prisma from "@/lib/db";
 import { getCached, setCached } from "@/lib/redis";
-import { verifyPermission } from "@/utils/permissions";
 import { QueryParams, PaginatedResponse } from "@/types/common";
-import { calculatePagination, removeFields } from "@/utils/query.utils";
 import { ExtendedMessage } from "@/types/messages";
+import { GetObjectByTParams } from "@/types/extended";
+import { processActionReturnData, calculatePagination, verifyPermission } from "@/utils";
 
-type GetMessageParams = {
-  messageId: string
-  userId: string
-}
 
-export const getMessage = async (params: GetMessageParams): Promise<ActionsReturnType<ExtendedMessage>> => {
+export const getMessage = async (params: GetObjectByTParams<"messageId">): Promise<ActionsReturnType<ExtendedMessage>> => {
   const isAuthorized = await verifyPermission({
     userId: params.userId,
     permissions: {
@@ -59,7 +55,7 @@ export const getMessage = async (params: GetMessageParams): Promise<ActionsRetur
 
     return {
       success: true,
-      data: JSON.parse(JSON.stringify(message))
+      data: processActionReturnData(message, params.limitFields) as ExtendedMessage
     };
   } catch (error) {
     return {
@@ -129,14 +125,11 @@ export const getMessages = async (
     }
 
     const lastPage = Math.ceil(total as number / take);
-    const processedMessages = messages.map(msg => 
-      removeFields(msg, params.limitFields)
-    );
 
     return {
       success: true,
       data: {
-        data: JSON.parse(JSON.stringify(processedMessages)),
+        data: processActionReturnData(messages, params.limitFields) as ExtendedMessage[],
         metadata: {
           total: total as number,
           page,

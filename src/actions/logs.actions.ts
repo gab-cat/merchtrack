@@ -5,7 +5,7 @@ import { getCached, setCached } from "@/lib/redis";
 import { PaginatedResponse, QueryParams } from "@/types/common";
 import { ExtendedLogs } from "@/types/logs";
 import { verifyPermission } from "@/utils/permissions";
-import { removeFields } from "@/utils/query.utils";
+import { processActionReturnData } from "@/utils";
 
 type GetLogsParams = {
     userId: string,
@@ -167,16 +167,11 @@ export async function getLogs({userId, params = {} }: GetLogsParams): Promise<Ac
     }
 
     const lastPage = Math.ceil((total as number) / take);
-    const processedLogs = logs?.map(log => {
-      if (!params.limitFields) return log;
-      const plainLog = { ...log } as Record<string, unknown>;
-      return { ...removeFields(plainLog, params.limitFields) } as ExtendedLogs;
-    });
     
     return {
       success: true,
       data: {
-        data: JSON.parse(JSON.stringify(processedLogs)),
+        data: processActionReturnData(logs, params.limitFields) as ExtendedLogs[],
         metadata: {
           total: total as number,
           page,
