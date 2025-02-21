@@ -4,7 +4,7 @@ export interface ExtendedProductVariant extends ProductVariant {
   rolePricing: Record<string, number>;
 }
 
-export interface ExtendedProduct extends Product {
+export type ExtendedProduct = Product & {
   category: Category;
   reviews: Review[];
   variants: ExtendedProductVariant[];
