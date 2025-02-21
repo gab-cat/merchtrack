@@ -41,28 +41,61 @@ export async function updateOrderStatus(
   }
 
   try {
-    const updatedOrder = await prisma.order.update({
-      where: { id: orderId },
-      data: { 
-        status: newStatus,
-        processedById: userId
-      }, include:{
-        customer: {
-          select: {
-            firstName: true,
-            email: true,
-            lastName: true
+    await prisma.$transaction(async (tx) => {
+      // If the order is being cancelled, restore the inventory
+      if (newStatus === OrderStatus.CANCELLED) {
+        const order = await tx.order.findUnique({
+          where: { id: orderId },
+          include: {
+            orderItems: {
+              include: {
+                variant: true
+              }
+            }
           }
+        });
+
+        if (!order) {
+          throw new Error("Order not found");
+        }
+
+        // Restore inventory for each item
+        for (const item of order.orderItems) {
+          await tx.productVariant.update({
+            where: { id: item.variantId },
+            data: {
+              inventory: {
+                increment: item.quantity
+              }
+            }
+          });
         }
       }
-    });
 
-    await sendOrderStatusEmail({
-      orderNumber: updatedOrder.id,
-      customerName: `${updatedOrder.customer.firstName} ${updatedOrder.customer.lastName}`,
-      customerEmail: updatedOrder.customer.email,
-      newStatus,
-      surveyLink: 'https://example.com/survey'
+      const updatedOrder = await tx.order.update({
+        where: { id: orderId },
+        data: { 
+          status: newStatus,
+          processedById: userId
+        }, 
+        include: {
+          customer: {
+            select: {
+              firstName: true,
+              email: true,
+              lastName: true
+            }
+          }
+        }
+      });
+
+      await sendOrderStatusEmail({
+        orderNumber: updatedOrder.id,
+        customerName: `${updatedOrder.customer.firstName} ${updatedOrder.customer.lastName}`,
+        customerEmail: updatedOrder.customer.email,
+        newStatus,
+        surveyLink: 'https://example.com/survey'
+      });
     });
 
     revalidatePath(`/admin/orders/${orderId}`);

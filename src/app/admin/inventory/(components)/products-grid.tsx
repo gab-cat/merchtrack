@@ -27,7 +27,8 @@ export default function ProductsGrid() {
     inventoryType: [] as ("PREORDER" | "STOCK")[],
     categories: [] as string[],
     priceRange: [0, 5000] as [number, number],
-    tags: [] as string[]
+    tags: [] as string[],
+    stockStatus: [] as ("IN_STOCK" | "OUT_OF_STOCK" | "LOW_STOCK")[]
   });
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [parent] = useAutoAnimate();
@@ -48,12 +49,30 @@ export default function ProductsGrid() {
       } : {}),
       ...(inventoryType !== "all" ? { inventoryType } : {}),
       ...(filters.categories.length > 0 ? { categoryId: { in: filters.categories } } : {}),
-      ...(filters.tags.length > 0 ? { tags: { hasSome: filters.tags } } : {})
+      ...(filters.tags.length > 0 ? { tags: { hasSome: filters.tags } } : {}),
+      ...(filters.stockStatus.length > 0 ? {
+        variants: {
+          some: {
+            OR: filters.stockStatus.map(status => {
+              switch (status) {
+              case "IN_STOCK":
+                return { inventory: { gt: 5 } };
+              case "LOW_STOCK":
+                return { inventory: { gt: 0, lte: 5 } };
+              case "OUT_OF_STOCK":
+                return { inventory: { equals: 0 } };
+              default:
+                return {};
+              }
+            })
+          }
+        }
+      } : {})
     },
     orderBy: {
       createdAt: 'desc' as const
     }
-  }), [currentPage, debouncedSearch, inventoryType, filters.categories, filters.tags]);
+  }), [currentPage, debouncedSearch, inventoryType, filters]);
 
   const { data, isLoading } = useProductsQuery(queryParams);
   const products = (data as PaginatedResponse<ExtendedProduct[]>)?.data ?? [];

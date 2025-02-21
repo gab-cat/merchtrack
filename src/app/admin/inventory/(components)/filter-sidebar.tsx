@@ -14,6 +14,7 @@ interface FilterSidebarProps {
     categories: string[]
     priceRange: [number, number]
     tags: string[]
+    stockStatus: ("IN_STOCK" | "OUT_OF_STOCK" | "LOW_STOCK")[]
   }
   setFilters: React.Dispatch<
     React.SetStateAction<{
@@ -21,6 +22,7 @@ interface FilterSidebarProps {
       categories: string[]
       priceRange: [number, number]
       tags: string[]
+      stockStatus: ("IN_STOCK" | "OUT_OF_STOCK" | "LOW_STOCK")[]
     }>
   >
   className?: string
@@ -60,6 +62,15 @@ export function FilterSidebar({ products, filters, setFilters, className = "" }:
   const handlePriceRangeChange = (value: number[]) => {
     setPriceRange([value[0], value[1]]);
     setFilters((prev) => ({ ...prev, priceRange: [value[0], value[1]] }));
+  };
+
+  const handleStockStatusChange = (status: "IN_STOCK" | "OUT_OF_STOCK" | "LOW_STOCK") => {
+    setFilters((prev) => ({
+      ...prev,
+      stockStatus: prev.stockStatus.includes(status)
+        ? prev.stockStatus.filter((s) => s !== status)
+        : [...prev.stockStatus, status],
+    }));
   };
 
   return (
@@ -139,6 +150,44 @@ export function FilterSidebar({ products, filters, setFilters, className = "" }:
               </label>
             </div>
           ))}
+        </div>
+      </div>
+
+      <div>
+        <h3 className="mb-2 flex items-center font-bold text-primary">
+          <FaBoxes className="mr-2"/>Stock Status
+        </h3>
+        <div className="space-y-2">
+          <div className="flex items-center">
+            <Checkbox
+              id="in-stock"
+              checked={filters.stockStatus.includes("IN_STOCK")}
+              onCheckedChange={() => handleStockStatusChange("IN_STOCK")}
+            />
+            <label htmlFor="in-stock" className="ml-2 text-sm">
+              In Stock
+            </label>
+          </div>
+          <div className="flex items-center">
+            <Checkbox
+              id="low-stock"
+              checked={filters.stockStatus.includes("LOW_STOCK")}
+              onCheckedChange={() => handleStockStatusChange("LOW_STOCK")}
+            />
+            <label htmlFor="low-stock" className="ml-2 text-sm">
+              Low Stock (≤ 5)
+            </label>
+          </div>
+          <div className="flex items-center">
+            <Checkbox
+              id="out-of-stock"
+              checked={filters.stockStatus.includes("OUT_OF_STOCK")}
+              onCheckedChange={() => handleStockStatusChange("OUT_OF_STOCK")}
+            />
+            <label htmlFor="out-of-stock" className="ml-2 text-sm">
+              Out of Stock
+            </label>
+          </div>
         </div>
       </div>
     </div>

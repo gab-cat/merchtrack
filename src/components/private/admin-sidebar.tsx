@@ -3,8 +3,10 @@
 import { FiLogOut } from "react-icons/fi";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
+import { MdAnnouncement } from "react-icons/md";
+import { FaUser } from "react-icons/fa";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -14,6 +16,7 @@ import { useUserStore } from "@/stores/user.store";
 export default function AdminSidebar() {
   const { user } = useUserStore();
   const pathname = usePathname();
+  const router = useRouter();
 
   return (
     <div className="bg-background flex h-full w-64 flex-col border-r">
@@ -69,7 +72,12 @@ export default function AdminSidebar() {
                 userButtonPopoverActionButton: "text-neutral-600",
               }
             }} 
-            />
+            >
+              <UserButton.MenuItems>
+                <UserButton.Action labelIcon={<FaUser />} label="Profile" onClick={() => router.push("/admin/profile")} />
+                <UserButton.Action labelIcon={<MdAnnouncement />} label="Announcements" onClick={() => router.push("/admin/settings")}/>
+              </UserButton.MenuItems>
+            </UserButton>
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-semibold">{user?.firstName} {user?.lastName}</span>

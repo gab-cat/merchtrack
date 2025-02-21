@@ -9,6 +9,7 @@ import { sendEmail } from "@/lib/mailgun";
 import ReplyEmailTemplate from "@/app/admin/messages/(components)/email-template";
 import { formContactSchema } from "@/schema/public-contact";
 import { CreateMessageType } from "@/schema/messages";
+import { processActionReturnData } from "@/utils";
 
 type ReplyToMessageParams = {
   userId: string
@@ -85,7 +86,7 @@ export const replyToMessage = async ({userId, messageId, reply}: ReplyToMessageP
 
   return {
     success: true,
-    data: JSON.parse(JSON.stringify(replyMessage)),
+    data: processActionReturnData(replyMessage) as Message,
     message: "Message replied successfully."
   };
 };
@@ -167,7 +168,7 @@ export const createMessage = async (params: CreateMessageParams): Promise<Action
 
   return {
     success: true,
-    data: JSON.parse(JSON.stringify(createdMessage)),
+    data: processActionReturnData(createdMessage) as Message,
     message: "Message sent successfully."
   };
 };

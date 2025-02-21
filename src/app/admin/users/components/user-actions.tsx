@@ -9,6 +9,7 @@ import {
   FaExclamationTriangle 
 } from "react-icons/fa";
 import { UserManagerDialog } from "./user-manager-dialog";
+import { ResetPasswordDialog } from "./reset-password-dialog";
 import { useUserQuery } from "@/hooks/users.hooks";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ interface UserActionsProps {
 export function UserActions({ email }: UserActionsProps) {
   const { data: user, isLoading } = useUserQuery(decodeURIComponent(email));
   const [isManagerDialogOpen, setIsManagerDialogOpen] = useState(false);
+  const [isResetPasswordDialogOpen, setIsResetPasswordDialogOpen] = useState(false);
 
   if (isLoading) {
     return <UserActionsSkeleton />;
@@ -39,11 +41,6 @@ export function UserActions({ email }: UserActionsProps) {
   const handleDeactivateUser = async () => {
     // TODO: Implement user deactivation
     console.log('Deactivate user:', user.id);
-  };
-
-  const handleResetPassword = async () => {
-    // TODO: Implement password reset
-    console.log('Reset password for user:', user.id);
   };
 
   return (
@@ -77,7 +74,7 @@ export function UserActions({ email }: UserActionsProps) {
           <Button
             variant="outline"
             className="w-full justify-start border-purple-100 bg-purple-50 text-purple-600 hover:bg-purple-100 hover:text-purple-700"
-            onClick={handleResetPassword}
+            onClick={() => setIsResetPasswordDialogOpen(true)}
           >
             <FaUnlock className="mr-2 size-4" />
             Reset Password
@@ -130,6 +127,12 @@ export function UserActions({ email }: UserActionsProps) {
         onOpenChange={setIsManagerDialogOpen}
         userId={user.id}
         currentManagerId={user.managerId}
+      />
+      <ResetPasswordDialog
+        open={isResetPasswordDialogOpen}
+        onOpenChange={setIsResetPasswordDialogOpen}
+        userId={user.clerkId}
+        email={user.email}
       />
     </>
   );
