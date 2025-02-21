@@ -36,7 +36,7 @@ model ProductVariant {
   variantName  String
   price        Decimal     @default(0)
   rolePricing  Json       // Optional: store pricing adjustments based on role
-
+  inventory    Int         @default(0)
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 
