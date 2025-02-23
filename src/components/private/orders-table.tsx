@@ -15,8 +15,8 @@ import type { OrderStatus, PaymentStatus, PaymentMethod, CustomerType } from "@/
 import type { ExtendedOrder } from "@/types/orders";
 import { useOrdersQuery } from "@/hooks/orders.hooks";
 import { useDebouncedValue } from "@/hooks";
-import { Pagination } from "@/components/ui/pagination";
 import { SearchInput } from "@/components/ui/search-input";
+import { PaginationFooter } from "@/app/admin/survey/components/pagination-footer";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -39,11 +39,11 @@ export function OrdersTable() {
   const debouncedSearch = useDebouncedValue(searchTerm, 500);
   const debouncedFilters = useDebouncedValue(filters, 500);
 
-  const { data: orders, isLoading } = useOrdersQuery({
+  const queryParams = React.useMemo(() => ({
     page: currentPage,
     limit: ITEMS_PER_PAGE,
     orderBy: {
-      createdAt: "desc"
+      createdAt: "desc" as const
     },
     where: {
       AND: [
@@ -64,7 +64,9 @@ export function OrdersTable() {
         ...(debouncedFilters.customerType ? [{ customer: { role: debouncedFilters.customerType } }] : [])
       ]
     }
-  });
+  }), [currentPage, debouncedSearch, debouncedFilters]);
+
+  const { data: orders, isLoading } = useOrdersQuery(queryParams);
 
   const handleFilterChange = (key: keyof OrderFilters, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));
@@ -125,15 +127,13 @@ export function OrdersTable() {
       </div>
 
       {totalPages > 0 && (
-        <div className="mt-4 flex justify-center">
-          <Pagination
-            page={currentPage}
-            total={totalPages}
-            onChange={setCurrentPage}
-            hasNextPage={orders?.metadata.hasNextPage ?? false}
-            hasPrevPage={orders?.metadata.hasPrevPage ?? false}
-          />
-        </div>
+        <PaginationFooter
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={orders?.metadata?.total ?? 0}
+          itemsPerPage={ITEMS_PER_PAGE}
+          onPageChange={setCurrentPage}
+        />
       )}
     </div>
   );

@@ -4,7 +4,7 @@ import { FiFilter } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const ORDER_STATUSES = ['PENDING', 'PROCESSING', 'COMPLETED', 'CANCELLED'] as const;
+const ORDER_STATUSES = ['PENDING', 'PROCESSING', 'READY', 'COMPLETED', 'CANCELLED'] as const;
 const PAYMENT_STATUSES = ['PENDING', 'PAID', 'REFUNDED', 'FAILED'] as const;
 const CUSTOMER_TYPES = ['PLAYER', 'STUDENT', 'STAFF_FACULTY', 'ALUMNI', 'OTHERS'] as const;
 
