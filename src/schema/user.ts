@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { College, Role } from '@/types/Misc';
 
+
 export const OnboardingFormSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
   firstName: z.string().min(2, { message: "First name must be at least 2 characters long" }),
@@ -13,3 +14,12 @@ export const OnboardingFormSchema = z.object({
 });
 
 export type OnboardingForm = z.infer<typeof OnboardingFormSchema>;
+
+export const resetUserPasswordSchema = z.object({
+  clerkId: z.string().min(1, { message: "User ID is required" }),
+  newPassword: z.string().min(8, { message: "New password must be at least 8 characters long" }),
+  skipLegalChecks: z.boolean().optional(),
+  signOutOfOtherSessions: z.boolean().optional(),
+});
+
+export type ResetUserPasswordType = z.infer<typeof resetUserPasswordSchema>;

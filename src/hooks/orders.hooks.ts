@@ -31,6 +31,9 @@ export function useOrdersQuery(params:QueryParams = {}) {
       },
       include: params.include,
       orderBy: params.orderBy,
+      page: params.page,
+      limit: params.limit,
+      ...params
     }
   });
 }

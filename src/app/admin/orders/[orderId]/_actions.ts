@@ -1,10 +1,11 @@
 'use server';
 
 import { revalidatePath } from "next/cache";
-import { OrderStatus, OrderPaymentStatus } from "@/types/orders";
+import { OrderStatus, OrderPaymentStatus, ExtendedOrder } from "@/types/orders";
 import prisma from "@/lib/db";
 import { verifyPermission } from "@/utils/permissions";
 import { sendOrderStatusEmail } from "@/lib/email-service";
+import { generateSurvey } from "@/actions/survey.actions";
 
 /**
  * Updates the status of an order and notifies the customer of the change.
@@ -41,12 +42,15 @@ export async function updateOrderStatus(
   }
 
   try {
-    const updatedOrder = await prisma.order.update({
+    // Validate order exists before proceeding
+    const existingOrder = await prisma.order.findUnique({
       where: { id: orderId },
-      data: { 
-        status: newStatus,
-        processedById: userId
-      }, include:{
+      include: {
+        orderItems: {
+          include: {
+            variant: true
+          }
+        },
         customer: {
           select: {
             firstName: true,
@@ -57,12 +61,92 @@ export async function updateOrderStatus(
       }
     });
 
-    await sendOrderStatusEmail({
-      orderNumber: updatedOrder.id,
-      customerName: `${updatedOrder.customer.firstName} ${updatedOrder.customer.lastName}`,
-      customerEmail: updatedOrder.customer.email,
-      newStatus,
-      surveyLink: 'https://example.com/survey'
+    if (!existingOrder) {
+      return {
+        success: false,
+        message: "Order not found"
+      };
+    }
+
+    await prisma.$transaction(async (tx) => {
+      // Update the order first
+      const updatedOrder = await tx.order.update({
+        where: { id: orderId },
+        data: {
+          status: newStatus,
+          processedById: userId,
+        },
+        include: {
+          customer: {
+            select: {
+              firstName: true,
+              email: true,
+              lastName: true
+            }
+          },
+          orderItems: {
+            include: {
+              variant: {
+                include: {
+                  product: true
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // If the order is being cancelled, restore the inventory
+      if (newStatus === OrderStatus.CANCELLED && existingOrder.status !== OrderStatus.CANCELLED) {
+        // Restore inventory for each item
+        for (const item of existingOrder.orderItems) {
+          if (item.variant) {
+            await tx.productVariant.update({
+              where: { id: item.variantId },
+              data: {
+                inventory: {
+                  increment: item.quantity
+                }
+              }
+            });
+          }
+        }
+      }
+
+      let surveyLink = process.env.NEXT_PUBLIC_APP_URL;
+      // Only generate survey for delivered orders
+      if (newStatus === OrderStatus.DELIVERED) {
+        const surveyCategory = await tx.surveyCategory.findFirst({
+          where: { 
+            isDeleted: false, 
+            name: 'Platform Survey'
+          },
+        });
+
+        if (surveyCategory) {
+          const surveyResponse = await generateSurvey({
+            orderId: updatedOrder.id,
+            categoryId: surveyCategory.id
+          });
+
+          if (surveyResponse.success && surveyResponse.data) {
+            const baseUrl = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_APP_URL : 'http://localhost:3000';
+            surveyLink = `${baseUrl}/survey?id=${surveyResponse.data.id}`;
+          } else {
+            console.error('Failed to generate survey:', surveyResponse.message);
+          }
+        }
+      }
+
+      // Send email notification
+      await sendOrderStatusEmail({
+        orderNumber: updatedOrder.id,
+        customerName: `${updatedOrder.customer.firstName} ${updatedOrder.customer.lastName}`,
+        customerEmail: updatedOrder.customer.email,
+        newStatus,
+        surveyLink,
+        order: updatedOrder as ExtendedOrder
+      });
     });
 
     revalidatePath(`/admin/orders/${orderId}`);
@@ -73,9 +157,10 @@ export async function updateOrderStatus(
       data: { success: true }
     };
   } catch (error) {
+    console.error('Failed to update order status:', error);
     return {
       success: false,
-      message: (error as Error).message
+      message: error instanceof Error ? error.message : 'An unknown error occurred'
     };
   }
 }

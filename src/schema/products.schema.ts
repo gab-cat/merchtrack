@@ -9,6 +9,20 @@ const rolePricingSchema = z.object({
   [Role.OTHERS]: z.number().min(0)
 });
 
+export const variantSchema = z.object({
+  id: z.string().optional(), // Make ID optional for new variants
+  variantName: z.string().min(1, "Variant name is required"),
+  price: z.number().min(0, "Price must be positive"),
+  inventory: z.number().min(0, "Inventory must be 0 or greater"),
+  rolePricing: z.object({
+    PLAYER: z.number().min(0).optional(),
+    STUDENT: z.number().min(0).optional(),
+    STAFF_FACULTY: z.number().min(0).optional(),
+    ALUMNI: z.number().min(0).optional(),
+    OTHERS: z.number().min(0),
+  })
+}).strict(); // Ensure no extra fields are passed
+
 export const createProductSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().optional(),
@@ -22,11 +36,7 @@ export const createProductSchema = z.object({
   categoryId: z.string({
     required_error: "Category is required"
   }),
-  variants: z.array(z.object({
-    variantName: z.string().min(1, "Variant name is required"),
-    price: z.number().min(0, "Price cannot be negative"),
-    rolePricing: rolePricingSchema
-  })).min(1, "At least one variant is required")
+  variants: z.array(variantSchema).min(1, "At least one variant is required")
 });
 
 export type CreateProductType = z.infer<typeof createProductSchema> & {

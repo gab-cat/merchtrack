@@ -37,6 +37,7 @@ const isPublicRoute = createRouteMatcher([
   '/faqs',
   '/terms-of-service',
   '/privacy-policy',
+  '/survey(.*)',
   '/test',
 ]);
 

@@ -111,8 +111,11 @@ export function ProductCard({ product }: Readonly<{ product: ExtendedProduct }>)
               <div className="mb-2 flex flex-wrap items-center gap-1">
                 <SlOptionsVertical className="size-4 text-primary" />
                 {product.variants.slice(0, 3).map((variant) => (
-                  <Badge key={variant.id} variant="outline" className="text-xs">
+                  <Badge key={variant.id} variant="outline" className="flex items-center gap-1 text-xs">
                     {variant.variantName}
+                    <span className="text-muted-foreground ml-1 text-xs">
+                      ({variant.inventory} in stock)
+                    </span>
                   </Badge>
                 ))}
                 {product.variants.length > 3 && (

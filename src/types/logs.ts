@@ -1,6 +1,6 @@
 import { Log } from "@prisma/client";
 
-export interface ExtendedLogs extends Log {
+export type ExtendedLogs = Log & {
   user?: Partial<BasicUserInfo>
   createdBy: Partial<BasicUserInfo>;
   category?: string;

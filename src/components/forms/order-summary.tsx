@@ -1,5 +1,6 @@
 import { CalendarIcon, Loader2 } from "lucide-react";
-import { FiDollarSign, FiPercent, FiShoppingBag, FiCalendar, FiAlertTriangle } from "react-icons/fi";
+import { FiPercent, FiShoppingBag, FiCalendar, FiAlertTriangle } from "react-icons/fi";
+import { LuPhilippinePeso } from "react-icons/lu";
 import { format } from "date-fns";
 import { type UseFormReturn } from "react-hook-form";
 import { FormSection } from "./form-section";
@@ -42,7 +43,7 @@ function PricingSummary({
             Total Amount
           </Label>
           <div className="flex items-baseline gap-2">
-            <FiDollarSign className="text-muted-foreground size-4 text-xl" />
+            <LuPhilippinePeso className="text-muted-foreground size-4 text-xl" />
             <p className="text-2xl font-bold">{totalAmount.toFixed(2)}</p>
           </div>
         </div>
@@ -53,7 +54,7 @@ function PricingSummary({
             Discount Amount
           </Label>
           <div className="relative">
-            <FiDollarSign className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" />
+            <LuPhilippinePeso className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" />
             <Input
               type="number"
               step="0.01"
@@ -78,7 +79,7 @@ function PricingSummary({
       <div className="flex items-baseline justify-between">
         <Label>Final Amount</Label>
         <div className="flex items-baseline gap-2">
-          <FiDollarSign className={cn(
+          <LuPhilippinePeso className={cn(
             "h-4 w-4 text-xl",
             finalAmount === 0 ? "text-destructive" : "text-primary"
           )} />

@@ -7,6 +7,7 @@ import { type CreateProductType as UpdateProductType } from "@/schema/products.s
 import { verifyPermission } from "@/utils/permissions";
 import type { ExtendedProduct } from "@/types/extended";
 import { createLog } from "@/actions/logs.actions";
+import { processActionReturnData } from "@/utils";
 
 /**
  * Updates a product in the database.
@@ -115,9 +116,6 @@ export async function updateProduct(
       }
     });
 
-    // Prepare cache data
-    const cacheData = JSON.parse(JSON.stringify(product));
-
     // Get total number of product pages
     const totalProducts = await prisma.product.count();
     const totalPages = Math.ceil(totalProducts / 12); // Assuming 10 products per page
@@ -143,7 +141,7 @@ export async function updateProduct(
 
     return {
       success: true,
-      data: cacheData
+      data: processActionReturnData(product) as ExtendedProduct
     };
   } catch (error) {
     await createLog({

@@ -1,4 +1,6 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import { RiArrowGoBackFill } from "react-icons/ri";
 import { OrderDetails } from "./order-details";
 import { getUserId, getSessionData } from "@/lib/auth";
 import { verifyPermission } from "@/utils/permissions";
@@ -7,14 +9,18 @@ import PermissionDenied from "@/components/private/permission-denied";
 import "@/components/ui/alert-dialog";
 import PageTitle from "@/components/private/page-title";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { RiArrowGoBackFill } from "react-icons/ri";
+
 
 interface Props {
   params: Promise<{
     orderId: string;
   }>;
 }
+
+export const metadata = {
+  title: 'Order Details | Admin Dashboard',
+  description: 'View order details and manage orders'
+};
 
 export default async function OrderDetailPage({ params }: Readonly<Props>) {
   const { metadata } = await getSessionData();

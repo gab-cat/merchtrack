@@ -1,0 +1,25 @@
+model Announcement {
+  id          String    @id @default(ulid())
+  title       String
+  type        AnnouncementType @default(NORMAL)
+  level       AnnouncementLevel @default(INFO)
+  publishedById String
+  content     String
+  publishedAt DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  publishedBy User @relation(fields: [publishedById], references: [id])
+}
+
+enum AnnouncementLevel {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+enum AnnouncementType {
+  NORMAL
+  SYSTEM
+}

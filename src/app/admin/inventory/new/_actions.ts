@@ -9,6 +9,7 @@ import { verifyPermission } from "@/utils/permissions";
 import type { ExtendedProduct } from "@/types/extended";
 import { uploadToR2 } from "@/lib/s3";
 import { createLog } from "@/actions/logs.actions";
+import { processActionReturnData } from "@/utils";
 
 /**
  * Creates a new product with the specified details, updates the cache, and logs significant events.
@@ -133,7 +134,7 @@ export async function createProduct(
 
     return {
       success: true,
-      data: JSON.parse(JSON.stringify(product))
+      data: processActionReturnData(product) as ExtendedProduct
     };
   } catch (error) {
     await createLog({

@@ -2,13 +2,13 @@
 
 import { OrderPaymentStatus, Payment, PaymentSite, PaymentStatus, PaymentMethod, Prisma } from "@prisma/client";
 import prisma from "@/lib/db";
-import { verifyPermission } from "@/utils/permissions";
 import { getCached, setCached } from "@/lib/redis";
 import { QueryParams, PaginatedResponse } from "@/types/common";
-import { calculatePagination, removeFields } from "@/utils/query.utils";
 import { GetObjectByTParams } from "@/types/extended";
 import { createLog } from '@/actions/logs.actions';
 import { sendPaymentStatusEmail } from "@/lib/email-service";
+import { calculatePagination, processActionReturnData, verifyPermission } from "@/utils";
+
 
 /**
  * Retrieves a paginated list of payments for the specified user.
@@ -64,7 +64,7 @@ export async function getPayments(
     if (!payments || !total) {
       [payments, total] = await prisma.$transaction([
         prisma.payment.findMany({
-          where: { isDeleted: false, ...params.where },
+          where: { ...params.where },
           include: {
             order: true,
             user: true,
@@ -81,14 +81,11 @@ export async function getPayments(
     }
 
     const lastPage = Math.ceil(total as number / take);
-    const processedPayments = payments.map(payment => 
-      removeFields(payment, params.limitFields)
-    );
 
     return {
       success: true,
       data: {
-        data: JSON.parse(JSON.stringify(processedPayments)),
+        data: processActionReturnData(payments, params.limitFields) as Payment[],
         metadata: {
           total: total as number,
           page,
@@ -146,7 +143,6 @@ export async function getPaymentById({ userId, paymentId, limitFields }: GetObje
       payment = await prisma.payment.findFirst({
         where: {
           id: paymentId,
-          isDeleted: false,
         },
         include: {
           order: true,
@@ -174,7 +170,7 @@ export async function getPaymentById({ userId, paymentId, limitFields }: GetObje
 
   return {
     success: true,
-    data: JSON.parse(JSON.stringify(removeFields(payment, limitFields)))
+    data: processActionReturnData(payment, limitFields) as Payment
   };
 }
 
@@ -244,13 +240,9 @@ export async function getPaymentsByUser({ userId, customerId, limitFields }: Get
     };
   }
 
-  const processedPayments = payments.map(payment =>
-    removeFields(payment, limitFields)
-  );
-
   return {
     success: true,
-    data: JSON.parse(JSON.stringify(processedPayments))
+    data: processActionReturnData(payments, limitFields) as Payment[]
   };
 }
 
@@ -318,13 +310,9 @@ export async function getPaymentsByOrderId({ userId, orderId, limitFields }: Get
     };
   }
 
-  const processedPayments = payments.map(payment =>
-    removeFields(payment, limitFields)
-  );
-
   return {
     success: true,
-    data: JSON.parse(JSON.stringify(processedPayments))
+    data: processActionReturnData(payments, limitFields) as Payment[]
   };
 }
 
@@ -508,11 +496,12 @@ export async function processPayment({
         status: 'verified'
       });
     } catch (emailError) {
-      // Log email error but don't fail the transaction
-      logger.error('Failed to send payment status email', {
-        error: emailError,
-        orderId,
-        customerEmail: order.customer.email
+      await createLog({
+        userId: order.customerId,
+        createdById: userId,
+        reason: "Payment Notification Email Error",
+        systemText: `Error sending payment notification email for order ${orderId}: ${emailError instanceof Error ? emailError.message : 'Unknown error'}`,
+        userText: "An error occurred while sending the payment notification email."
       });
     }
 
@@ -524,7 +513,7 @@ export async function processPayment({
 
     return {
       success: true,
-      data: JSON.parse(JSON.stringify(removeFields(payment, limitFields)))
+      data: processActionReturnData(payment, limitFields) as Payment
     };
   } catch (error) {
     await createLog({
@@ -699,7 +688,7 @@ export async function refundPayment(
 
     return {
       success: true,
-      data: JSON.parse(JSON.stringify(refund))
+      data: processActionReturnData(refund) as Payment
     };
   } catch (error) {
     await createLog({

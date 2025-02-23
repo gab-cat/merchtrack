@@ -1,12 +1,12 @@
 'use server';
 
 import { Product } from "@prisma/client";
+
 import prisma from "@/lib/db";
 import { getCached, setCached } from "@/lib/redis";
 import { QueryParams, PaginatedResponse } from "@/types/common";
 import { ExtendedProduct, GetObjectByTParams } from "@/types/extended";
-import { verifyPermission } from "@/utils/permissions";
-import { calculatePagination, removeFields } from "@/utils/query.utils";
+import { processActionReturnData, calculatePagination, verifyPermission } from "@/utils";
 
 
 /**
@@ -129,14 +129,11 @@ export async function getProducts(
     }
 
     const lastPage = Math.ceil(total/ take);
-    const processedProducts = products.map(product => {
-      return removeFields(product, params.limitFields);
-    });
 
     return {
       success: true,
       data: {
-        data: JSON.parse(JSON.stringify(processedProducts)),
+        data: processActionReturnData(products, params.limitFields) as ExtendedProduct[],
         metadata: {
           total: total,
           page: page,
@@ -209,7 +206,7 @@ export async function getProductById({ userId, limitFields, productId }: GetObje
 
     return {
       success: true,
-      data: JSON.parse(JSON.stringify(removeFields(product, limitFields)))
+      data: processActionReturnData(product, limitFields) as ExtendedProduct
     };
   } catch (error) {
     return {
@@ -287,7 +284,7 @@ export async function getProductBySlug({ userId, limitFields, slug }: GetObjectB
 
     return {
       success: true,
-      data: JSON.parse(JSON.stringify(removeFields(product, limitFields)))
+      data: processActionReturnData(product, limitFields) as ExtendedProduct
     };
   } catch (error) {
     return {

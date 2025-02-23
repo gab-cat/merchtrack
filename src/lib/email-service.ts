@@ -18,6 +18,7 @@ interface OrderStatusEmailParams {
   customerEmail: string;
   newStatus: OrderStatus;
   surveyLink?: string;
+  order: ExtendedOrder;
 }
 
 interface PaymentStatusEmailParams {
@@ -40,16 +41,16 @@ export const sendOrderConfirmationEmail = async (params: OrderConfirmationEmailP
     from: 'MerchTrack Orders'
   });
 };
-
 export const sendOrderStatusEmail = async (params: OrderStatusEmailParams) => {
   await sendEmail({
     to: params.customerEmail,
-    subject: `Order Status Update - #${params.orderNumber}`,
+    subject: `Order Update - ${params.newStatus} #${params.orderNumber}`,
     html: await render(OrderStatusEmail({ 
       orderNumber: params.orderNumber,
       customerName: params.customerName,
       newStatus: params.newStatus,
-      surveyLink: params.surveyLink
+      surveyLink: params.surveyLink ?? '',
+      order: params.order
     })),
     from: 'MerchTrack Orders'
   });
@@ -68,5 +69,4 @@ export const sendPaymentStatusEmail = async (params: PaymentStatusEmailParams) =
     })),
     from: 'MerchTrack Payments'
   });
-  console.log(`Payment ${params.status === 'verified' ? 'Verification' : 'Refund'} email sent to ${params.customerEmail}`);
 };

@@ -14,7 +14,8 @@ import { ImagesSection } from '../../new/(components)/sections/images';
 import { InventorySection } from '../../new/(components)/sections/inventory';
 import { VariantsSection } from '../../new/(components)/sections/variants';
 import { ConfirmationDialog } from '../../new/(components)/confirmation-dialog';
-import { deleteProductById, updateProduct } from '../_actions';
+import { deleteProductById } from '../_actions';
+import { updateProduct } from '../../_actions';
 import { Button } from "@/components/ui/button";
 import { createProductSchema as updateProductSchema, type CreateProductType as UpdateProductType } from '@/schema/products.schema';
 import { useUserStore } from '@/stores/user.store';
@@ -66,8 +67,10 @@ export default function UpdateProductContainer({ slug }: Readonly<UpdateProductC
         tags: product.tags ?? [],
         imageUrl: product.imageUrl ?? [],
         variants: product.variants.map(variant => ({
+          id: variant.id,
           variantName: variant.variantName,
           price: Number(variant.price),
+          inventory: variant.inventory,
           rolePricing: variant.rolePricing as {
             PLAYER?: number;
             STUDENT?: number;

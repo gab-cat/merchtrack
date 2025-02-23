@@ -1,40 +1,43 @@
 import { FaUserFriends, FaShoppingCart } from "react-icons/fa";
 import { FaChartSimple } from "react-icons/fa6";
 import { MdSettings } from "react-icons/md";
+import { getAnnouncements } from "./settings/_actions";
 import { getSessionData } from "@/lib/auth";
+import { getDashboardStats } from "@/actions/dashboard.actions";
 import { AnnouncementsCard } from "@/app/admin/components/AnnouncementsCard";
 import { MessageOfTheDayCard } from "@/app/admin/components/MessageOfTheDayCard";
 import { QuickActions } from "@/app/admin/components/QuickActions";
 import { StatCard } from "@/app/admin/components/StatCard";
 import PageAnimation from "@/components/public/page-animation";
+import { ExtendedAnnouncement } from "@/types/announcement";
 
 export const metadata = {
   title: "Admin Dashboard",
   description: "Welcome back to your admin dashboard",
 };
 
-
 export default async function AdminWelcome() {
   const { metadata } = await getSessionData();
   const currentTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   
-  const announcements = [
-    {
-      id: 1,
-      title: "New Feature Launch",
-      description: "We're excited to announce the launch of our new analytics dashboard!",
-    },
-    {
-      id: 2,
-      title: "Scheduled Maintenance",
-      description: "There will be scheduled maintenance on July 15th from 2-4 AM EST.",
-    },
-  ];
+  const [announcementsResult, statsResult] = await Promise.all([
+    getAnnouncements(10),
+    getDashboardStats()
+  ]);
 
-  const messageOfTheDay = {
-    title: "Embrace Challenges",
-    message: "Every challenge you face today makes you stronger tomorrow. The challenge of leadership is to be strong, but not rude; be kind, but not weak; be bold, but not bully; be thoughtful, but not lazy; be humble, but not timid; be proud, but not arrogant; have humor, but without folly.",
-  };
+  const announcements = announcementsResult.success ? announcementsResult.data : [];
+  const stats = statsResult.success ? statsResult.data : null;
+  
+  const messageOfTheDay = Array.isArray(announcements) ? announcements.find(a => a.type === "SYSTEM") : undefined;
+  const normalAnnouncements = Array.isArray(announcements) ? announcements.filter(a => a.type === "NORMAL").map(a => ({
+    id: a.id,
+    title: a.title,
+    content: a.content,
+    level: a.level,
+    createdAt: a.createdAt,
+    publishedBy: a.publishedBy,
+    updatedAt: a.updatedAt
+  })) : [];
 
   return (
     <PageAnimation>
@@ -51,15 +54,40 @@ export default async function AdminWelcome() {
         </div>
 
         <div className="mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <StatCard title="Total Users" value="1,234" subtext="+10% from last month" Icon={FaUserFriends} />
-          <StatCard title="Total Sales" value="$12,345" subtext="+5% from last month" Icon={FaShoppingCart} />
-          <StatCard title="Active Products" value="567" subtext="+2% from last month" Icon={FaChartSimple} />
-          <StatCard title="Server Status" value="Healthy" subtext="99.9% uptime" Icon={MdSettings} />
+          <StatCard 
+            title="Total Users" 
+            value={stats ? stats.users.total.toLocaleString() : "---"} 
+            subtext={stats ? `${stats.users.change}% from last month` : "Loading..."} 
+            Icon={FaUserFriends} 
+          />
+          <StatCard 
+            title="Total Sales" 
+            value={stats ? `₱${stats.sales.total.toLocaleString()}` : "---"} 
+            subtext={stats ? `${stats.sales.change}% from last month` : "Loading..."} 
+            Icon={FaShoppingCart} 
+          />
+          <StatCard 
+            title="Active Products" 
+            value={stats ? stats.products.total.toLocaleString() : "---"} 
+            subtext={stats ? `${stats.products.change}% from last month` : "Loading..."} 
+            Icon={FaChartSimple} 
+          />
+          <StatCard 
+            title="Server Status" 
+            value={stats ? stats.system.status : "---"} 
+            subtext={stats ? stats.system.subtext : "Loading..."} 
+            Icon={MdSettings} 
+          />
         </div>
 
         <div className="mb-8 grid gap-6 md:grid-cols-2">
-          <AnnouncementsCard announcements={announcements} />
-          <MessageOfTheDayCard title={messageOfTheDay.title} message={messageOfTheDay.message} />
+          <AnnouncementsCard announcements={normalAnnouncements as ExtendedAnnouncement[]} />
+          {messageOfTheDay && (
+            <MessageOfTheDayCard 
+              title={messageOfTheDay.title} 
+              message={messageOfTheDay.content} 
+            />
+          )}
         </div>
 
         <QuickActions />

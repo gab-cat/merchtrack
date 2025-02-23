@@ -50,6 +50,7 @@ model User {
   // Product reviews written by the user
   Review Review[]
   Message Message[] @relation("MessageToUser")
+  Announcement Announcement[]
 }
 
 enum Role {

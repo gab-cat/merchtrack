@@ -3,8 +3,10 @@
 import { FiLogOut } from "react-icons/fi";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
-import { UserButton } from "@clerk/nextjs";
+import { usePathname, useRouter } from "next/navigation";
+import { SignedIn, UserButton } from "@clerk/nextjs";
+import { MdAnnouncement } from "react-icons/md";
+import { FaUser } from "react-icons/fa";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -14,6 +16,7 @@ import { useUserStore } from "@/stores/user.store";
 export default function AdminSidebar() {
   const { user } = useUserStore();
   const pathname = usePathname();
+  const router = useRouter();
 
   return (
     <div className="bg-background flex h-full w-64 flex-col border-r">
@@ -24,9 +27,9 @@ export default function AdminSidebar() {
             <Image
               src="/img/logo.png"
               alt="MerchTrack Logo"
-              layout="fill"
-              objectFit="contain"
               className="w-auto"
+              width={64}
+              height={64}
             />
           </div>
           <span className="text-2xl font-bold tracking-tight text-primary">MerchTrack</span>
@@ -62,14 +65,21 @@ export default function AdminSidebar() {
       <div className="mt-auto px-10 py-8">
         <div className="flex items-center gap-2 py-4">
           <div className="relative size-12" suppressHydrationWarning>
-            <UserButton appearance={{ 
-              elements: {
-                userButtonAvatarBox: "w-12 h-12",
-                userButtonPopoverCard: "bg-blue-100", 
-                userButtonPopoverActionButton: "text-neutral-600",
-              }
-            }} 
-            />
+            <SignedIn>
+              <UserButton appearance={{ 
+                elements: {
+                  userButtonAvatarBox: "w-12 h-12",
+                  userButtonPopoverCard: "bg-blue-100", 
+                  userButtonPopoverActionButton: "text-neutral-600",
+                }
+              }} 
+              >
+                <UserButton.MenuItems>
+                  <UserButton.Action labelIcon={<FaUser />} label="Profile" onClick={() => router.push("/admin/profile")} />
+                  <UserButton.Action labelIcon={<MdAnnouncement />} label="Announcements" onClick={() => router.push("/admin/settings")}/>
+                </UserButton.MenuItems>
+              </UserButton>
+            </SignedIn>
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-semibold">{user?.firstName} {user?.lastName}</span>

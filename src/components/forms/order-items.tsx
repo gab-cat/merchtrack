@@ -1,8 +1,7 @@
-'use client';
-
 import { Prisma, ProductSize } from "@prisma/client";
 import { useMemo, useState } from "react";
-import { FiPackage, FiTag, FiDollarSign, FiHash, FiEdit3, FiTrash2, FiPlus } from "react-icons/fi";
+import { FiPackage, FiTag, FiHash, FiEdit3, FiTrash2, FiPlus } from "react-icons/fi";
+import { LuPhilippinePeso } from "react-icons/lu";
 import { FormSection } from "./form-section";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -187,7 +186,7 @@ export function OrderItems({ onItemsChange, disabled, customerId }: Readonly<Ord
           );
           
           return {
-            label: `${v.variantName} - $${pricingDetails.price} (${pricingDetails.appliedRole})`,
+            label: `${v.variantName} - ₱${pricingDetails.price} (${pricingDetails.appliedRole})`,
             value: v.id
           };
         } catch (error) {
@@ -418,12 +417,12 @@ export function OrderItems({ onItemsChange, disabled, customerId }: Readonly<Ord
                         Qty: {item.quantity}
                       </span>
                       <span className="flex items-center gap-1">
-                        <FiDollarSign className="size-3" />
-                        Price: ${item.price}/unit
+                        <LuPhilippinePeso className="size-3" />
+                        Price: ₱{item.price}/unit
                       </span>
                       <span className="flex items-center gap-1 font-medium text-primary">
-                        <FiDollarSign className="size-3" />
-                        Total: ${(item.price * item.quantity).toFixed(2)}
+                        <LuPhilippinePeso className="size-3" />
+                        Total: ₱{(item.price * item.quantity).toFixed(2)}
                       </span>
                     </div>
                     {item.customerNote && (

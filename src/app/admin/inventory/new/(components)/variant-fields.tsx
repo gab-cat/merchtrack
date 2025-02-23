@@ -76,6 +76,27 @@ export default function VariantFields() {
             </div>
           </div>
 
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor={`variants.${index}.inventory`}>Inventory</Label>
+              <Input
+                type="number"
+                min={0}
+                {...register(`variants.${index}.inventory`, {
+                  valueAsNumber: true,
+                  required: true,
+                  min: 0
+                })}
+                placeholder="Stock quantity"
+              />
+              {errors.variants?.[index]?.inventory && (
+                <FormError>
+                  {errors.variants[index]?.inventory?.message}
+                </FormError>
+              )}
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
             {Object.values(Role).map((role) => (
               <div key={role} className="space-y-2">
@@ -99,6 +120,7 @@ export default function VariantFields() {
         type="button"
         variant="default"
         className="w-full text-white"
+        // @ts-expect-error - Type mismatch
         onClick={() => append({ variantName: '', price: 0, rolePricing: defaultRolePricing })}
       >
         <Plus size={20} className="mr-2" />
