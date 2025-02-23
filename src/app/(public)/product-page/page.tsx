@@ -3,7 +3,7 @@
 import { SearchIcon } from "lucide-react";
 import Link from "next/link";
 import React from 'react';
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, easeInOut } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Carousel from "@/components/ui/carousel";
@@ -13,7 +13,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 const Page = () => {
   const { scrollYProgress } = useScroll(); // Track scroll position
 
-  const carouselHeight = useTransform(scrollYProgress, [0, 0.2], ["100vh", "20vh"]); // 100% to 0%
+  const carouselHeight = useTransform(scrollYProgress, [0, 0.2], ["100vh", "20vh"], {
+    ease: easeInOut, // Add easing function for smoother transition
+  });
 
   // Carousel images
   const images = [
@@ -29,21 +31,20 @@ const Page = () => {
       {/* Carousel */}
       <motion.div
         style={{ height: carouselHeight }}
-        className="left-0 z-10 w-full overflow-hidden transition-all duration-500"
+        className="left-0 z-10 w-full overflow-hidden transition-all duration-700 ease-in-out" // Adjust duration and add easing
       >
         <Carousel images={images} />
       </motion.div>
 
       {/* Spacer to prevent content from overlapping */}
       <motion.div
-        //style={{ height: scrollY }}
         className="w-full"
       />
 
       {/* Content Section */}
       <motion.div
-        //style={{ y: scrollY }}
         className="w-full max-w-7xl px-4 sm:px-6 lg:px-8"
+        transition={{ duration: 0.7, ease: [0.42, 0, 0.58, 1] }} // Add transition properties
       >
         <h1 className="mb-4 mt-6 text-2xl font-bold">Products Page</h1>
 
