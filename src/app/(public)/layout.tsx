@@ -6,7 +6,9 @@ const Layout = ({children}: Readonly<{ children: React.ReactNode }>) => {
   return (
     <div className="flex flex-col text-neutral-7">
       <HeaderLP />
-      {children}
+      <div className="min-h-[75vh] pt-16">
+        {children}
+      </div>
       <Footer />
     </div>
   );

@@ -4,6 +4,7 @@ import PageTitle from '@/components/private/page-title';
 import PageAnimation from '@/components/public/page-animation';
 import { getSessionData, getUserId } from '@/lib/auth';
 import { verifyPermission } from '@/utils/permissions';
+import InsightsTabs from '@/app/admin/insights/components/insights-tabs';
 
 export const metadata = {  
   title: 'Business Insights | Admin Dashboard',  
@@ -11,7 +12,6 @@ export const metadata = {
 };  
 
 const PermissionDenied = dynamic(() => import('@/components/private/permission-denied'));
-const InsightsTabs = dynamic(() => import('./components/insights-tabs'));
 
 const Page = async () => {
   const { metadata } = await getSessionData();

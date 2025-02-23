@@ -1,11 +1,8 @@
-'use client';
-
-import dynamic from 'next/dynamic';
 import { LineChart, FileSpreadsheet } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ExportsContainer from '@/app/admin/insights/components/exports-container';
+import InsightsContainer from '@/app/admin/insights/components/insights-container';
 
-const InsightsContainer = dynamic(() => import('./insights-container'));
-const ExportsContainer = dynamic(() => import('./exports-container'));
 
 export default function InsightsTabs() {
   return (

@@ -12,6 +12,57 @@ interface ExportParams {
   productId?: string;
 }
 
+interface DailyStats {
+  date: string;
+  totalCollected: number;
+  totalOrders: number;
+}
+
+interface SurveyMetric {
+  categoryName: string;
+  totalScore: number;
+  count: number;
+  avgScore: number;
+}
+
+interface ExportItem {
+  order: {
+    id: string;
+    createdAt: Date;
+    customer: {
+      firstName: string;
+      lastName: string;
+    };
+    status: string;
+    paymentStatus: string;
+    payments?: Array<{ paymentMethod: string }>;
+  };
+  variant: {
+    product: {
+      id: string;
+      title: string;
+    };
+    variantName: string;
+  };
+  quantity: number;
+  price: number | string;
+  size?: string;
+  customerNote?: string;
+}
+
+interface SaleData {
+  createdAt: Date;
+  totalAmount: number | string;
+}
+
+interface SurveyData {
+  categoryId: string;
+  category: {
+    name: string;
+  };
+  answers: Record<string, number> | null;
+}
+
 // Helper to create CSV content
 function arrayToCSV(data: Record<string, unknown>[]) {
   if (data.length === 0) return '';
@@ -22,6 +73,75 @@ function arrayToCSV(data: Record<string, unknown>[]) {
       .join(',')
   );
   return `${headers}\n${rows.join('\n')}`;
+}
+
+function processExportData(item: ExportItem) {
+  return {
+    orderId: item.order.id,
+    orderDate: item.order.createdAt.toISOString(),
+    customerName: `${item.order.customer.firstName} ${item.order.customer.lastName}`,
+    productId: item.variant.product.id,
+    productName: item.variant.product.title,
+    variantName: item.variant.variantName,
+    quantity: item.quantity,
+    pricePerUnit: Number(item.price),
+    totalAmount: Number(item.price) * Number(item.quantity),
+    size: item.size ?? 'N/A',
+    customerNote: item.customerNote ?? '',
+    orderStatus: item.order.status,
+    paymentStatus: item.order.paymentStatus,
+    paymentMethod: item.order.payments?.[0]?.paymentMethod ?? 'N/A',
+  };
+}
+
+function calculateCollectionMetrics(salesData: SaleData[], totalPayableAmount: number) {
+  const dailyStats = salesData.reduce<DailyStats[]>((acc, sale) => {
+    const date = new Date(sale.createdAt);
+    const dateKey = date.toISOString().split('T')[0];
+    
+    const existingDay = acc.find(d => d.date === dateKey);
+    if (existingDay) {
+      existingDay.totalCollected += Number(sale.totalAmount);
+      existingDay.totalOrders += 1;
+    } else {
+      acc.push({
+        date: dateKey,
+        totalCollected: Number(sale.totalAmount),
+        totalOrders: 1,
+      });
+    }
+    return acc;
+  }, []);
+
+  return dailyStats.map(day => ({
+    date: day.date,
+    collectionRate: totalPayableAmount > 0 ? (day.totalCollected / totalPayableAmount) * 100 : 0,
+  }));
+}
+
+function processSurveyMetrics(surveyData: SurveyData[]) {
+  const surveyMetrics = surveyData.reduce<Record<string, SurveyMetric>>((acc, survey) => {
+    const answers = survey.answers as Record<string, number> ?? {};
+    const values = Object.values(answers);
+    const avgScore = values.length > 0 ? values.reduce((sum, score) => sum + score, 0) / values.length : 0;
+    
+    const categoryId = survey.categoryId;
+    if (!acc[categoryId]) {
+      acc[categoryId] = {
+        categoryName: survey.category.name,
+        totalScore: avgScore,
+        count: 1,
+        avgScore: avgScore,
+      };
+    } else {
+      acc[categoryId].totalScore += avgScore;
+      acc[categoryId].count += 1;
+      acc[categoryId].avgScore = acc[categoryId].totalScore / acc[categoryId].count;
+    }
+    return acc;
+  }, {});
+
+  return Object.values(surveyMetrics);
 }
 
 export async function exportProductOrders({ startDate, endDate, productId }: ExportParams) {
@@ -56,29 +176,12 @@ export async function exportProductOrders({ startDate, endDate, productId }: Exp
       variant: {
         include: {
           product: true,
-        }
+        },
       },
     },
   });
 
-  const exportData = orders.map(item => ({
-    orderId: item.order.id,
-    orderDate: item.order.createdAt.toISOString(),
-    customerName: `${item.order.customer.firstName} ${item.order.customer.lastName}`,
-    customerEmail: item.order.customer.email,
-    productName: item.variant.product.title,
-    variantName: item.variant.variantName,
-    quantity: item.quantity,
-    pricePerUnit: Number(item.price),
-    totalAmount: Number(item.price) * Number(item.quantity),
-    originalPrice: Number(item.originalPrice),
-    appliedRole: item.appliedRole,
-    size: item.size || 'N/A',
-    customerNote: item.customerNote || '',
-    orderStatus: item.order.status,
-    paymentStatus: item.order.paymentStatus,
-    paymentMethod: item.order.payments[0]?.paymentMethod || 'N/A',
-  }));
+  const exportData = orders.map(processExportData);
 
   return arrayToCSV(exportData);
 }
@@ -110,20 +213,7 @@ export async function exportOrders({ startDate, endDate }: ExportParams) {
     },
   });
 
-  const exportData = orders.map(item => ({
-    orderId: item.order.id,
-    orderDate: item.order.createdAt.toISOString(),
-    customerName: `${item.order.customer.firstName} ${item.order.customer.lastName}`,
-    productId: item.variant.product.id,
-    productName: item.variant.product.title,
-    variantName: item.variant.variantName,
-    quantity: item.quantity,
-    pricePerUnit: Number(item.price),
-    totalAmount: Number(item.price) * Number(item.quantity),
-    orderStatus: item.order.status,
-    paymentStatus: item.order.paymentStatus,
-    customerNote: item.customerNote || '',
-  }));
+  const exportData = orders.map(processExportData);
 
   return arrayToCSV(exportData);
 }
@@ -207,8 +297,8 @@ export async function getInsights(
     };
 
     // Ensure we have valid dates before proceeding
-    if (dateFilter.gte && isNaN(dateFilter.gte.getTime()) || 
-        dateFilter.lte && isNaN(dateFilter.lte.getTime())) {
+    if ((dateFilter.gte && isNaN(dateFilter.gte.getTime())) || 
+        (dateFilter.lte && isNaN(dateFilter.lte.getTime()))) {
       return {
         success: false,
         message: 'Invalid date format'
@@ -223,7 +313,8 @@ export async function getInsights(
       topCustomers,
       ordersByStatus,
       paymentsByStatus,
-      totalPayableAmount
+      totalPayableAmount,
+      surveyData
     ] = await Promise.all([
       // Get total orders
       prisma.order.count({
@@ -284,10 +375,10 @@ export async function getInsights(
             include: { product: true },
           });
           return {
-            id: variant?.product.id || '',
-            title: variant?.product.title || 'Unknown Product',
-            totalSold: item._sum.quantity || 0,
-            revenue: item._sum.price || 0,
+            id: variant?.product.id ?? '',
+            title: variant?.product.title ?? 'Unknown Product',
+            totalSold: item._sum.quantity ?? 0,
+            revenue: item._sum.price ?? 0,
           };
         }))
       ),
@@ -355,11 +446,28 @@ export async function getInsights(
           totalAmount: true,
         },
       }),
+      // Get survey data
+      prisma.customerSatisfactionSurvey.findMany({
+        where: {
+          submitDate: Object.keys(dateFilter).length > 0 ? dateFilter : undefined,
+        },
+        include: {
+          category: true,
+        },
+        orderBy: {
+          submitDate: 'asc',
+        },
+      }),
     ]);
 
+    const totalAmount = Number(totalPayableAmount._sum.totalAmount ?? 0);
     const totalSales = salesData.reduce((sum, order) => sum + Number(order.totalAmount), 0);
-    const averageOrderValue = totalSales / (ordersData || 1);
-    const collectionRate = (totalSales / (Number(totalPayableAmount._sum.totalAmount) || 1)) * 100;
+    const averageOrderValue = totalSales / (ordersData ?? 1);
+    const collectionRate = totalAmount > 0 ? (totalSales / totalAmount) * 100 : 0;
+
+    // Process the metrics using helper functions
+    const collectionTrends = calculateCollectionMetrics(salesData, totalAmount);
+    const surveyMetrics = processSurveyMetrics(surveyData);
 
     return {
       success: true,
@@ -383,9 +491,11 @@ export async function getInsights(
         paymentsByStatus: paymentsByStatus.map(status => ({
           status: status.paymentStatus,
           count: status._count,
-          total: Number(status._sum.totalAmount) || 0,
+          total: Number(status._sum.totalAmount ?? 0),
         })),
-        topCustomers: topCustomers.sort((a, b) => b.totalSpent - a.totalSpent),
+        topCustomers: topCustomers.toSorted((a, b) => b.totalSpent - a.totalSpent),
+        collectionTrends,
+        surveyMetrics,
       }) as InsightsData
     };
   } catch (error) {

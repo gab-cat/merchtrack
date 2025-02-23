@@ -32,10 +32,14 @@ export const OrderDetails: FC<OrderDetailsProps> = ({ orderId, userId }) => {
 
   const { mutate: updateStatus, isPending: isUpdatingStatus } = useMutation({
     mutationFn: async (newStatus: OrderStatus) => {
+      if (!order) {
+        throw new Error("Order not found");
+      }
+      
       if (newStatus === OrderStatus.DELIVERED) {
-        // check if the order payment status is paid before marking as ready
+        // check if the order payment status is paid before marking as delivered
         if (order?.paymentStatus !== OrderPaymentStatus.PAID) {
-          throw new Error("Order payment status must be 'PAID' before marking as ready");
+          throw new Error("Order payment status must be 'PAID' before marking as delivered");
         }
       }
       const result = await updateOrderStatus(orderId, newStatus, userId);

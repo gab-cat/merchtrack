@@ -38,7 +38,7 @@ export default function InsightsContainer() {
   return (
     <motion.div {...fadeInUp} className="space-y-6">
       {/* Date Range Filters */}
-      <Card className="p-4">
+      <Card className="p-4 shadow-sm">
         <div className="flex items-center gap-4">
           <DatePicker
             name="start-date"
@@ -64,34 +64,34 @@ export default function InsightsContainer() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <SummaryCard
           title="Total Sales"
-          value={formatCurrency(insights?.totalSales || 0)}
+          value={formatCurrency(insights?.totalSales ?? 0)}
           icon="💰"
         />
         <SummaryCard
           title="Total Orders"
-          value={insights?.totalOrders.toString() || "0"}
+          value={insights?.totalOrders.toString() ?? "0"}
           icon="📦"
         />
         <SummaryCard
           title="Average Order Value"
-          value={formatCurrency(insights?.averageOrderValue || 0)}
+          value={formatCurrency(insights?.averageOrderValue ?? 0)}
           icon="📈"
         />
         <SummaryCard
           title="Collection Rate"
-          value={`${Math.round(insights?.collectionRate || 0)}%`}
+          value={`${Math.round(insights?.collectionRate ?? 0)}%`}
           icon="💱"
         />
         <SummaryCard
           title="Total Customers"
-          value={insights?.totalCustomers.toString() || "0"}
+          value={insights?.totalCustomers.toString() ?? "0"}
           icon="👥"
         />
       </div>
 
       {/* Charts Row 1 */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card>
+        <Card className='shadow-sm'>
           <CardHeader>
             <CardTitle>Sales Over Time</CardTitle>
           </CardHeader>
@@ -126,7 +126,7 @@ export default function InsightsContainer() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className='shadow-sm'>
           <CardHeader>
             <CardTitle>Orders by Status</CardTitle>
           </CardHeader>
@@ -157,7 +157,7 @@ export default function InsightsContainer() {
 
       {/* Charts Row 2 */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card>
+        <Card className='shadow-sm'>
           <CardHeader>
             <CardTitle>Top Selling Products</CardTitle>
           </CardHeader>
@@ -175,7 +175,7 @@ export default function InsightsContainer() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className='shadow-sm'>
           <CardHeader>
             <CardTitle>Top Customers</CardTitle>
           </CardHeader>
@@ -208,13 +208,13 @@ export default function InsightsContainer() {
 
       {/* Charts Row 3 */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card>
+        <Card className='shadow-sm'>
           <CardHeader>
             <CardTitle>Collection Rate Trends</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={insights?.recentSales || []}>
+              <AreaChart data={insights?.collectionTrends ?? []}>
                 <defs>
                   <linearGradient id="colorCollection" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#10B981" stopOpacity={0.8}/>
@@ -222,10 +222,13 @@ export default function InsightsContainer() {
                   </linearGradient>
                 </defs>
                 <XAxis
-                  dataKey="createdAt"
+                  dataKey="date"
                   tickFormatter={(date) => format(new Date(date), 'MMM dd')}
                 />
-                <YAxis tickFormatter={(value) => `${Math.round(value)}%`} />
+                <YAxis
+                  tickFormatter={(value) => `${Math.round(value)}%`}
+                  domain={[0, 100]}
+                />
                 <CartesianGrid strokeDasharray="3 3" />
                 <Tooltip
                   formatter={(value) => `${Math.round(Number(value))}%`}
@@ -243,38 +246,39 @@ export default function InsightsContainer() {
           </CardContent>
         </Card>
 
-        {/* Payment Status Distribution */}
-        <Card>
+        <Card className='shadow-sm'>
           <CardHeader>
-            <CardTitle>Payment Status Distribution</CardTitle>
+            <CardTitle>Survey Metrics</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={insights?.paymentsByStatus || []}
-                  dataKey="count"
-                  nameKey="status"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                  fill="#2C59DB"
-                  label={(entry) => entry.status}
-                >
-                  <Cell fill="#EF4444" />
-                  <Cell fill="#10B981" />
-                  <Cell fill="#FFA500" />
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
+            <div className="h-[300px] overflow-auto">
+              <table className="w-full">
+                <thead className="sticky top-0 bg-white">
+                  <tr className="border-b">
+                    <th className="p-2 text-left">Category</th>
+                    <th className="p-2 text-right">Avg. Score</th>
+                    <th className="p-2 text-right">Responses</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {insights?.surveyMetrics.map((metric) => (
+                    <tr key={metric.categoryName} className="border-b">
+                      <td className="p-2">{metric.categoryName}</td>
+                      <td className="p-2 text-right">
+                        {metric.avgScore.toFixed(1)} / 5
+                      </td>
+                      <td className="p-2 text-right">{metric.count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Payment Status Chart */}
-      <Card>
+      <Card className='shadow-sm'>
         <CardHeader>
           <CardTitle>Payments by Status</CardTitle>
         </CardHeader>
@@ -314,9 +318,9 @@ export default function InsightsContainer() {
   );
 }
 
-function SummaryCard({ title, value, icon }: { title: string; value: string; icon: string }) {
+function SummaryCard({ title, value, icon }: Readonly<{ title: string; value: string; icon: string }>) {
   return (
-    <Card>
+    <Card className='shadow-sm'>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <span className="text-2xl">{icon}</span>
