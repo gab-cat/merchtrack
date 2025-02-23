@@ -7,7 +7,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu-custom";
 import { Badge } from "@/components/ui/badge";
 import { StatusOption } from "@/types/Misc";
 
