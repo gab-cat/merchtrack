@@ -20,7 +20,7 @@ const Carousel: React.FC<CarouselProps> = ({ images }) => {
   };
 
   return (
-    <div className="relative w-screen overflow-hidden" style={{ height: "100vh" }}>
+    <div className="relative w-screen overflow-hidden pt-16" style={{ height: "100vh" }}>
       <div
         className="flex transition-transform duration-500 ease-in-out"
         style={{ transform: `translateX(-${currentSlide * 100}%)` }}
@@ -28,8 +28,8 @@ const Carousel: React.FC<CarouselProps> = ({ images }) => {
         {images.map((src, index) => (
           <div key={index} className="min-w-full">
             <Image 
-              width={2000}
-              height={2000}
+              width={1920}
+              height={1080}
               src={src || "/placeholder.svg"} 
               alt={`Slide ${index + 1}`} 
               objectFit="cover" />
