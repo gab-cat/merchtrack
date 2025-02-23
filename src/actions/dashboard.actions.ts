@@ -85,13 +85,13 @@ export async function getDashboardStats() {
       })
     ]);
 
-    const currentSales = totalSales._sum?.totalAmount || 0;
-    const previousSales = lastMonthSales._sum?.totalAmount || 1; // Prevent division by zero
+    const currentSales = totalSales._sum?.totalAmount ?? 0;
+    const previousSales = lastMonthSales._sum?.totalAmount ?? 1; // Prevent division by zero
     
     // Calculate percentage changes
-    const userChange = ((totalUsers - lastMonthUsers) / lastMonthUsers * 100).toFixed(1);
+    const userChange = ((totalUsers - (lastMonthUsers || 1)) / (lastMonthUsers || 1) * 100).toFixed(1);
     const salesChange = ((currentSales - previousSales) / previousSales * 100).toFixed(1);
-    const productsChange = ((activeProducts - lastMonthProducts) / lastMonthProducts * 100).toFixed(1);
+    const productsChange = ((activeProducts - (lastMonthProducts || 1)) / (lastMonthProducts || 1) * 100).toFixed(1);
 
     // Calculate system health based on error logs
     const errorRate = (recentLogs.length / 100) * 100;

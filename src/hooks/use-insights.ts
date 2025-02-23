@@ -37,6 +37,15 @@ export interface InsightsData {
     totalSpent: number;
     ordersCount: number;
   }[];
+  collectionTrends: {
+    date: string;
+    collectionRate: number;
+  }[];
+  surveyMetrics: {
+    categoryName: string;
+    avgScore: number;
+    count: number;
+  }[];
 }
 
 export function useInsights(
