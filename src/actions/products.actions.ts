@@ -250,18 +250,7 @@ export async function getProductById({ userId, limitFields, productId }: GetObje
  * }
  * ```
  */
-export async function getProductBySlug({ userId, limitFields, slug }: GetObjectByTParams<"slug">): Promise<ActionsReturnType<ExtendedProduct>> {
-  if (!await verifyPermission({
-    userId: userId,
-    permissions: {
-      dashboard: { canRead: true },
-    }
-  })) {
-    return {
-      success: false,
-      message: "You are not authorized to view products."
-    };
-  }
+export async function getProductBySlug({ limitFields, slug }: GetObjectByTParams<"slug">): Promise<ActionsReturnType<ExtendedProduct>> {
 
   try {
     let product: Product | null = await getCached(`product:${slug}`);

@@ -6,7 +6,19 @@ import SizeSelector from "@/components/ui/size-selector";
 import QuantitySelector from "@/components/ui/quantity-selector";
 import { getProductBySlug } from "@/actions/products.actions";
 import { ExtendedProductVariant } from "@/types/extended";
-import Carousel from "@/components/ui/carousel";
+
+import "./embla.css";
+
+import EmblaCarousel from '@/components/ui/EmblaCarousel';
+ 
+// import { Card, CardContent } from "@/components/ui/card";
+// import {
+//   Carousel,
+//   CarouselContent,
+//   CarouselItem,
+//   CarouselNext,
+//   CarouselPrevious,
+// } from "@/components/ui/embla-carousel";
 
 interface ProductListingProps {
     variants: ExtendedProductVariant[];
@@ -19,27 +31,49 @@ const ProductListing: React.FC<ProductListingProps> = async ({ slug }) => {
     slug: slug,
   });
 
-  //   const data = {
-  //     imageUrl : [],
-  //     title: "Lemon",
-  //     description: "<h4>Wow<h4><p> Manok ako eh ano ka?<p>",
-  //     variants:[{"id":"1",variantName:"Male"}, {"id":"2",variantName:"Female"}]
+  // const SLIDE_COUNT = 10;
+  // const SLIDES = Array.from(Array(SLIDE_COUNT).keys());
+
+  // const data = {
+  //   imageUrl : ['/img/profile-placeholder-img.png', '/img/profile-placeholder-img.png', '/img/profile-placeholder-img.png'],
+  //   title: "Lemon",
+  //   description: "<p> Manok ako eh ano ka?</p>",
+  //   variants:[{"id":"1",variantName:"Male"}, {"id":"2",variantName:"Female"}]
     
-  //   };
+  // };
 
 
 
   return (
-    <div className="mt-20 flex flex-col items-center gap-6 rounded-lg border bg-white p-6 shadow-sm md:flex-row">
+    <div className="mx-auto my-10 mt-20 flex max-w-5xl flex-1 flex-col items-stretch gap-16  rounded-lg bg-white p-6 shadow-sm md:flex-row">
       {/* Left Column - Image */}
       <div className="relative flex h-auto w-full justify-center overflow-hidden md:w-1/2">
-        {/* <div className="aspect-square"> */}
-        <Carousel images={data?.imageUrl  || ['/img/profile-placeholder-img.png']} />
-        {/* </div> */}
+
+        <EmblaCarousel slides={[...(data?.imageUrl ?? []), "/img/profile-placeholder-img.png"]}/>
+
+        {/* <Carousel className="w-full max-w-fit">
+          <CarouselContent>
+            {data?.imageUrl.map((url, index) => (
+              <CarouselItem key={index}>
+                <div className="p-1">
+                  <Card>
+                    <CardContent className="flex aspect-square items-center justify-center p-6">
+                      <img src={url} alt="product-image" className="size-full object-contain"/>
+                    </CardContent>
+                  </Card>
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel> */}
+
+        
       </div>
 
       {/* Right Column - Text & Button */}
-      <div className="flex flex-col justify-center gap-4 px-10 text-center md:w-1/2 md:text-left">
+      <div className="flex flex-1 flex-col gap-4 px-10 text-left  md:text-left">
 
         <h1 className="text-4xl font-bold text-gray-900">{data?.title}</h1>
         <h1 className="text-4xl text-gray-900">₱ 450.00</h1>
@@ -52,7 +86,6 @@ const ProductListing: React.FC<ProductListingProps> = async ({ slug }) => {
         <div className="flex">
           <Button className="w-full">Add to Cart</Button>
         </div>
-
       </div>
     </div>
 
