@@ -5,6 +5,7 @@ import type { EmblaOptionsType } from 'embla-carousel';
 import useEmblaCarousel from 'embla-carousel-react';
 import Image from 'next/image';
 import { Thumb } from './EmblaCarouselThumbsButton';
+import "./embla.css";
 
 type PropType = {
   slides: string[]
@@ -42,11 +43,20 @@ const EmblaCarousel: React.FC<PropType> = (props) => {
   }, [emblaMainApi, onSelect]);
 
   return (
-    <div className="embla">
+    <div className="embla w-full">
       <div className="embla__viewport" ref={emblaMainRef}>
         <div className="embla__container">
           {slides.map((url, index) => (
-            <Image className="embla__slide border object-contain" key={index} src={url} width={200} height={200} alt='A Pic'/>
+            <div className="embla__slide" key={index}>
+              <Image 
+                src={url} 
+                alt={`Product image ${index + 1}`}
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority={index === 0}
+                className="object-contain"
+              />
+            </div>
           ))}
         </div>
       </div>

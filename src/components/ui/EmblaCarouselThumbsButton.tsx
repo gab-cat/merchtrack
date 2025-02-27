@@ -3,26 +3,26 @@ import Image from 'next/image';
 
 type PropType = {
   selected: boolean
-  index: string
   onClick: () => void
+  index: string
 }
 
 export const Thumb: React.FC<PropType> = (props) => {
-  const { selected, index, onClick } = props;
+  const { selected, onClick, index } = props;
 
   return (
     <div
-      className={'embla-thumbs__slide'.concat(
-        selected ? ' embla-thumbs__slide--selected' : ''
-      )}
+      className={`embla-thumbs__slide ${selected ? 'is-selected' : ''}`}
+      onClick={onClick}
     >
-      <button
-        onClick={onClick}
-        type="button"
-        className="embla-thumbs__slide__number"
-      >
-        <Image src={index} width={150} height={150} alt='thumbs' />
-      </button>
+      <Image 
+        className={`embla-thumbs__slide-img border-2 ${selected ? 'border-primary' : 'border-transparent'}`}
+        src={index}
+        alt="Product thumbnail"
+        width={120}
+        height={80}
+        objectFit="cover"
+      />
     </div>
   );
 };

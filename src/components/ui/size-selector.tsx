@@ -18,10 +18,10 @@ const SizeSelector: React.FC<SizeSelectorProps> = ({ variants }) => {
         <Button
           key={variant.id}
           onClick={() => { setSelectedSize(variant.id); }}
-          className={`flex items-center justify-center rounded-lg border transition-colors
+          className={`flex items-center justify-center rounded-lg border shadow-none transition-colors
                         ${selectedSize === variant.id
-          ? "bg-gray-700 text-white " // Active (selected) state
-          : "bg-gray-200 text-gray-700  hover:bg-gray-700 hover:text-white "
+          ? "border-primary bg-primary-100 text-primary hover:bg-primary-100 " // Active (selected) state
+          : " bg-white text-gray-700  hover:bg-primary-100 "
         }`}
         >
           {variant.variantName}

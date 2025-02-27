@@ -1,0 +1,65 @@
+
+.embla {
+  --slide-spacing: 1rem;
+  --slide-size: 100%;
+  --slide-height: 19rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+.embla__viewport {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.embla__container {
+  display: flex;
+  flex-direction: row;
+  gap: var(--slide-spacing);
+  width: 100%;
+}
+
+.embla__slide {
+  flex: 0 0 var(--slide-size);
+  min-width: 0;
+  position: relative;
+  height: var(--slide-height);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.embla-thumbs {
+  --thumbs-slide-spacing: 0.8rem;
+  --thumbs-slide-height: 6rem;
+  margin-top: var(--thumbs-slide-spacing);
+  width: 100%;
+}
+
+.embla-thumbs__viewport {
+  overflow: hidden;
+  width: 100%;
+}
+
+.embla-thumbs__container {
+  display: flex;
+  flex-direction: row;
+  gap: var(--thumbs-slide-spacing);
+  margin-left: calc(var(--thumbs-slide-spacing) * -1);
+}
+
+.embla-thumbs__slide {
+  flex: 0 0 28%;
+  min-width: 0;
+  position: relative;
+  height: var(--thumbs-slide-height);
+  cursor: pointer;
+}
+
+.embla-thumbs__slide-img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}

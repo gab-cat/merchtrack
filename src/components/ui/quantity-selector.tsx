@@ -15,24 +15,24 @@ const QuantitySelector = () => {
   };
 
   return (
-    <div className="flex items-center gap-16">
+    <div className="flex items-center gap-4">
       {/* Minus Button */}
       <Button
         onClick={decreaseQuantity}
-        className="flex size-10 items-center justify-center rounded-md border border-gray-300 bg-white text-lg font-bold text-[gray] hover:bg-blue-500 hover:text-white"
+        className="flex size-10 items-center justify-center rounded-md border border-gray-300 bg-white text-lg font-bold text-[gray] shadow-none hover:bg-blue-500 hover:text-white"
       >
                 −
       </Button>
 
       {/* Quantity Display */}
-      <span className="flex h-10 w-12 items-center justify-center rounded-md border border-gray-300 text-lg font-medium">
+      <span className="flex h-10 w-12 items-center justify-center rounded-md border border-gray-300 text-lg font-medium shadow-none">
         {quantity}
       </span>
 
       {/* Plus Button */}
       <Button
         onClick={increaseQuantity}
-        className="flex size-10 items-center justify-center rounded-md border border-gray-300 bg-white text-lg font-bold text-[gray] hover:bg-blue-500 hover:text-white"
+        className="flex size-10 items-center justify-center rounded-md border border-gray-300 bg-white text-lg font-bold text-[gray] shadow-none hover:bg-blue-500 hover:text-white"
       >
                 +
       </Button>

@@ -6,7 +6,7 @@ export interface ExtendedProductVariant extends ProductVariant {
 
 export interface ExtendedProduct extends Product {
   category: Category;
-  reviews: Review[];
+  reviews: ExtendedReview[];
   variants: ExtendedProductVariant[];
   postedBy: User;
 }
@@ -17,3 +17,7 @@ export type GetObjectByTParams<T extends string> = {
 } & {
   [K in T]: string;
 };
+
+export type ExtendedReview = Review & {
+  user: User;
+}

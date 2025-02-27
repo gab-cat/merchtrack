@@ -34,6 +34,8 @@ const nextConfig: NextConfig = {
         'https://merchtrack.tech',
         'https://staging.merchtrack.tech',
         process.env.NEXT_PUBLIC_APP_URL!,
+        'cuddly-succotash-5795q6qxrj627w7-3000.app.github.dev',
+        'localhost:3000',
       ]
     },
     // useLightningcss: true,
