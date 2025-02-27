@@ -21,7 +21,6 @@ interface RecommendedProduct {
 }
 
 interface ProductReviewsRecommendationsProps {
-  productId: string;
   reviews?: ExtendedReview[];
   recommendedProducts?: RecommendedProduct[];
   onReviewSubmit?: (review: { rating: number; comment: string }) => Promise<void>;

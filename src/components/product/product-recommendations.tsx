@@ -4,19 +4,31 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Star } from "lucide-react";
+import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { useProductsQuery } from "@/hooks/products.hooks";
 import { ExtendedProduct } from "@/types/extended";
-
+import { PaginationFooter } from "@/app/admin/survey/components/pagination-footer";
+import ProductRecommendationSkeleton from "@/components/product/product-recommendation-skeleton";
+import { fadeInUp } from "@/constants/animations";
 
 export default function ProductRecommendations() {
-  const { data: recommendedProducts } = useProductsQuery({
-    limit: 6, 
-    take: 6,
+  const [page, setPage] = React.useState(1);
+  const ITEMS_PER_PAGE = 6;
+  
+  const { data: recommendedProducts, isLoading } = useProductsQuery({
+    skip: (page - 1) * ITEMS_PER_PAGE,
+    take: ITEMS_PER_PAGE, 
+    limit: 6,
     orderBy: {
       createdAt: "desc",
-    }
+    },
+    page,
   });
+
+  function handlePageChange(page: number) {
+    setPage(page);
+  }
 
   // Function to render star ratings
   const renderRating = (rating: number) => {
@@ -35,6 +47,13 @@ export default function ProductRecommendations() {
     );
   };
 
+  const totalItems = recommendedProducts?.metadata.total || 0;
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+
+  if (isLoading) {
+    return (<ProductRecommendationSkeleton />);
+  }
+
   return (
     <>
       <Card className="border-none shadow-none">
@@ -45,7 +64,7 @@ export default function ProductRecommendations() {
               const rating = product.reviews?.reduce((acc, review) => acc + review.rating, 0) / product.reviews?.length;
               return (
                 <Link href={`/products/${product.slug}`} key={product.id}>
-                  <div className="group cursor-pointer">
+                  <motion.div {...fadeInUp} className="group cursor-pointer">
                     <div className="relative mb-2 aspect-square overflow-hidden rounded-md">
                       <Image
                         src={product.imageUrl[0]}
@@ -57,11 +76,18 @@ export default function ProductRecommendations() {
                     <h4 className="font-medium">{product.title}</h4>
                     {rating > 0 && renderRating(rating)}
                     <p className="mt-1 text-gray-700">$0</p>
-                  </div>
+                  </motion.div>
                 </Link>
               );
             })}
           </div>
+          <PaginationFooter 
+            currentPage={page} 
+            totalPages={totalPages}
+            totalItems={totalItems} 
+            itemsPerPage={ITEMS_PER_PAGE}
+            onPageChange={handlePageChange}
+          />
         </CardContent>
       </Card>
     </>

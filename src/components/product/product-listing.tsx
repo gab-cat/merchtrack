@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import DOMPurify from "isomorphic-dompurify";
 import { Button } from "@/components/ui/button";
 import SizeSelector from "@/components/ui/size-selector";
@@ -41,7 +41,7 @@ const ProductListing: React.FC<ProductListingProps> = async ({ slug }) => {
           </div>
         </div>
       </div>
-      <ProductReviewsRecommendations productId={data!.id} reviews={data?.reviews} />
+      <ProductReviewsRecommendations reviews={data?.reviews} />
     </>
   );
 };
