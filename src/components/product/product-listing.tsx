@@ -19,6 +19,8 @@ const ProductListing: React.FC<ProductListingProps> = async ({ slug }) => {
     slug: slug,
   });
 
+  console.log(data);
+
   return (
     <>
       <div className="mx-auto my-10 mt-20 flex max-w-5xl flex-1 flex-col items-stretch gap-16 rounded-lg bg-white p-6 md:flex-row">
@@ -30,7 +32,7 @@ const ProductListing: React.FC<ProductListingProps> = async ({ slug }) => {
         {/* Right Column - Text & Button */}
         <div className="flex flex-1 flex-col gap-4 text-left md:px-6">
           <h1 className="text-4xl font-bold text-gray-900">{data?.title}</h1>
-          <h1 className="text-4xl text-gray-900">₱ 450.00</h1>
+          <h1 className="text-4xl text-gray-900">₱ {data?.variants[0].price.toString() || "No Listed Price"}</h1>
           {(data?.description) && <p dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(data?.description) }}></p>}
           <h3 className="mt-[20px] font-bold">Options</h3>
           <SizeSelector variants={data?.variants || []} />
