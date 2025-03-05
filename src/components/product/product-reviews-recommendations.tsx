@@ -10,7 +10,7 @@ import { prettyFormatDate } from "@/utils/format";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import useToast from "@/hooks/use-toast";
-
+import ProductReviews from "./product-reviews";
 
 interface RecommendedProduct {
   id: string;
@@ -24,11 +24,13 @@ interface ProductReviewsRecommendationsProps {
   reviews?: ExtendedReview[];
   recommendedProducts?: RecommendedProduct[];
   onReviewSubmit?: (review: { rating: number; comment: string }) => Promise<void>;
+  slug: string;
 }
 
 export default function ProductReviewsRecommendations({
   reviews = [],
   onReviewSubmit,
+  slug
 }: ProductReviewsRecommendationsProps) {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
@@ -143,7 +145,13 @@ export default function ProductReviewsRecommendations({
               </form>
               
               <h3 className="mb-4 text-xl font-semibold">Customer Reviews</h3>
-              {reviews.length === 0 ? (
+              <ProductReviews slug= {slug}/>
+
+
+
+
+
+              {/* {reviews.length === 0 ? (
                 <p>No reviews yet. Be the first to review this product!</p>
               ) : (
                 <div className="space-y-6">
@@ -170,7 +178,7 @@ export default function ProductReviewsRecommendations({
                     </div>
                   ))}
                 </div>
-              )}
+              )} */}
             </CardContent>
           </Card>
         </TabsContent>

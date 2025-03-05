@@ -3,7 +3,7 @@ import DOMPurify from "isomorphic-dompurify";
 import { Button } from "@/components/ui/button";
 import SizeSelector from "@/components/ui/size-selector";
 import QuantitySelector from "@/components/ui/quantity-selector";
-import { getProductBySlug } from "@/actions/products.actions";
+import { getProductBySlug, getProductReviewsBySlug } from "@/actions/products.actions";
 import "./embla.css";
 import EmblaCarousel from '@/components/ui/EmblaCarousel';
 import { FaCartPlus } from "react-icons/fa";
@@ -19,7 +19,15 @@ const ProductListing: React.FC<ProductListingProps> = async ({ slug }) => {
     slug: slug,
   });
 
+  const { data: reviewsData } = await getProductReviewsBySlug({
+    userId: '',
+    slug: slug,
+  });
+
+  
   console.log(data);
+  console.log(reviewsData);
+
 
   return (
     <>
@@ -43,7 +51,7 @@ const ProductListing: React.FC<ProductListingProps> = async ({ slug }) => {
           </div>
         </div>
       </div>
-      <ProductReviewsRecommendations reviews={data?.reviews} />
+      <ProductReviewsRecommendations slug={slug} reviews={data?.reviews} />
     </>
   );
 };

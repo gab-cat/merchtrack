@@ -5,7 +5,7 @@ import { Product } from "@prisma/client";
 import prisma from "@/lib/db";
 import { getCached, setCached } from "@/lib/redis";
 import { QueryParams, PaginatedResponse } from "@/types/common";
-import { ExtendedProduct, GetObjectByTParams } from "@/types/extended";
+import { ExtendedProduct, ExtendedReview, GetObjectByTParams } from "@/types/extended";
 import { processActionReturnData, calculatePagination, verifyPermission } from "@/utils";
 
 
@@ -257,11 +257,11 @@ export async function getProductBySlug({ limitFields, slug }: GetObjectByTParams
         include: {
           category: true,
           postedBy: true,
-          reviews: {
-            include: {
-              user: true,
-            }
-          },
+          // reviews: {
+          //   include: {
+          //     user: true,
+          //   }
+          // },
           variants: true
         }
       });
@@ -278,6 +278,47 @@ export async function getProductBySlug({ limitFields, slug }: GetObjectByTParams
     return {
       success: true,
       data: processActionReturnData(product, limitFields) as ExtendedProduct
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: (error as Error).message
+    };
+  }
+}
+
+export async function getProductReviewsBySlug({ limitFields, slug }: GetObjectByTParams<"slug">): Promise<ActionsReturnType<ExtendedReview[]>> {
+  try {
+    const cacheKey = `product:${slug}:reviews`;
+    let reviews = await getCached(cacheKey);
+
+    // If no cache, fetch reviews directly from database
+    if (!reviews) {
+      const product = await prisma.product.findUnique({
+        where: { slug },
+        select: {
+          reviews: {
+            include: {
+              user: true
+            }
+          }
+        }
+      });
+
+      if (!product) {
+        return {
+          success: false,
+          message: "Product not found."
+        };
+      }
+
+      reviews = product.reviews;
+      await setCached(cacheKey, reviews);
+    }
+
+    return {
+      success: true,
+      data: processActionReturnData(reviews, limitFields) as ExtendedReview[]
     };
   } catch (error) {
     return {
