@@ -6,11 +6,17 @@ export type CartItem = {
   variantId: string;
   quantity: number;
   selected: boolean;
+  note?: string;
   variant: ProductVariant & {
     product: {
       title: string;
       imageUrl: string[];
+      inventoryType?: 'STOCK' | 'PREORDER';
     };
+    rolePricing?: {
+      price: number;
+      roleId: string;
+    } | null;
   };
 };
 
@@ -37,7 +43,7 @@ export const useCartStore = create(
             return {
               cartItems: state.cartItems.map((i) =>
                 i.variantId === item.variantId
-                  ? { ...i, quantity: i.quantity + item.quantity }
+                  ? { ...i, quantity: i.quantity + item.quantity, note: item.note || i.note }
                   : i
               ),
             };

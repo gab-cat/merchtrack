@@ -297,7 +297,7 @@ export default function MyTickets() {
       
       {/* Ticket Detail Drawer */}
       <Drawer open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-        <DrawerContent className="max-h-[90vh] antialiased">
+        <DrawerContent className="mx-auto max-h-[90vh] max-w-5xl antialiased">
           <DrawerHeader>
             <DrawerTitle>
               {selectedTicketData ? 'Ticket Details' : 'Create Support Ticket'}

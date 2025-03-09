@@ -13,7 +13,7 @@ export function OrderSummary() {
 
   const selectedItems = cartItems.filter(item => item.selected);
   const subtotal = selectedItems.reduce(
-    (total, item) => total + Number(item.variant.price) * item.quantity,
+    (total, item) => total + (Number(item.variant.rolePricing?.price) || Number(item.variant.price)) * item.quantity,
     0
   );
 
@@ -75,7 +75,7 @@ export function OrderSummary() {
                       Qty: {item.quantity}
                     </span>
                     <span className="font-medium">
-                      {formatCurrency(Number(item.variant.price) * item.quantity)}
+                      {formatCurrency((Number(item.variant.rolePricing?.price) || Number(item.variant.price)) * item.quantity)}
                     </span>
                   </div>
                 </div>

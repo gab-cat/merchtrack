@@ -1,7 +1,7 @@
 'use server';
 
 import type { Cart, CartItem } from '@prisma/client';
-import { prisma } from '@/lib/prisma';
+import prisma from '@/lib/prisma';
 import { processActionReturnData } from '@/utils';
 
 // Action to update an item's selected state
@@ -308,6 +308,45 @@ export async function clearCart(userId: string): Promise<{ success: boolean; mes
     return {
       success: false,
       message: 'Failed to clear cart',
+    };
+  }
+}
+
+// Update cart item note
+export async function updateCartItemNote(userId: string, variantId: string, note: string): Promise<{ success: boolean; message?: string }> {
+  try {
+    // Get the user's cart
+    const cart = await prisma.cart.findFirst({
+      where: {
+        userId,
+      },
+    });
+    if (!cart) {
+      return {
+        success: false,
+        message: 'Cart not found',
+      };
+    }
+    
+    // Update the cart item note
+    await prisma.cartItem.updateMany({
+      where: {
+        cartId: cart.id,
+        variantId,
+      },
+      data: {
+        note,
+      },
+    });
+    
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error('Error updating cart item note:', error);
+    return {
+      success: false,
+      message: 'Failed to update cart item note',
     };
   }
 }

@@ -53,6 +53,7 @@ export function CheckoutForm() {
           variantId: item.variantId,
           quantity: item.quantity,
           price: Number(item.variant.price),
+          note: item.note, // Include the note from cart item
         })),
         customerNotes: form.getValues('customerNotes'),
       });

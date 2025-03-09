@@ -12,12 +12,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { useCartStore } from '@/stores/cart.store';
+import { useUserStore } from '@/stores/user.store';
 
 
 export default function ProtectedHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { cartItems , setCartOpen } = useCartStore();
+  const { user } = useUserStore();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -127,7 +129,7 @@ export default function ProtectedHeader() {
             }
           }} >
             <UserButton.MenuItems>
-              <UserButton.Action labelIcon={<FaUserShield className='size-4'/>} label="Switch To Admin View" onClick={() => router.push("/admin")} />
+              {(user?.isAdmin || user?.isStaff) && <UserButton.Action labelIcon={<FaUserShield className='size-4'/>} label="Switch To Admin View" onClick={() => router.push("/admin")} />}
             </UserButton.MenuItems>
           </UserButton>
         </div>

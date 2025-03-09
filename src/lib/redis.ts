@@ -26,7 +26,7 @@ export default redis;
 if (NODE_ENV !== 'production') {globalThis.redisGlobal = redis;}
 
 export const getCached = async <T>(key: string): Promise<T | null> => {
-  if (NODE_ENV === 'development') return null;
+  if (NODE_ENV === 'development' || NODE_ENV === 'production') return null;
   const cachedData = await redis.get(key);
   return cachedData ? JSON.parse(cachedData) : null;
 };
@@ -49,7 +49,7 @@ const expirationLengths: Record<ExpirationLength, number> = {
 };
 
 export const setCached = async <T>(key: string, data: T, expirationInSeconds: number | ExpirationLength = 3600) => {
-  if (NODE_ENV === 'development') return null;
+  if (NODE_ENV === 'development' || NODE_ENV === 'production') return null;
   const duration = typeof expirationInSeconds === 'number' 
     ? expirationInSeconds 
     : expirationLengths[expirationInSeconds];

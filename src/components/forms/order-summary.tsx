@@ -14,7 +14,6 @@ import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader,
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { CreateOrderType } from "@/schema/orders.schema";
 import useToast from "@/hooks/use-toast";
@@ -110,6 +109,7 @@ function DeliveryDatePicker({
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function PaymentPreferenceSelector({
   value,
   onChange,
@@ -238,41 +238,50 @@ export function OrderSummary({
   date,
   onDateChange
 }: Readonly<OrderSummaryProps>) {
-  const totalAmount = orderItems.reduce((sum, item) => {
-    return sum + (item.price * item.quantity);
-  }, 0);
+  const { watch, setValue, formState: { errors } } = form;
+  const showToast = useToast;
 
-  const discountAmount = form.watch('discountAmount') || 0;
+  // Calculate total using the role-based price from orderItems
+  const totalAmount = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const discountAmount = watch('discountAmount') || 0;
   const finalAmount = Math.max(0, totalAmount - discountAmount);
-  const discountPercentage = ((discountAmount / totalAmount) * 100).toFixed(1);
-  const { errors } = form.formState;
+  const discountPercentage = totalAmount > 0 ? ((discountAmount / totalAmount) * 100).toFixed(1) : '0';
 
-  const handleDiscountChange = (value: string) => {
-    const amount = Number(value) || 0;
-    form.setValue('discountAmount', amount, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
-  };
-
-  const handlePaymentPreferenceChange = (value: 'FULL' | 'DOWNPAYMENT') => {
-    form.setValue('paymentPreference', value, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
+  const validateDiscountAmount = (value: string) => {
+    const numValue = parseFloat(value);
+    
+    if (isNaN(numValue) || numValue < 0) {
+      setValue('discountAmount', 0);
+      showToast({
+        type: "error",
+        title: "Invalid Discount",
+        message: "Discount amount cannot be negative"
+      });
+      return;
+    }
+    
+    if (numValue > totalAmount) {
+      setValue('discountAmount', totalAmount);
+      showToast({
+        type: "warning",
+        title: "Discount Adjusted",
+        message: "Discount amount cannot exceed total amount"
+      });
+      return;
+    }
+    
+    setValue('discountAmount', numValue);
   };
 
   return (
-    <FormSection
-      title="Order Summary"
-    >
-      <div className="grid gap-6">
+    <FormSection title="Order Summary">
+      <div className="space-y-6">
         <PricingSummary
           totalAmount={totalAmount}
           discountAmount={discountAmount}
           finalAmount={finalAmount}
           discountPercentage={discountPercentage}
-          onDiscountChange={handleDiscountChange}
+          onDiscountChange={validateDiscountAmount}
           disabled={isPending}
         />
 
@@ -281,43 +290,29 @@ export function OrderSummary({
           onDateChange={onDateChange}
           disabled={isPending}
         />
-
-        <PaymentPreferenceSelector
-          value={form.watch('paymentPreference') || 'FULL'}
-          onChange={handlePaymentPreferenceChange}
-          disabled={isPending}
-        />
-
-        <div className="space-y-2">
-          <Label>Order Notes (Optional)</Label>
-          <Textarea
-            placeholder="Add any special instructions or notes for this order..."
-            {...form.register('customerNotes')}
-            className="min-h-[100px] resize-y"
-            disabled={isPending}
-          />
-        </div>
-
-        <ConfirmOrderDialog
-          onConfirm={form.handleSubmit(onSubmit)}
-          finalAmount={finalAmount}
-          disabled={!date || orderItems.length === 0}
-          isPending={isPending}
-        />
-
-        {Object.keys(errors).length > 0 && (
-          <Alert variant="destructive">
-            <FiAlertTriangle className="size-4" />
-            <AlertDescription>
-              <ul className="list-disc pl-4">
-                {Object.entries(errors).map(([key, error]) => (
-                  error?.message ? <li key={key}>{error.message}</li> : null
-                ))}
-              </ul>
-            </AlertDescription>
-          </Alert>
-        )}
       </div>
+
+      <Separator className="my-6" />
+
+      <ConfirmOrderDialog
+        onConfirm={form.handleSubmit(onSubmit)}
+        finalAmount={finalAmount}
+        disabled={!date || orderItems.length === 0}
+        isPending={isPending}
+      />
+
+      {Object.keys(errors).length > 0 && (
+        <Alert variant="destructive" className="mt-4">
+          <FiAlertTriangle className="size-4" />
+          <AlertDescription>
+            <ul className="list-disc pl-4">
+              {Object.entries(errors).map(([key, error]) => (
+                error?.message ? <li key={key}>{error.message}</li> : null
+              ))}
+            </ul>
+          </AlertDescription>
+        </Alert>
+      )}
     </FormSection>
   );
 }

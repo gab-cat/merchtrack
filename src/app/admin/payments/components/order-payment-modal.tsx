@@ -75,7 +75,7 @@ export function OrderPaymentModal({ open, onOpenChange, order }: Readonly<OrderP
       if (!order?.id || !userId) return;
       return processPayment({
         orderId: order.id,
-        processedById: userId,
+        userId,
         ...data,
       });
     },

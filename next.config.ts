@@ -17,6 +17,14 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: process.env.CLOUDFLARE_R2_PUBLIC_DOMAIN!,
+      },
+      {
+        protocol: 'https',
+        hostname: 'loremflickr.com'
+      },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos'
       }
     ],
   },

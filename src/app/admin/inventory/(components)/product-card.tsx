@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useState } from "react";
-import { Heart, Star, Eye } from "lucide-react";
+import { Star, Eye } from "lucide-react";
 import { FaTags } from "react-icons/fa";
 import { SlOptionsVertical } from "react-icons/sl";
 import Link from "next/link";
@@ -16,6 +16,69 @@ import { formatCurrency } from "@/utils/formatCurrency";
 import { fadeIn, fadeInUp } from "@/constants/animations";
 import { cn } from "@/lib/utils";
 
+interface ProductImageProps {
+  product: ExtendedProduct;
+  isHovered: boolean;
+  onHoverChange: (hover: boolean) => void;
+}
+
+function ProductImage({ product, isHovered, onHoverChange }: Readonly<ProductImageProps>) {
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      className="relative aspect-square"
+      onMouseEnter={() => onHoverChange(true)}
+      onMouseLeave={() => onHoverChange(false)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') onHoverChange(true);
+      }}
+      onKeyUp={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') onHoverChange(false);
+      }}
+      aria-label="View product details"
+    >
+      <Image
+        src={product.imageUrl[0] || "/placeholder.png"}
+        alt={product.title}
+        fill
+        className="aspect-square object-cover transition-transform group-hover:scale-105"
+      />
+      {isHovered && (
+        <motion.div {...fadeIn} className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm transition-all">
+          <Button variant="default" size="sm" className="mr-2 bg-white text-primary hover:bg-white/90">
+            <Link className="flex items-center" href={`/admin/inventory/${product.slug}`} passHref>
+              <Eye className="mr-2 size-4" />
+              Quick View
+            </Link>
+          </Button>
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
+interface ProductRatingProps {
+  rating: number;
+  reviewCount: number;
+}
+
+function ProductRating({ rating, reviewCount }: Readonly<ProductRatingProps>) {
+  return (
+    <div className="flex items-center">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <Star
+          key={star}
+          className={`size-4 ${
+            star <= rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+          }`}
+        />
+      ))}
+      <span className="text-muted-foreground ml-2 text-sm">({reviewCount})</span>
+    </div>
+  );
+}
+
 export function ProductCard({ product }: Readonly<{ product: ExtendedProduct }>) {
   const [isHovered, setIsHovered] = useState(false);
   const basePrice = product.variants[0]?.price || 0;
@@ -23,52 +86,21 @@ export function ProductCard({ product }: Readonly<{ product: ExtendedProduct }>)
     product.variants.length > 1
       ? `${formatCurrency(Math.min(...product.variants.map((v) => Number(v.price))))} - ${formatCurrency(Math.max(...product.variants.map((v) => Number(v.price))))}`
       : formatCurrency(basePrice);
+  
+  const averageRating = product.reviews.length > 0
+    ? Math.round(product.reviews.reduce((acc, review) => acc + review.rating, 0) / product.reviews.length)
+    : 0;
+
+  const showOutOfStock = product.inventoryType === "STOCK" && product.inventory <= 0;
 
   return (
-    <motion.div {...fadeInUp} >
-      <Card className="group overflow-hidden rounded-md shadow-none">
-        <div
-          role="button"
-          tabIndex={0}
-          className="relative aspect-square"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              setIsHovered(true);
-            }
-          }}
-          onKeyUp={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              setIsHovered(false);
-            }
-          }}
-          aria-label="View product details"
-        >
-          <Image
-            src={product.imageUrl[0] || "/placeholder.png"}
-            alt={product.title}
-            fill
-            className="aspect-square object-cover transition-transform"
-          />
-          {isHovered && (
-            <motion.div {...fadeIn} className="absolute inset-0 flex items-center justify-center bg-black/40 transition-all">
-              <Button variant="default" size="sm" className="mr-2 text-white">
-                <Link className="flex items-center" href={`/admin/inventory/${product.slug}`} passHref>
-                  <Eye className="mr-2 size-4" />
-                  Quick View
-                </Link>
-              </Button>
-            </motion.div>
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-2 top-2 bg-white/80 hover:bg-white"
-          >
-            <Heart className="size-4" />
-          </Button>
-        </div>
+    <motion.div {...fadeInUp}>
+      <Card className="group overflow-hidden rounded-md border border-neutral-200 shadow-sm transition-all hover:shadow-md">
+        <ProductImage 
+          product={product} 
+          isHovered={isHovered}
+          onHoverChange={setIsHovered}
+        />
         <CardContent className="p-4">
           <div className="space-y-2">
             <div className="flex items-start justify-between">
@@ -77,22 +109,12 @@ export function ProductCard({ product }: Readonly<{ product: ExtendedProduct }>)
             <div className="flex items-center justify-between">
               <p className="font-bold text-primary">{priceRange}</p>
               {product.category && (
-                <Badge  className="text-xs text-white">
+                <Badge className="text-xs text-white">
                   {product.category.name}
                 </Badge>
               )}
             </div>
-            <div className="flex items-center">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Star
-                  key={star}
-                  className={`size-4 ${
-                    star <= Math.round(product.rating || 0) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
-                  }`}
-                />
-              ))}
-              <span className="text-muted-foreground ml-2 text-sm">({product.reviews.length ?? 0})</span>
-            </div>
+            <ProductRating rating={averageRating} reviewCount={product.reviews.length} />
           </div>
 
           {product.description && (
@@ -101,10 +123,18 @@ export function ProductCard({ product }: Readonly<{ product: ExtendedProduct }>)
 
           <div className="mt-4 space-y-2">
             <div className="flex items-center justify-between text-sm">
-              <Badge variant={product.inventory > 0 ? "default" : "destructive"} className={cn("text-xs underline", product.inventory <= 0 ? "text-primary" : "text-white")}>
-                {product.inventory > 0 || product.inventoryType === "PREORDER" ? "In Stock" : "Out of Stock"}
+              <Badge 
+                variant={showOutOfStock ? "destructive" : "default"} 
+                className={cn(
+                  "text-xs", 
+                  showOutOfStock ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800"
+                )}
+              >
+                {showOutOfStock ? "Out of Stock" : "Available"}
               </Badge>
-              <span className="rounded-md border bg-neutral-2 px-3 py-1 text-xs font-normal">{product.inventoryType.toString()}</span>
+              <span className="rounded-md border bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700">
+                {product.inventoryType === "PREORDER" ? "Pre-order" : "In Stock"}
+              </span>
             </div>
 
             {product.variants.length > 0 && (
@@ -127,10 +157,10 @@ export function ProductCard({ product }: Readonly<{ product: ExtendedProduct }>)
             )}
 
             {product.tags.length > 0 && (
-              <div className="flex flex-wrap items-center gap-1 text-primary">
+              <div className="flex flex-wrap items-center gap-1">
                 <FaTags className="size-4 text-primary" />
                 {product.tags.slice(0, 3).map((tag) => (
-                  <Badge key={tag} variant="default" className="border-primary bg-white text-xs">
+                  <Badge key={tag} variant="secondary" className="text-xs">
                     {tag}
                   </Badge>
                 ))}

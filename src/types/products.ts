@@ -1,11 +1,21 @@
 import { ProductSize, User } from "@prisma/client";
 
+export type StockStatus = "IN_STOCK" | "OUT_OF_STOCK" | "LOW_STOCK";
+
+export type RolePricing = {
+  PLAYER?: number;
+  STUDENT?: number;
+  STAFF_FACULTY?: number;
+  ALUMNI?: number;
+  OTHERS: number;
+};
+
 export type ExtendedProductVariant = {
   id: string;
   productId: string;
   variantName: string;
   price: number;
-  rolePricing: PriceMap;
+  rolePricing: RolePricing;
   createdAt: Date;
   updatedAt: Date;
   attributes?: {

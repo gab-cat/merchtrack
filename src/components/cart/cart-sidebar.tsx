@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { X, ShoppingCart, Trash2 } from 'lucide-react';
+import { X, ShoppingCart, Trash2, MessageSquareText } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -12,9 +12,10 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Input } from '@/components/ui/input';
 import { formatCurrency } from '@/utils/format';
 import QuantitySelector from '@/components/ui/quantity-selector';
-import { updateCartItemSelection, updateCartItemQuantity, removeCartItem as removeCartItemAction } from '@/actions/cart.actions';
+import { updateCartItemSelection, updateCartItemQuantity, removeCartItem as removeCartItemAction, updateCartItemNote } from '@/actions/cart.actions';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 export default function CartSidebar() {
@@ -50,11 +51,23 @@ export default function CartSidebar() {
     }
   };
 
+  const handleNoteChange = async (variantId: string, note: string) => {
+    updateCartItem(variantId, { note });
+    if (userId) {
+      try {
+        await updateCartItemNote(userId, variantId, note);
+      } catch (error) {
+        console.error('Failed to update item note:', error);
+        toast.error('Failed to update note');
+      }
+    }
+  };
+
   const handleQuantityChange = async (variantId: string, quantity: number) => {
     const item = cartItems.find(item => item.variantId === variantId);
     if (!item) return;
 
-    if (quantity > (item.variant?.inventory || 0)) {
+    if (quantity > (item.variant?.inventory || 0) && item.variant.product.inventoryType === 'STOCK') {
       toast.error('Not enough stock available');
       return;
     }
@@ -143,42 +156,54 @@ export default function CartSidebar() {
             <ScrollArea className="flex-1">
               <div className="space-y-4 px-6 py-4">
                 {cartItems.map((item) => (
-                  <div key={item.variantId} className="flex items-start gap-3">
-                    <Checkbox
-                      checked={item.selected}
-                      onCheckedChange={(checked) => handleSelectionChange(item.variantId, !!checked)}
-                    />
-                    <div className="relative size-16 overflow-hidden rounded-md border">
-                      <Image
-                        src={item.variant.product.imageUrl?.[0] ?? '/img/profile-placeholder-img.png'}
-                        alt={item.variant.product.title}
-                        fill
-                        className="object-cover"
+                  <div key={item.variantId} className="flex flex-col space-y-2 rounded-lg border p-3">
+                    <div className="flex items-start gap-3">
+                      <Checkbox
+                        checked={item.selected}
+                        onCheckedChange={(checked) => handleSelectionChange(item.variantId, !!checked)}
                       />
-                    </div>
-                    <div className="flex flex-1 flex-col">
-                      <h3 className="font-medium">{item.variant.product.title}</h3>
-                      <p className="text-muted-foreground text-sm">{item.variant.variantName}</p>
-                      <div className="mt-2 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <QuantitySelector
-                            value={item.quantity}
-                            onChange={(value) => handleQuantityChange(item.variantId, value)}
-                            min={1}
-                            max={item.variant.inventory ?? 10}
-                            compact
-                          />
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleRemoveItem(item.variantId)}
-                            className="size-8 hover:text-red-600"
-                          >
-                            <X className="size-4" />
-                          </Button>
-                        </div>
-                        <p className="font-medium">{formatCurrency(Number(item.variant.price) * item.quantity)}</p>
+                      <div className="relative size-16 overflow-hidden rounded-md border">
+                        <Image
+                          src={item.variant.product.imageUrl?.[0] ?? '/img/profile-placeholder-img.png'}
+                          alt={item.variant.product.title}
+                          fill
+                          className="object-cover"
+                        />
                       </div>
+                      <div className="flex flex-1 flex-col">
+                        <h3 className="font-medium">{item.variant.product.title}</h3>
+                        <p className="text-muted-foreground text-sm">{item.variant.variantName}</p>
+                        <div className="mt-2 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <QuantitySelector
+                              value={item.quantity}
+                              onChange={(value) => handleQuantityChange(item.variantId, value)}
+                              min={1}
+                              max={item.variant.inventory ?? 10}
+                              compact
+                            />
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleRemoveItem(item.variantId)}
+                              className="size-8 hover:text-red-600"
+                            >
+                              <X className="size-4" />
+                            </Button>
+                          </div>
+                          <p className="font-medium">{formatCurrency(Number(item.variant.price) * item.quantity)}</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 pl-9 pt-1">
+                      <MessageSquareText className="size-4 shrink-0 text-primary" />
+                      <Input
+                        placeholder="Add note for this item..."
+                        value={item.note || ''}
+                        onChange={(e) => handleNoteChange(item.variantId, e.target.value)}
+                        className="h-8 grow text-sm"
+                      />
                     </div>
                   </div>
                 ))}

@@ -8,6 +8,7 @@ import prisma from "@/lib/db";
 import { validateCartItems } from "@/lib/cart";
 import { processActionReturnData } from "@/utils";
 import { sendOrderConfirmationEmail } from "@/lib/email-service";
+import { calculateRoleBasedPrice, RolePricing } from "@/utils/pricing";
 
 const checkoutSchema = z.object({
   userId: z.string(),
@@ -15,6 +16,7 @@ const checkoutSchema = z.object({
     variantId: z.string(),
     quantity: z.number(),
     price: z.number(),
+    note: z.string().max(500).optional(),
   })),
   customerNotes: z.string().max(500, 'Note cannot exceed 500 characters').optional()
 });
@@ -26,13 +28,26 @@ export async function processCheckout(input: CheckoutInput): Promise<ActionsRetu
     // Validate input
     const validatedInput = checkoutSchema.parse(input);
 
-    // Calculate total amount
-    const totalAmount = validatedInput.items.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
+    // Get user details for role-based pricing
+    const user = await prisma.user.findUnique({
+      where: { id: validatedInput.userId },
+      select: { 
+        role: true, 
+        college: true,
+        firstName: true,
+        lastName: true,
+        email: true
+      }
+    });
 
-    // Validate inventory
+    if (!user) {
+      return {
+        success: false,
+        message: "User not found"
+      };
+    }
+
+    // Get variants with product and seller info for pricing
     const variants = await prisma.productVariant.findMany({
       where: {
         id: { in: validatedInput.items.map(item => item.variantId) }
@@ -42,15 +57,50 @@ export async function processCheckout(input: CheckoutInput): Promise<ActionsRetu
           select: {
             title: true,
             imageUrl: true,
+            inventoryType: true,
+            postedBy: {
+              select: {
+                college: true
+              }
+            }
           }
         }
       }
     });
 
-    const cartItems = validatedInput.items.map(item => ({
+    // Calculate correct prices based on role and college
+    const itemsWithPricing = validatedInput.items.map(item => {
+      const variant = variants.find(v => v.id === item.variantId);
+      if (!variant) throw new Error(`Variant ${item.variantId} not found`);
+
+      const { price, appliedRole } = calculateRoleBasedPrice({
+        basePrice: Number(variant.price),
+        rolePricing: variant.rolePricing as RolePricing,
+        customerInfo: {
+          role: user.role,
+          college: user.college
+        },
+        productCollege: variant.product.postedBy.college
+      });
+
+      return {
+        ...item,
+        variant,
+        price, // Use calculated price
+        appliedRole
+      };
+    });
+
+    // Calculate total with role-based pricing
+    const totalAmount = itemsWithPricing.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+
+    const cartItems = itemsWithPricing.map(item => ({
       ...item,
-      variant: variants.find(v => v.id === item.variantId)!,
-      selected: true // or false, depending on your logic
+      variant: item.variant,
+      selected: true
     }));
 
     const validation = validateCartItems(cartItems);
@@ -73,12 +123,13 @@ export async function processCheckout(input: CheckoutInput): Promise<ActionsRetu
           estimatedDelivery: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), 
           customerNotes: validatedInput.customerNotes,
           orderItems: {
-            create: validatedInput.items.map((item) => ({
+            create: itemsWithPricing.map((item) => ({
               variantId: item.variantId,
               quantity: item.quantity,
               price: new Prisma.Decimal(item.price),
-              originalPrice: new Prisma.Decimal(item.price),
-              appliedRole: "OTHERS", // Default role for now
+              originalPrice: new Prisma.Decimal(item.variant.price),
+              appliedRole: item.appliedRole,
+              customerNote: item.note,
             })),
           },
         },
@@ -91,6 +142,7 @@ export async function processCheckout(input: CheckoutInput): Promise<ActionsRetu
                     select: {
                       title: true,
                       imageUrl: true,
+                      inventoryType: true
                     }
                   }
                 }
@@ -103,25 +155,28 @@ export async function processCheckout(input: CheckoutInput): Promise<ActionsRetu
         },
       });
 
-      // Update inventory
+      // Update inventory only for STOCK items
       await Promise.all(
-        validatedInput.items.map((item) =>
-          tx.productVariant.update({
-            where: { id: item.variantId },
-            data: {
-              inventory: {
-                decrement: item.quantity
+        itemsWithPricing.map(async (item) => {
+          if (item.variant.product.inventoryType === 'STOCK') {
+            return tx.productVariant.update({
+              where: { id: item.variantId },
+              data: {
+                inventory: {
+                  decrement: item.quantity
+                }
               }
-            }
-          })
-        )
+            });
+          }
+          return Promise.resolve();
+        })
       );
 
       await sendOrderConfirmationEmail({
         // @ts-expect-error - no need for other fields
         order,
-        customerName: `${order.customer.firstName} ${order.customer.lastName}`,
-        customerEmail: order.customer.email
+        customerName: `${user.firstName} ${user.lastName}`,
+        customerEmail: user.email
       });
 
       return order;
@@ -132,11 +187,9 @@ export async function processCheckout(input: CheckoutInput): Promise<ActionsRetu
       userId: validatedInput.userId,
       createdById: validatedInput.userId,
       reason: "Order Created",
-      systemText: `Order ${result.id} created by ${result.customer?.firstName ?? 'Unknown'}`,
+      systemText: `Order ${result.id} created by ${user.firstName}`,
       userText: "Order created successfully",
     });
-
-
 
     revalidatePath('/orders');
     revalidatePath('/checkout');

@@ -3,13 +3,13 @@
 import React, { useState } from "react";
 import { Star } from "lucide-react";
 import ProductRecommendations from "./product-recommendations";
-import ProductReviews from "./product-reviews";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { ExtendedReview } from "@/types/extended";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import useToast from "@/hooks/use-toast";
+import { prettyFormatDate } from "@/utils";
 
 interface RecommendedProduct {
   id: string;
@@ -27,8 +27,8 @@ interface ProductReviewsRecommendationsProps {
 }
 
 export default function ProductReviewsRecommendations({
+  reviews,
   onReviewSubmit,
-  slug
 }: Readonly<ProductReviewsRecommendationsProps>) {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
@@ -143,17 +143,12 @@ export default function ProductReviewsRecommendations({
               </form>
               
               <h3 className="mb-4 text-xl font-semibold">Customer Reviews</h3>
-              <ProductReviews slug= {slug}/>
-
-
-
-
-
-              {/* {reviews.length === 0 ? (
+              {/* <ProductReviews slug= {slug}/> */}
+              {reviews?.length === 0 ? (
                 <p>No reviews yet. Be the first to review this product!</p>
               ) : (
                 <div className="space-y-6">
-                  {reviews.map((review) => (
+                  {reviews?.map((review) => (
                     <div key={review.id} className="border-b pb-4 last:border-b-0">
                       <div className="mb-2 flex items-center justify-between">
                         <div className="flex items-center">
@@ -176,7 +171,7 @@ export default function ProductReviewsRecommendations({
                     </div>
                   ))}
                 </div>
-              )} */}
+              )}
             </CardContent>
           </Card>
         </TabsContent>

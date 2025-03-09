@@ -2,7 +2,7 @@ import type { CartItem } from '@/stores/cart.store';
 
 export function cartTotalAmount(items: CartItem[]): number {
   return items.reduce(
-    (total, item) => total + Number(item.variant.price) * item.quantity,
+    (total, item) => total + (Number(item.variant.rolePricing?.price) || Number(item.variant.price)) * item.quantity,
     0
   );
 }
@@ -26,7 +26,7 @@ export function validateCartItems(items: CartItem[]): {
       };
     }
 
-    if (item.quantity > item.variant.inventory) {
+    if (item.variant.product.inventoryType === 'STOCK' && item.quantity > item.variant.inventory) {
       return {
         valid: false,
         error: `Not enough stock for ${item.variant.product?.title}`,
