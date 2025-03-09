@@ -9,7 +9,7 @@ import { useDebounce } from "use-debounce";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Carousel from "@/components/ui/carousel";
-import Products from "@/app/(public)/products/(components)/products";
+import Products from "@/app/(public)/productsq/(components)/products";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useProductsQuery } from "@/hooks/products.hooks";
 import type { PaginatedResponse } from "@/types/common";

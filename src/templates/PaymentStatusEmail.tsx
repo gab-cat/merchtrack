@@ -15,7 +15,7 @@ interface PaymentStatusEmailProps {
   orderNumber: string;
   customerName: string;
   amount: number;
-  status: 'verified' | 'refunded';
+  status: 'verified' | 'refunded' | 'declined';
   refundReason?: string;
 }
 
@@ -39,8 +39,23 @@ export const PaymentStatusEmail = ({
       return `Your payment of ${formatPrice(amount)} for order #${orderNumber} has been verified successfully.`;
     case 'refunded':
       return `A refund of ${formatPrice(amount)} for order #${orderNumber} has been processed.`;
+    case 'declined':
+      return `Your payment of ${formatPrice(amount)} for order #${orderNumber} has been declined.`;
     default:
       return "";
+    }
+  };
+
+  const getHeaderMessage = () => {
+    switch (status) {
+    case 'verified':
+      return '✅ Payment Verified';
+    case 'refunded':
+      return '💰 Payment Refunded';
+    case 'declined':
+      return '❌ Payment Declined';
+    default:
+      return '';
     }
   };
 
@@ -65,7 +80,7 @@ export const PaymentStatusEmail = ({
 
           <Section style={contentContainer}>
             <Heading style={h1}>
-              {status === 'verified' ? '✅ Payment Verified' : '💰 Payment Refunded'}
+              {getHeaderMessage()} - Order #{orderNumber}
             </Heading>
             
             <Text style={greeting}>Hi {customerName},</Text>

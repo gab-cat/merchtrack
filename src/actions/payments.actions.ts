@@ -1,6 +1,6 @@
 'use server';
 
-import { OrderPaymentStatus, Payment, PaymentSite, PaymentStatus, PaymentMethod, Prisma } from "@prisma/client";
+import { OrderPaymentStatus, Payment, PaymentSite, PaymentStatus, PaymentMethod, Prisma, OrderStatus } from "@prisma/client";
 import prisma from "@/lib/db";
 import { getCached, setCached } from "@/lib/redis";
 import { QueryParams, PaginatedResponse } from "@/types/common";
@@ -405,7 +405,6 @@ export async function processPayment({
       message: "You are not authorized to process payments."
     };
   }
-
   try {
     const order = await prisma.order.findUnique({
       where: { id: orderId },
@@ -414,7 +413,6 @@ export async function processPayment({
         customer: true
       }
     });
-
     if (!order) {
       await createLog({
         userId: userId,
@@ -428,7 +426,6 @@ export async function processPayment({
         message: "Order not found."
       };
     }
-
     const totalPaid = order.payments.filter(payment => payment.paymentStatus === 'VERIFIED').reduce((sum, payment) => sum + Number(payment.amount), 0) + amount;
     if (totalPaid > Number(order.totalAmount)) {
       await createLog({
@@ -443,7 +440,6 @@ export async function processPayment({
         message: "Payment amount exceeds order total."
       };
     }
-
     const payment = await prisma.payment.create({
       data: {
         orderId,
@@ -464,53 +460,66 @@ export async function processPayment({
       }
     });
 
-    // Determine if order is fully paid
-    const isFullyPaid = totalPaid === Number(order.totalAmount);
-
-    // Update order payment status and order status if fully paid
-    await prisma.order.update({
-      where: { id: orderId },
-      data: { 
-        paymentStatus: isFullyPaid ? OrderPaymentStatus.PAID : OrderPaymentStatus.DOWNPAYMENT,
-        // Change order status to PROCESSING only if fully paid and current status is PENDING
-        ...(isFullyPaid && order.status === 'PENDING' ? { status: 'PROCESSING' } : {})
-      }
-    });
-
-    // Create success log
-    await createLog({
-      userId: order.customerId,
-      createdById: userId,
-      reason: "Payment Processed Successfully",
-      systemText: `Payment of ₱${amount} processed for order ${orderId} via ${paymentMethod}. Status: ${paymentStatus}. ${isFullyPaid ? 'Order is now fully paid.' : ''}`,
-      userText: `Payment of ₱${amount} has been processed successfully${isFullyPaid ? '. Your order is now fully paid.' : '.'}`
-    });
-
-    // Send payment notification email
-    try {
-      await sendPaymentStatusEmail({
-        orderNumber: orderId,
-        customerName: `${order.customer.firstName} ${order.customer.lastName}`,
-        customerEmail: order.customer.email,
-        amount,
-        status: 'verified'
+    // For offsite pending payments, don't update order status or send emails
+    const isOffsitePending = paymentSite === PaymentSite.OFFSITE && paymentStatus === PaymentStatus.PENDING;
+    
+    if (!isOffsitePending) {
+      // Only update order status for non-offsite or verified payments
+      const isFullyPaid = totalPaid === Number(order.totalAmount);
+      
+      await prisma.order.update({
+        where: { id: orderId },
+        data: { 
+          paymentStatus: isFullyPaid ? OrderPaymentStatus.PAID : OrderPaymentStatus.DOWNPAYMENT,
+          // Change order status to PROCESSING only if fully paid and current status is PENDING
+          ...(isFullyPaid && order.status === 'PENDING' ? { status: 'PROCESSING' } : {})
+        }
       });
-    } catch (emailError) {
+
+      // Create success log with appropriate messaging
       await createLog({
         userId: order.customerId,
         createdById: userId,
-        reason: "Payment Notification Email Error",
-        systemText: `Error sending payment notification email for order ${orderId}: ${emailError instanceof Error ? emailError.message : 'Unknown error'}`,
-        userText: "An error occurred while sending the payment notification email."
+        reason: "Payment Processed Successfully",
+        systemText: `Payment of ₱${amount} processed for order ${orderId} via ${paymentMethod}. Status: ${paymentStatus}. ${isFullyPaid ? 'Order is now fully paid.' : ''}`,
+        userText: `Payment of ₱${amount} has been processed successfully${isFullyPaid ? '. Your order is now fully paid.' : '.'}`
+      });
+
+      // Send payment notification email for verified payments only
+      try {
+        await sendPaymentStatusEmail({
+          orderNumber: orderId,
+          customerName: `${order.customer.firstName} ${order.customer.lastName}`,
+          customerEmail: order.customer.email,
+          amount,
+          status: 'verified'
+        });
+      } catch (emailError) {
+        await createLog({
+          userId: order.customerId,
+          createdById: userId,
+          reason: "Payment Notification Email Error",
+          systemText: `Error sending payment notification email for order ${orderId}: ${emailError instanceof Error ? emailError.message : 'Unknown error'}`,
+          userText: "An error occurred while sending the payment notification email."
+        });
+      }
+    } else {
+      // Log for offsite pending payment
+      await createLog({
+        userId: order.customerId,
+        createdById: userId,
+        reason: "Offsite Payment Submitted",
+        systemText: `Offsite payment of ₱${amount} submitted for order ${orderId} via ${paymentMethod}. Awaiting verification.`,
+        userText: `Your payment submission of ₱${amount} has been received and is awaiting verification by our team.`
       });
     }
-
+    
     // Invalidate caches
     await Promise.all([
       setCached(`payments:order:${orderId}`, null),
       setCached(`order:${orderId}`, null)
     ]);
-
+    
     return {
       success: true,
       data: processActionReturnData(payment, limitFields) as Payment
@@ -708,13 +717,13 @@ export async function refundPayment(
 }
 
 /**
- * Validates a payment for an order by verifying user permissions, checking for duplicate transactions, creating a payment record, updating the order status, sending a verification email, and invalidating caches.
+ * Validates a payment for an order by verifying user permissions, checking for duplicate transactions, updating the payment record, updating the order status, sending a verification email, and invalidating caches.
  *
  * This function performs the following steps:
  * - Verifies that the user has the necessary dashboard read permissions.
- * - Retrieves the order by its identifier and ensures it exists.
+ * - Retrieves the order and payment by their identifiers and ensures they exist.
  * - Checks for an existing verified payment with the same transaction ID to prevent duplicate processing.
- * - Creates a validated payment record in the database.
+ * - Updates the existing payment record with VERIFIED status in the database.
  * - Calculates the total paid amount and updates the order's payment status to either PAID (if fully paid) or DOWNPAYMENT.
  * - Logs the outcome for auditing purposes.
  * - Sends a payment verification email to the customer with order and payment details.
@@ -728,6 +737,7 @@ export async function refundPayment(
  *   - referenceNo: The payment reference number.
  *   - paymentMethod: The method used for the payment.
  *   - paymentSite: The site where the payment was made.
+ * @param paymentId - The identifier of the payment to be validated.
  *
  * @returns A promise that resolves to an ActionsReturnType object. On success, the object indicates success; on failure, it contains an error message.
  */
@@ -740,7 +750,8 @@ export async function validatePayment(
     referenceNo: string;
     paymentMethod: PaymentMethod;
     paymentSite: PaymentSite;
-  }
+  },
+  paymentId: string
 ): Promise<ActionsReturnType<void>> {
   if (!await verifyPermission({
     userId,
@@ -762,6 +773,7 @@ export async function validatePayment(
   }
 
   try {
+    // Find the order and validate it exists
     const order = await prisma.order.findUnique({
       where: { id: orderId },
       include: {
@@ -784,15 +796,35 @@ export async function validatePayment(
       };
     }
 
-    // Check for duplicate transaction ID
-    const existingPayment = await prisma.payment.findFirst({
+    // Find the payment to validate
+    const existingPayment = await prisma.payment.findUnique({
+      where: { id: paymentId }
+    });
+
+    if (!existingPayment) {
+      await createLog({
+        userId,
+        createdById: userId,
+        reason: "Payment Validation Failed - Payment Not Found",
+        systemText: `Attempted to validate non-existent payment ${paymentId}`,
+        userText: "Payment not found."
+      });
+      return {
+        success: false,
+        message: "Payment not found."
+      };
+    }
+
+    // Check for duplicate verified transaction (with same transactionId)
+    const duplicateTransaction = await prisma.payment.findFirst({
       where: {
         transactionId: transactionDetails.transactionId,
-        paymentStatus: PaymentStatus.VERIFIED
+        paymentStatus: PaymentStatus.VERIFIED,
+        id: { not: paymentId } // Exclude the current payment we're validating
       }
     });
 
-    if (existingPayment) {
+    if (duplicateTransaction) {
       await createLog({
         userId: order.customerId,
         createdById: userId,
@@ -806,19 +838,20 @@ export async function validatePayment(
       };
     }
 
-    // Create validated payment record
-    const verifiedPayment = await prisma.payment.create({
+    const validatingEmployee = await prisma.user.findUnique({
+      where: { id: userId }
+    });
+    const employeeName = validatingEmployee ? `${validatingEmployee.firstName} ${validatingEmployee.lastName}` : userId;
+
+    // Update the existing payment record
+    const verifiedPayment = await prisma.payment.update({
+      where: { id: paymentId },
       data: {
-        orderId,
-        userId: order.customerId,
         processedById: userId,
-        amount: new Prisma.Decimal(amount),
-        paymentMethod: transactionDetails.paymentMethod,
-        paymentSite: transactionDetails.paymentSite,
         paymentStatus: PaymentStatus.VERIFIED,
         transactionId: transactionDetails.transactionId,
         referenceNo: transactionDetails.referenceNo,
-        memo: `Payment validated by ${userId}`
+        memo: existingPayment.memo ? `${existingPayment.memo} | Payment validated by ${employeeName}` : `Payment validated by ${employeeName}`
       },
       include: {
         order: {
@@ -836,14 +869,32 @@ export async function validatePayment(
     });
 
     // Update order status if needed
-    const totalPaid = order.payments.reduce((sum, payment) => sum + Number(payment.amount), 0) + amount;
-    if (totalPaid >= Number(order.totalAmount)) {
+    const totalPaid = order.payments.reduce((sum, payment) => {
+      if (payment.id === paymentId) {
+        // Skip the payment we're validating as we'll add it separately
+        return sum;
+      }
+      return payment.paymentStatus === 'VERIFIED' ? sum + Number(payment.amount) : sum;
+    }, 0) + Number(existingPayment.amount);
+
+    const isFullyPaid = totalPaid >= Number(order.totalAmount);
+
+    if (isFullyPaid) {
       await prisma.order.update({
         where: { id: orderId },
         data: {
           paymentStatus: OrderPaymentStatus.PAID,
           status: order.status === OrderStatus.PENDING ? OrderStatus.PROCESSING : order.status
         },
+      });
+
+
+      await sendPaymentStatusEmail({
+        orderNumber: orderId,
+        customerName: `${order.customer.firstName} ${order.customer.lastName}`,
+        customerEmail: order.customer.email,
+        amount: Number(amount),
+        status: 'verified',
       });
     } else {
       await prisma.order.update({
@@ -859,17 +910,17 @@ export async function validatePayment(
       userId: order.customerId,
       createdById: userId,
       reason: "Payment Validated Successfully",
-      systemText: `Validated payment of ₱${amount} for order ${orderId}. Transaction ID: ${transactionDetails.transactionId}`,
+      systemText: `Validated payment of ₱${existingPayment.amount} for order ${orderId}. Payment ID: ${paymentId}. Transaction ID: ${transactionDetails.transactionId}`,
       userText: "Payment has been validated successfully."
     });
 
-    // Send payment verification email
+    // Send payment verification email with order status
     await sendPaymentStatusEmail({
       orderNumber: verifiedPayment.order.id,
       customerName: `${verifiedPayment.order.customer.firstName} ${verifiedPayment.order.customer.lastName}`,
       customerEmail: verifiedPayment.order.customer.email,
       amount: Number(verifiedPayment.amount),
-      status: 'verified'
+      status: 'verified',
     });
 
     // Invalidate caches
@@ -898,14 +949,13 @@ export async function validatePayment(
 }
 
 /**
- * Rejects a payment for a specified order by updating the payment's status to "DECLINED" and logging the rejection.
+ * Rejects a payment for a specified order.
  *
  * This function first verifies that the user has the necessary permissions to reject payments. It then attempts
- * to find the associated order. If the order exists, it updates an existing payment record or creates a new one
- * with a "DECLINED" status and a memo containing the rejection reason. The function logs the rejection action,
- * invalidates cache entries related to the order and its payments, and returns a success status. In case of a 
- * permission failure, an order not found, or any other error, it logs the error and returns a failure status with
- * an appropriate message.
+ * to find the associated order and payment. If both exist, it updates the existing payment record with a "DECLINED" status
+ * and adds a memo containing the rejection reason. The function logs the rejection action, invalidates cache entries
+ * related to the order and its payments, and returns a success status. In case of permission failure, order or payment not found,
+ * or any other error, it logs the error and returns a failure status with an appropriate message.
  *
  * @param userId - ID of the user initiating the rejection.
  * @param orderId - ID of the order associated with the payment.
@@ -966,25 +1016,35 @@ export async function rejectPayment(
         message: "Order not found."
       };
     }
+    
+    // Find the payment to reject
+    const existingPayment = await prisma.payment.findUnique({
+      where: { id: paymentId }
+    });
 
-    // Update or create payment record with rejected status
-    await prisma.payment.upsert({
-      where: {
-        id: paymentId
-      },
-      update: {
+    if (!existingPayment) {
+      await createLog({
+        userId,
+        createdById: userId,
+        reason: "Payment Rejection Failed - Payment Not Found",
+        systemText: `Attempted to reject non-existent payment ${paymentId}`,
+        userText: "Payment not found."
+      });
+      return {
+        success: false,
+        message: "Payment not found."
+      };
+    }
+
+    // Update the existing payment record with rejected status
+    await prisma.payment.update({
+      where: { id: paymentId },
+      data: {
         paymentStatus: PaymentStatus.DECLINED,
-        memo: `Payment rejected: ${rejectionReason}`
-      },
-      create: {
-        orderId,
-        userId: order.customerId,
         processedById: userId,
-        amount: new Prisma.Decimal(0),
-        paymentMethod: PaymentMethod.OTHERS,
-        paymentSite: PaymentSite.OFFSITE,
-        paymentStatus: PaymentStatus.DECLINED,
-        memo: `Payment rejected: ${rejectionReason}`
+        memo: existingPayment.memo 
+          ? `${existingPayment.memo} | Payment rejected: ${rejectionReason}` 
+          : `Payment rejected: ${rejectionReason}`
       }
     });
 
@@ -995,6 +1055,15 @@ export async function rejectPayment(
       reason: "Payment Rejected",
       systemText: `Rejected payment for order ${orderId}. Payment ID: ${paymentId}. Reason: ${rejectionReason}`,
       userText: `Payment has been rejected. Reason: ${rejectionReason}`
+    });
+
+    // Send rejection email to customer
+    await sendPaymentStatusEmail({
+      orderNumber: orderId,
+      customerName: `${order.customer.firstName} ${order.customer.lastName}`,
+      customerEmail: order.customer.email,
+      amount: Number(existingPayment.amount),
+      status: 'declined'
     });
 
     // Invalidate caches

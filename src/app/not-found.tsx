@@ -40,7 +40,7 @@ export default function NotFound() {
   return (
     <>
       <HeaderLP />
-      <div className="from-primary-50 relative flex min-h-[75vh] flex-col items-center justify-center overflow-hidden bg-gradient-to-b to-white px-4">
+      <div className="from-primary-50 relative flex min-h-[75vh] flex-col items-center justify-center overflow-hidden bg-gradient-to-b to-white px-4 py-20">
         {/* Animated background particles */}
         <div className="absolute inset-0 overflow-hidden">
           {particles.map((particle, i) => (

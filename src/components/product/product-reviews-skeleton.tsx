@@ -11,7 +11,7 @@ export default function ProductReviewsSkeleton() {
               <Skeleton className="mr-3 h-5 w-24" />
               <div className="flex">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <Skeleton key={i} className="mr-0.5 h-4 w-4" />
+                  <Skeleton key={i} className="mr-0.5 size-4" />
                 ))}
               </div>
             </div>

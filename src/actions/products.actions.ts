@@ -52,17 +52,17 @@ export async function getProducts(
   userId: string,
   params: QueryParams = {}
 ): Promise<ActionsReturnType<PaginatedResponse<ExtendedProduct[]>>> {
-  if (!await verifyPermission({
-    userId: userId,
-    permissions: {
-      dashboard: { canRead: true },
-    }
-  })) {
-    return {
-      success: false,
-      message: "You are not authorized to view products."
-    };
-  }
+  // if (!await verifyPermission({
+  //   userId: userId,
+  //   permissions: {
+  //     dashboard: { canRead: true },
+  //   }
+  // })) {
+  //   return {
+  //     success: false,
+  //     message: "You are not authorized to view products."
+  //   };
+  // }
 
   const { skip, take, page } = calculatePagination(params);
   const cacheKey = `products:${page}:${take}:${JSON.stringify(params.where)}:${JSON.stringify(params.orderBy)}`;

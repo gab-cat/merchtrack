@@ -140,6 +140,10 @@ export const OrderDetails: FC<OrderDetailsProps> = ({ orderId, userId }) => {
                   <span className="font-semibold text-accent-destructive">{formatCurrency(Number(order.totalAmount))}</span>
                 </div>
               </div>
+              <div>
+                <h3 className="mb-2 font-semibold text-neutral-7">Customer Note</h3>
+                <p>{order.customerNotes ?? '—'}</p>
+              </div>
             </div>
           </CardContent>
         </Card>

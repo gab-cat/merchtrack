@@ -1,10 +1,12 @@
 "use client";
 
 import React from "react";
-import { PaymentStatus } from "@prisma/client";
+import { PaymentStatus, PaymentSite } from "@prisma/client";
 import { BiSearch } from "react-icons/bi";
 import { FaMoneyBill } from "react-icons/fa";
 import { useSearchParams, useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { OrdersPaymentTable } from "./orders-payment-table";
 import { OffsitePayment } from "./offsite-payment";
 import { TransactionHistory } from "@/app/admin/payments/components/transaction-history";
@@ -13,6 +15,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useOrdersQuery } from "@/hooks/orders.hooks";
 import { usePaymentsQuery } from "@/hooks/payments.hooks";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { validatePayment, rejectPayment } from "@/actions/payments.actions";
+import { useUserStore } from "@/stores/user.store";
 
 export function PaymentsContent() {
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -20,6 +25,8 @@ export function PaymentsContent() {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [selectedOrderId, setSelectedOrderId] = React.useState<string | null>(null);
   const itemsPerPage = 10;
+  const { userId } = useUserStore();
+  const queryClient = useQueryClient();
 
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -43,6 +50,15 @@ export function PaymentsContent() {
     }
   });
 
+  // Query specifically for pending offsite payments
+  const { data: offsitePaymentsResponse, isLoading: isOffsitePaymentsLoading } = usePaymentsQuery({
+    where: {
+      isDeleted: false,
+      paymentStatus: PaymentStatus.PENDING,
+      paymentSite: PaymentSite.OFFSITE
+    }
+  });
+
   // Effect to handle URL orderId parameter
   React.useEffect(() => {
     if (orderId && orders?.data) {
@@ -61,13 +77,14 @@ export function PaymentsContent() {
     router.replace(newUrl);
   };
 
-  const totalPages = Math.ceil((orders?.data.length ?? 0) / itemsPerPage);
+  const totalPages = Math.ceil((orders?.data?.length ?? 0) / itemsPerPage);
 
   const filteredOrders = React.useMemo(() => {
     if (!orders?.data || !searchQuery) return orders?.data;
-
+    
     return orders.data.filter(order => {
       const searchValue = searchQuery.toLowerCase();
+      
       switch (searchField) {
       case "orderNo":
         return order.id.toLowerCase().includes(searchValue);
@@ -82,6 +99,82 @@ export function PaymentsContent() {
       }
     });
   }, [orders?.data, searchQuery, searchField]);
+
+  // Mutation for verifying payments
+  const { mutate: verifyPaymentMutation } = useMutation({
+    mutationFn: async ({ paymentId }: { paymentId: string; notes: string }) => {
+      if (!userId) throw new Error("User not authenticated");
+      
+      const payment = offsitePaymentsResponse?.data?.find(p => p.id === paymentId);
+      if (!payment) throw new Error("Payment not found");
+
+      const result = await validatePayment(
+        userId,
+        payment.orderId,
+        Number(payment.amount),
+        {
+          transactionId: payment.transactionId ?? `manual-${Date.now()}`,
+          referenceNo: payment.referenceNo ?? "",
+          paymentMethod: payment.paymentMethod,
+          paymentSite: payment.paymentSite,
+        },
+        paymentId // Add the paymentId parameter here
+      );
+
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to verify payment");
+      }
+
+      return result;
+    },
+    onSuccess: () => {
+      toast.success("Payment verified successfully");
+      queryClient.invalidateQueries({ queryKey: ["payments"] });
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message ?? "Failed to verify payment");
+    },
+  });
+
+  // Mutation for rejecting payments
+  const { mutate: rejectPaymentMutation } = useMutation({
+    mutationFn: async ({ paymentId, notes }: { paymentId: string; notes: string }) => {
+      if (!userId) throw new Error("User not authenticated");
+      
+      const payment = offsitePaymentsResponse?.data?.find(p => p.id === paymentId);
+      if (!payment) throw new Error("Payment not found");
+
+      const result = await rejectPayment(
+        userId,
+        payment.orderId,
+        paymentId,
+        notes ?? "Payment rejected by administrator"
+      );
+
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to reject payment");
+      }
+
+      return result;
+    },
+    onSuccess: () => {
+      toast.success("Payment rejected successfully");
+      queryClient.invalidateQueries({ queryKey: ["payments"] });
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message ?? "Failed to reject payment");
+    },
+  });
+
+  const handleVerifyPayment = async (paymentId: string, notes: string) => {
+    verifyPaymentMutation({ paymentId, notes });
+  };
+
+  const handleRejectPayment = async (paymentId: string, notes: string) => {
+    rejectPaymentMutation({ paymentId, notes });
+  };
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
@@ -129,15 +222,15 @@ export function PaymentsContent() {
         <div className="rounded-lg border bg-white p-6">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-semibold">Offsite Payments</h2>
+            <Badge className="bg-yellow-100 px-2 py-1 text-xs text-yellow-800">
+              {offsitePaymentsResponse?.data?.length ?? 0} pending
+            </Badge>
           </div>
           <OffsitePayment 
-            payments={[]} 
-            onConfirm={(payment) => {
-              console.log('Confirm payment:', payment);
-            }}
-            onReject={(payment) => {
-              console.log('Reject payment:', payment);
-            }}
+            payments={offsitePaymentsResponse?.data ?? []} 
+            isLoading={isOffsitePaymentsLoading}
+            onVerify={handleVerifyPayment}
+            onReject={handleRejectPayment}
           />
         </div>
 

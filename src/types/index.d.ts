@@ -143,8 +143,8 @@ declare type ActionsReturnType<T> = {
 }
 
 declare type TicketUpdate = {
-  status: "OPEN" | "CLOSE" | "IN_PROGRESS" | "RESOLVED" | "REOPEN"
+  status: "OPEN" | "CLOSED" | "IN_PROGRESS" | "RESOLVED" 
   message: string
-  assignedTo?: string
+  createdBy?: string
   createdAt?: string
 }

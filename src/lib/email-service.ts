@@ -26,7 +26,7 @@ interface PaymentStatusEmailParams {
   customerName: string;
   customerEmail: string;
   amount: number;
-  status: 'verified' | 'refunded';
+  status: 'verified' | 'refunded' | 'declined';
   refundReason?: string;
 }
 
@@ -57,9 +57,21 @@ export const sendOrderStatusEmail = async (params: OrderStatusEmailParams) => {
 };
 
 export const sendPaymentStatusEmail = async (params: PaymentStatusEmailParams) => {
+  const getSubject = () => {
+    switch (params.status) {
+    case 'verified':
+      return `Payment Verified - #${params.orderNumber}`;
+    case 'refunded':
+      return `Payment Refunded - #${params.orderNumber}`;
+    case 'declined':
+      return `Payment Declined - #${params.orderNumber}`;
+    default:
+      return '';
+    }
+  };
   await sendEmail({
     to: params.customerEmail,
-    subject: `Payment ${params.status === 'verified' ? 'Verification' : 'Refund'} - #${params.orderNumber}`,
+    subject: getSubject(),
     html: await render(PaymentStatusEmail({ 
       orderNumber: params.orderNumber,
       customerName: params.customerName,
@@ -70,3 +82,4 @@ export const sendPaymentStatusEmail = async (params: PaymentStatusEmailParams) =
     from: 'MerchTrack Payments'
   });
 };
+

@@ -1,6 +1,5 @@
-import { CalendarIcon, Loader2 } from "lucide-react";
-import { FiPercent, FiShoppingBag, FiCalendar, FiAlertTriangle } from "react-icons/fi";
-import { LuPhilippinePeso } from "react-icons/lu";
+import { Loader2 } from "lucide-react";
+import { FiShoppingBag, FiCalendar, FiAlertTriangle } from "react-icons/fi";
 import { format } from "date-fns";
 import { type UseFormReturn } from "react-hook-form";
 import { FormSection } from "./form-section";
@@ -14,6 +13,8 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { CreateOrderType } from "@/schema/orders.schema";
 import useToast from "@/hooks/use-toast";
@@ -35,61 +36,35 @@ function PricingSummary({
   disabled?: boolean;
 }>) {
   return (
-    <div className="border-border bg-card relative rounded-lg border p-4">
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label className="flex items-center gap-2">
-            <FiShoppingBag className="text-primary" />
-            Total Amount
-          </Label>
-          <div className="flex items-baseline gap-2">
-            <LuPhilippinePeso className="text-muted-foreground size-4 text-xl" />
-            <p className="text-2xl font-bold">{totalAmount.toFixed(2)}</p>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="discountAmount" className="flex items-center gap-2">
-            <FiPercent className="text-primary" />
-            Discount Amount
-          </Label>
-          <div className="relative">
-            <LuPhilippinePeso className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" />
-            <Input
-              type="number"
-              step="0.01"
-              min="0"
-              max={totalAmount}
-              value={discountAmount}
-              onChange={(e) => onDiscountChange(e.target.value)}
-              disabled={disabled}
-              className="pl-8"
-            />
-            <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              <Badge className="text-xs text-white">
-                {discountPercentage}%
-              </Badge>
-            </div>
-          </div>
+    <div className="space-y-4 rounded-lg border p-4">
+      <div className="flex items-center justify-between">
+        <Label htmlFor="discount">Discount Amount</Label>
+        <div className="flex items-center gap-2">
+          <Input
+            type="number"
+            id="discount"
+            value={discountAmount}
+            onChange={(e) => onDiscountChange(e.target.value)}
+            className="w-32 text-right"
+            min={0}
+            max={totalAmount}
+            disabled={disabled}
+          />
+          <Badge variant="secondary">{discountPercentage}%</Badge>
         </div>
       </div>
-
-      <Separator className="my-4" />
-
-      <div className="flex items-baseline justify-between">
-        <Label>Final Amount</Label>
-        <div className="flex items-baseline gap-2">
-          <LuPhilippinePeso className={cn(
-            "h-4 w-4 text-xl",
-            finalAmount === 0 ? "text-destructive" : "text-primary"
-          )} />
-          <p className={cn(
-            "text-3xl font-bold",
-            finalAmount === 0 ? "text-destructive" : "text-primary"
-          )}>
-            {finalAmount.toFixed(2)}
-          </p>
-        </div>
+      <Separator />
+      <div className="flex items-center justify-between">
+        <span className="text-sm text-gray-600">Subtotal</span>
+        <span>{totalAmount.toFixed(2)}</span>
+      </div>
+      <div className="flex items-center justify-between">
+        <span className="text-sm text-gray-600">Discount</span>
+        <span className="text-red-600">-{discountAmount.toFixed(2)}</span>
+      </div>
+      <div className="flex items-center justify-between font-bold">
+        <span>Final Amount</span>
+        <span className="text-lg">{finalAmount.toFixed(2)}</span>
       </div>
     </div>
   );
@@ -105,39 +80,67 @@ function DeliveryDatePicker({
   disabled?: boolean;
 }>) {
   return (
-    <div className="grid w-full gap-2">
-      <Label className="flex items-center gap-2">
-        <FiCalendar className="text-primary" />
-        Estimated Delivery Date
-      </Label>
+    <div className="flex flex-col space-y-2">
+      <Label>Estimated Delivery Date</Label>
       <Popover>
         <PopoverTrigger asChild>
           <Button
-            variant='outline'
+            variant="outline"
             className={cn(
-              "w-full justify-start text-left font-normal",
+              "justify-start text-left font-normal",
               !date && "text-muted-foreground"
             )}
             disabled={disabled}
           >
-            <CalendarIcon className="mr-2 size-4" />
+            <FiCalendar className="mr-2 size-4" />
             {date ? format(date, "PPP") : <span>Pick a date</span>}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent className="w-auto p-0">
           <Calendar
-            className="bg-neutral-2"
             mode="single"
             selected={date}
             onSelect={onDateChange}
             initialFocus
-            disabled={(date) => 
-              date < new Date() || 
-              date > new Date(new Date().setFullYear(new Date().getFullYear() + 1))
-            }
+            disabled={(date) => date < new Date()}
           />
         </PopoverContent>
       </Popover>
+    </div>
+  );
+}
+
+function PaymentPreferenceSelector({
+  value,
+  onChange,
+  disabled
+}: Readonly<{
+  value: 'FULL' | 'DOWNPAYMENT';
+  onChange: (value: 'FULL' | 'DOWNPAYMENT') => void;
+  disabled?: boolean;
+}>) {
+  return (
+    <div className="space-y-2">
+      <Label>Payment Preference</Label>
+      <RadioGroup
+        value={value}
+        onValueChange={onChange as (value: string) => void}
+        disabled={disabled}
+        className="flex flex-col space-y-2"
+      >
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="FULL" id="full" />
+          <Label htmlFor="full" className="cursor-pointer">
+            Full Payment
+          </Label>
+        </div>
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="DOWNPAYMENT" id="downpayment" />
+          <Label htmlFor="downpayment" className="cursor-pointer">
+            Downpayment (50% of total amount)
+          </Label>
+        </div>
+      </RadioGroup>
     </div>
   );
 }
@@ -159,18 +162,18 @@ function ConfirmOrderDialog({
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button
-          className="w-full text-white"
+          className="w-full gap-2"
           variant={finalAmount === 0 ? "destructive" : "default"}
           disabled={disabled || isPending || finalAmount === 0}
         >
           {isPending ? (
             <>
-              <Loader2 className="mr-2 size-4 animate-spin" />
+              <Loader2 className="size-4 animate-spin" />
               Creating Order...
             </>
           ) : (
             <>
-              <FiShoppingBag className="mr-2" />
+              <FiShoppingBag className="size-4" />
               Create Order
             </>
           )}
@@ -179,7 +182,7 @@ function ConfirmOrderDialog({
       <AlertDialogContent className="bg-neutral-2">
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2 text-primary">
-            <FiAlertTriangle className="text-warning" />
+            <FiAlertTriangle />
             Confirm Order Creation
           </AlertDialogTitle>
           <AlertDialogDescription>
@@ -203,14 +206,14 @@ function ConfirmOrderDialog({
                 showToast({
                   type: "error",
                   title: "Invalid Order",
-                  message: "Final amount cannot be zero"
+                  message: "The order amount cannot be zero."
                 });
                 return;
               }
               onConfirm();
             }}
           >
-            Confirm Order
+            Confirm
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -235,50 +238,41 @@ export function OrderSummary({
   date,
   onDateChange
 }: Readonly<OrderSummaryProps>) {
-  const { watch, setValue, formState: { errors } } = form;
-  const showToast = useToast;
-  console.log(errors);
+  const totalAmount = orderItems.reduce((sum, item) => {
+    return sum + (item.price * item.quantity);
+  }, 0);
 
-  const totalAmount = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const discountAmount = watch('discountAmount') || 0;
+  const discountAmount = form.watch('discountAmount') || 0;
   const finalAmount = Math.max(0, totalAmount - discountAmount);
-  const discountPercentage = totalAmount > 0 ? ((discountAmount / totalAmount) * 100).toFixed(1) : '0';
+  const discountPercentage = ((discountAmount / totalAmount) * 100).toFixed(1);
+  const { errors } = form.formState;
 
-  const validateDiscountAmount = (value: string) => {
-    const numValue = parseFloat(value);
-    
-    if (isNaN(numValue) || numValue < 0) {
-      setValue('discountAmount', 0);
-      showToast({
-        type: "error",
-        title: "Invalid Discount",
-        message: "Discount amount cannot be negative"
-      });
-      return;
-    }
-    
-    if (numValue > totalAmount) {
-      setValue('discountAmount', totalAmount);
-      showToast({
-        type: "warning",
-        title: "Discount Adjusted",
-        message: "Discount amount cannot exceed total amount"
-      });
-      return;
-    }
-    
-    setValue('discountAmount', numValue);
+  const handleDiscountChange = (value: string) => {
+    const amount = Number(value) || 0;
+    form.setValue('discountAmount', amount, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  };
+
+  const handlePaymentPreferenceChange = (value: 'FULL' | 'DOWNPAYMENT') => {
+    form.setValue('paymentPreference', value, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
   };
 
   return (
-    <FormSection title="Order Summary">
-      <div className="space-y-6">
+    <FormSection
+      title="Order Summary"
+    >
+      <div className="grid gap-6">
         <PricingSummary
           totalAmount={totalAmount}
           discountAmount={discountAmount}
           finalAmount={finalAmount}
           discountPercentage={discountPercentage}
-          onDiscountChange={validateDiscountAmount}
+          onDiscountChange={handleDiscountChange}
           disabled={isPending}
         />
 
@@ -287,29 +281,43 @@ export function OrderSummary({
           onDateChange={onDateChange}
           disabled={isPending}
         />
+
+        <PaymentPreferenceSelector
+          value={form.watch('paymentPreference') || 'FULL'}
+          onChange={handlePaymentPreferenceChange}
+          disabled={isPending}
+        />
+
+        <div className="space-y-2">
+          <Label>Order Notes (Optional)</Label>
+          <Textarea
+            placeholder="Add any special instructions or notes for this order..."
+            {...form.register('customerNotes')}
+            className="min-h-[100px] resize-y"
+            disabled={isPending}
+          />
+        </div>
+
+        <ConfirmOrderDialog
+          onConfirm={form.handleSubmit(onSubmit)}
+          finalAmount={finalAmount}
+          disabled={!date || orderItems.length === 0}
+          isPending={isPending}
+        />
+
+        {Object.keys(errors).length > 0 && (
+          <Alert variant="destructive">
+            <FiAlertTriangle className="size-4" />
+            <AlertDescription>
+              <ul className="list-disc pl-4">
+                {Object.entries(errors).map(([key, error]) => (
+                  error?.message ? <li key={key}>{error.message}</li> : null
+                ))}
+              </ul>
+            </AlertDescription>
+          </Alert>
+        )}
       </div>
-
-      <Separator className="my-6" />
-
-      <ConfirmOrderDialog
-        onConfirm={form.handleSubmit(onSubmit)}
-        finalAmount={finalAmount}
-        disabled={!date || orderItems.length === 0}
-        isPending={isPending}
-      />
-
-      {Object.keys(errors).length > 0 && (
-        <Alert variant="destructive" className="mt-4">
-          <FiAlertTriangle className="size-4" />
-          <AlertDescription>
-            <ul className="list-disc pl-4">
-              {Object.entries(errors).map(([key, error]) => (
-                error?.message ? <li key={key}>{error.message}</li> : null
-              ))}
-            </ul>
-          </AlertDescription>
-        </Alert>
-      )}
     </FormSection>
   );
 }

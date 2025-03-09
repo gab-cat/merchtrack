@@ -5,45 +5,31 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { $Enums } from "@prisma/client";
-import { FaBox, FaMoneyBill } from "react-icons/fa";
 import { MdPayments } from "react-icons/md";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { processPayment } from "@/actions/payments.actions";
 import { useUserStore } from "@/stores/user.store";
-import { ExtendedOrder, ExtendedOrderItem } from "@/types/orders";
-import { Badge } from "@/components/ui/badge";
+import { ExtendedOrder } from "@/types/orders";
 import { cn } from "@/lib/utils";
 
-const paymentFormSchema = (maxAmount: number) => z.object({
+const paymentFormSchema = (maxAmount: number, order: ExtendedOrder) => z.object({
   amount: z.number()
     .min(1, "Amount must be greater than 0")
     .max(maxAmount, `Amount cannot exceed ₱${maxAmount.toFixed(2)}`)
-    .refine((val) => val > 0, {
-      message: "Amount must be greater than 0",
+    .refine((val) => {
+      if (order.paymentPreference === 'DOWNPAYMENT') {
+        const minDownpayment = maxAmount * 0.5;
+        return val >= minDownpayment;
+      }
+      return true;
+    }, {
+      message: "Downpayment must be at least 50% of the total amount",
     }),
   paymentMethod: z.enum(['CASH', 'BANK_TRANSFER', 'GCASH', 'MAYA', 'OTHERS'] as const),
   paymentSite: z.enum(['ONSITE', 'OFFSITE'] as const),
@@ -66,12 +52,13 @@ export function OrderPaymentModal({ open, onOpenChange, order }: Readonly<OrderP
   const { userId } = useUserStore();
   const queryClient = useQueryClient();
   
-  const remaining = Number(order?.totalAmount) - (order?.payments?.filter(payment => payment.paymentStatus === 'VERIFIED').reduce((acc, payment) => acc + Number(payment.amount), 0) ?? 0);
+  const remaining = order ? Number(order.totalAmount) - (order.payments?.filter(payment => payment.paymentStatus === 'VERIFIED').reduce((acc, payment) => acc + Number(payment.amount), 0) ?? 0) : 0;
+  const minPayment = order?.paymentPreference === 'DOWNPAYMENT' ? remaining * 0.5 : 0;
   
   const form = useForm<PaymentFormValues>({
-    resolver: zodResolver(paymentFormSchema(remaining)),
+    resolver: zodResolver(paymentFormSchema(remaining, order!)),
     defaultValues: {
-      amount: 0,
+      amount: minPayment,
       paymentMethod: 'CASH',
       paymentSite: 'ONSITE',
       paymentStatus: 'VERIFIED',
@@ -83,43 +70,32 @@ export function OrderPaymentModal({ open, onOpenChange, order }: Readonly<OrderP
   });
 
   const { mutate: submitPayment, isPending } = useMutation({
-    mutationKey: ['payments:all', 'orders:all'], 
+    mutationKey: ['payments:all', 'orders:all'],
     mutationFn: async (data: PaymentFormValues) => {
-      if (!userId || !order) throw new Error("Missing required data");
-    
-      if (data.amount > remaining) {
-        throw new Error(`Payment amount (₱${data.amount.toFixed(2)}) cannot exceed remaining balance (₱${remaining.toFixed(2)})`);
-      }
-      
-      const result = await processPayment({
-        userId,
+      if (!order?.id || !userId) return;
+      return processPayment({
         orderId: order.id,
-        amount: data.amount,
-        paymentMethod: data.paymentMethod as $Enums.PaymentMethod,
-        paymentSite: data.paymentSite as $Enums.PaymentSite,
-        paymentStatus: data.paymentStatus as $Enums.PaymentStatus,
-        referenceNo: data.referenceNo,
-        memo: data.memo,
-        transactionId: data.transactionId,
-        paymentProvider: data.paymentProvider,
-        limitFields: []
+        processedById: userId,
+        ...data,
       });
-      
-      if (!result.success) {
-        throw new Error(result.message);
+    },
+    onSuccess: (data) => {
+      if (!data?.success) {
+        toast.error('Failed to process payment', {
+          description: data?.message ?? 'An error occurred'
+        });
+        return;
       }
-      
-      return result.data;
-    },
-    onSuccess: () => {
-      toast.success("Payment processed successfully");
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
-      queryClient.invalidateQueries({ queryKey: ["payments"] });
+
+      toast.success('Payment processed successfully');
+      queryClient.invalidateQueries({ queryKey: ['orders:all'] });
+      queryClient.invalidateQueries({ queryKey: ['payments:all'] });
       onOpenChange(false);
-      form.reset();
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to process payment");
+    onError: (error) => {
+      toast.error('Failed to process payment', {
+        description: error instanceof Error ? error.message : 'An error occurred'
+      });
     }
   });
 
@@ -127,199 +103,187 @@ export function OrderPaymentModal({ open, onOpenChange, order }: Readonly<OrderP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl bg-neutral-2">
+      <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center text-xl text-primary">
-            <MdPayments className="mr-2"/>
+          <DialogTitle className="flex items-center gap-2">
+            <MdPayments className="size-5" />
             Process Payment
           </DialogTitle>
         </DialogHeader>
 
-        <div className="grid gap-6 pt-4 md:grid-cols-5">
-          {/* Order Details */}
-          <div className="space-y-6 md:col-span-2">
-            <div>
-              <h3 className="mb-2 font-semibold text-primary">Order Details</h3>
-              <div className="rounded-lg border p-4">
-                <p className="text-sm text-gray-500">Order Number</p>
-                <p className="text-xs font-medium">{order.id}</p>
-                <Separator className="my-3" />
-                <p className="text-sm text-gray-500">Customer</p>
-                <p className="font-medium">{order.customer.firstName} {order.customer.lastName}</p>
-                <Separator className="my-3" />
-                <p className="text-sm text-gray-500">Total Amount</p>
-                <p className="font-medium">₱{Number(order.totalAmount).toFixed(2)}</p>
-                <Separator className="my-3" />
-                <p className="text-sm text-gray-500">Remaining Balance</p>
-                <div className="mt-1 rounded-md bg-gray-50 p-2">
-                  <p className="text-lg font-bold text-red-500">₱{remaining.toFixed(2)}</p>
-                </div>
-              </div>
+        <div className="mt-4 space-y-6">
+          <div className="rounded-lg border">
+            <div className="border-b p-4">
+              <h3 className="text-sm font-medium">Order Details</h3>
+              <p className="text-muted-foreground mt-1 text-sm">Order #{order.id}</p>
             </div>
 
-            <div>
-              <h3 className="mb-2 font-semibold text-primary">Order Items</h3>
-              <div className="space-y-2">
-                {order.orderItems?.map((item: ExtendedOrderItem) => (
-                  <div key={item.id} className="flex items-center gap-3 rounded-lg border p-3">
-                    <div className="flex size-10 items-center justify-center rounded-lg bg-gray-100">
-                      <FaBox className="size-5 text-gray-500" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{item.variant.product.title}</p>
-                      <Badge variant='outline'>{item.variant.variantName}</Badge>
-                      <p className="text-sm text-gray-500">{item.quantity}x @ ₱{Number(item.price).toFixed(2)}</p>
-                    </div>
+            <div className="p-4">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground text-sm">Total Amount</span>
+                  <span className="font-medium">₱{Number(order.totalAmount).toFixed(2)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground text-sm">Amount Paid</span>
+                  <span className="font-medium">
+                    ₱{(Number(order.totalAmount) - remaining).toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground text-sm">Remaining</span>
+                  <span className="font-medium">₱{remaining.toFixed(2)}</span>
+                </div>
+                {order.paymentPreference === 'DOWNPAYMENT' && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground text-sm">Minimum Payment Required</span>
+                    <Badge>₱{minPayment.toFixed(2)}</Badge>
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>
 
-          {/* Payment Form */}
-          <div className="md:col-span-3">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit((data) => submitPayment(data))} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="amount"
-                  render={({ field }) => {
-                    const value = parseFloat(field.value.toString()) || 0;
-                    const isFullPayment = value === remaining;
-                    const isDownpayment = value >= remaining * 0.5 && value < remaining;
-                    
-                    return (
-                      <FormItem>
-                        <FormLabel>
-                          Payment Amount<span className="text-red-500">*</span>
-                        </FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Input
-                              type="number"
-                              placeholder="Enter amount"
-                              {...field}
-                              onChange={(e) => {
-                                const value = parseFloat(e.target.value);
-                                if (value > remaining) {
-                                  toast.warning(`Amount cannot exceed remaining balance (₱${remaining.toFixed(2)})`);
-                                  return;
-                                }
-                                field.onChange(value);
-                              }}
-                              max={remaining}
-                              className={cn(
-                                "bg-white pr-24 appearance-none",
-                                isFullPayment && "border-green-500 ring-green-500",
-                                isDownpayment && "border-blue-500 ring-blue-500",
-                              )}
-                            />
-                            {isFullPayment && (
-                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-green-600">
-                                Full Payment
-                              </span>
-                            )}
-                            {isDownpayment && (
-                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-blue-600">
-                                Down Payment
-                              </span>
-                            )}
-                          </div>
-                        </FormControl>
-                        <FormMessage className="text-xs text-red-500" />
-                        <div className="flex items-center justify-between">
-                          <p className="text-xs text-gray-500">
-                            Maximum amount: ₱{remaining.toFixed(2)}
-                          </p>
-                          {value > 0 && (
-                            <p className="text-xs text-gray-500">
-                              Remaining after payment: ₱{(remaining - value).toFixed(2)}
-                            </p>
-                          )}
-                        </div>
-                      </FormItem>
-                    );
-                  }}
-                />
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="paymentMethod"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Payment Method<span className="text-red-500">*</span>
-                        </FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="bg-white">
-                              <SelectValue placeholder="Select payment method" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {Object.values($Enums.PaymentMethod).map((method) => (
-                              <SelectItem key={method} value={method}>
-                                {method}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage className="text-xs text-red-500" />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="paymentSite"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Payment Site<span className="text-red-500">*</span>
-                        </FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="bg-white">
-                              <SelectValue placeholder="Select payment site" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {Object.values($Enums.PaymentSite).map((site) => (
-                              <SelectItem key={site} value={site}>
-                                {site}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage className="text-xs text-red-500" />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="paymentStatus"
-                  render={({ field }) => (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit((data) => submitPayment(data))} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="amount"
+                render={({ field }) => {
+                  const value = parseFloat(field.value.toString()) || 0;
+                  const isFullPayment = value === remaining;
+                  const isDownpayment = value >= remaining * 0.5 && value < remaining;
+                  
+                  return (
                     <FormItem>
                       <FormLabel>
-                        Payment Status<span className="text-red-500">*</span>
+                        Payment Amount<span className="text-red-500">*</span>
                       </FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="bg-white">
-                            <SelectValue placeholder="Select payment status" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {Object.values($Enums.PaymentStatus).map((status) => (
-                            <SelectItem key={status} value={status}>
-                              {status}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            {...field}
+                            type="number"
+                            min={minPayment}
+                            max={remaining}
+                            step="0.01"
+                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                            className={cn(
+                              "pr-16",
+                              isFullPayment && "border-green-500 focus-visible:ring-green-500",
+                              isDownpayment && "border-blue-500 focus-visible:ring-blue-500"
+                            )}
+                          />
+                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                            <span className="text-sm text-gray-500">PHP</span>
+                          </div>
+                        </div>
+                      </FormControl>
+                      <FormMessage className="text-xs text-red-500" />
+                    </FormItem>
+                  );
+                }}
+              />
+
+              <FormField
+                control={form.control}
+                name="paymentMethod"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Payment Method<span className="text-red-500">*</span></FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select payment method" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {['CASH', 'BANK_TRANSFER', 'GCASH', 'MAYA', 'OTHERS'].map((method) => (
+                          <SelectItem key={method} value={method}>
+                            {method}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage className="text-xs text-red-500" />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="paymentSite"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Payment Site<span className="text-red-500">*</span></FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select payment site" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {['ONSITE', 'OFFSITE'].map((site) => (
+                          <SelectItem key={site} value={site}>
+                            {site}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage className="text-xs text-red-500" />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="paymentStatus"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Payment Status<span className="text-red-500">*</span></FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select payment status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Object.values($Enums.PaymentStatus).map((status) => (
+                          <SelectItem key={status} value={status}>
+                            {status}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage className="text-xs text-red-500" />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="referenceNo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Reference Number</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter reference number" {...field} className="bg-white" />
+                    </FormControl>
+                    <FormMessage className="text-xs text-red-500" />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="transactionId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Transaction ID</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter transaction ID" {...field} className="bg-white" />
+                      </FormControl>
                       <FormMessage className="text-xs text-red-500" />
                     </FormItem>
                   )}
@@ -327,78 +291,52 @@ export function OrderPaymentModal({ open, onOpenChange, order }: Readonly<OrderP
 
                 <FormField
                   control={form.control}
-                  name="referenceNo"
+                  name="paymentProvider"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Reference Number</FormLabel>
+                      <FormLabel>Payment Provider</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter reference number" {...field} className="bg-white" />
+                        <Input placeholder="Enter provider name" {...field} className="bg-white" />
                       </FormControl>
                       <FormMessage className="text-xs text-red-500" />
                     </FormItem>
                   )}
                 />
+              </div>
 
-                <div className="grid gap-4 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="transactionId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Transaction ID</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter transaction ID" {...field} className="bg-white" />
-                        </FormControl>
-                        <FormMessage className="text-xs text-red-500" />
-                      </FormItem>
-                    )}
-                  />
+              <FormField
+                control={form.control}
+                name="memo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Memo</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Add payment notes..."
+                        className="min-h-[80px] resize-none bg-white"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage className="text-xs text-red-500" />
+                  </FormItem>
+                )}
+              />
 
-                  <FormField
-                    control={form.control}
-                    name="paymentProvider"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Payment Provider</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter payment provider" {...field} className="bg-white" />
-                        </FormControl>
-                        <FormMessage className="text-xs text-red-500" />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="memo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Memo</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Add any notes about this payment"
-                          className="resize-none bg-white"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage className="text-xs text-red-500" />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="flex justify-end gap-2 pt-4">
-                  <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={isPending || remaining <= 0} className="bg-primary text-neutral-2 hover:bg-primary-600">
-                    <FaMoneyBill className="mr-2 size-4" />
-                    {isPending ? "Processing..." : "Process Payment"}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </div>
+              <div className="flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  disabled={isPending}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isPending}>
+                  {isPending ? "Processing..." : "Process Payment"}
+                </Button>
+              </div>
+            </form>
+          </Form>
         </div>
       </DialogContent>
     </Dialog>

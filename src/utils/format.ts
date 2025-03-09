@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { format, formatDistanceToNow as formatDistanceToNowFn } from "date-fns";
 
 /**
  * Formats a number as Philippine Pesos (PHP) using the locale-specific currency format.
@@ -46,4 +46,10 @@ export function formatDate(date: Date | string): string {
  */
 export function prettyFormatDate(date: Date | string): string {
   return format(new Date(date), "MMM d, yyyy HH:mm:ss");
+}
+
+
+
+export function formatDistanceToNow(date: Date | string): string {
+  return formatDistanceToNowFn(new Date(date), { addSuffix: true });
 }

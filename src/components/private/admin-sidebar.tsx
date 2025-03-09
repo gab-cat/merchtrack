@@ -6,7 +6,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { SignedIn, UserButton } from "@clerk/nextjs";
 import { MdAnnouncement } from "react-icons/md";
-import { FaUser } from "react-icons/fa";
+import { FaUserAlt } from "react-icons/fa";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -75,8 +75,8 @@ export default function AdminSidebar() {
               }} 
               >
                 <UserButton.MenuItems>
-                  <UserButton.Action labelIcon={<FaUser />} label="Profile" onClick={() => router.push("/admin/profile")} />
                   <UserButton.Action labelIcon={<MdAnnouncement />} label="Announcements" onClick={() => router.push("/admin/settings")}/>
+                  <UserButton.Action labelIcon={<FaUserAlt />} label="Back to Customer View" onClick={() => router.push("/dashboard")} />
                 </UserButton.MenuItems>
               </UserButton>
             </SignedIn>
@@ -88,7 +88,7 @@ export default function AdminSidebar() {
         </div>
 
 
-        <Button variant="ghost" className="w-full justify-start gap-2">
+        <Button onClick={() => router.push("/dashboard")} variant="ghost" className="w-full justify-start gap-2">
           <FiLogOut className="size-4" />
           Back to Customer View
         </Button>

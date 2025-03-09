@@ -1,7 +1,8 @@
 import { Order, OrderItem, Payment } from "@prisma/client";
-import type { Product, ProductVariant, User } from "@prisma/client";
+import type { CustomerSatisfactionSurvey, Product, ProductVariant, User } from "@prisma/client";
 
 export type ExtendedOrder = Order & {
+  customerSatisfactionSurvey: CustomerSatisfactionSurvey;
   customer: User;
   payments: Payment[];
   orderItems: (OrderItem & {
@@ -36,12 +37,24 @@ export enum PaymentMethod {
   CASH = "CASH",
   GCASH = "GCASH",
   MAYA = "MAYA",
-  BANK_TRANSFER = "BANK_TRANSFER"
+  BANK_TRANSFER = "BANK_TRANSFER",
+  OTHERS = "OTHERS"
 }
 
-export enum PaymentStatus {
-  PENDING = "PENDING",
-  COMPLETED = "COMPLETED",
-  FAILED = "FAILED"
+export enum PaymentSitePreference {
+  ONSITE = "ONSITE",
+  OFFSITE = "OFFSITE"
+}
+
+export enum PaymentPreference {
+  FULL = "FULL",
+  DOWNPAYMENT = "DOWNPAYMENT"
+}
+
+export enum CancellationReason {
+  OUT_OF_STOCK = "OUT_OF_STOCK",
+  CUSTOMER_REQUEST = "CUSTOMER_REQUEST",
+  PAYMENT_FAILED = "PAYMENT_FAILED",
+  OTHERS = "OTHERS"
 }
 

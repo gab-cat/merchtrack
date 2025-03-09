@@ -14,6 +14,8 @@ export type ExtendedUser = User & Partial<{
   Cart: Cart[]
 }>;
 
+export type BasicUser = Pick<User, 'id' | 'firstName' | 'lastName' | 'email' | 'role' | 'college'>;
+
 export interface UserData {
   id: string
   name: string

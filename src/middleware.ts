@@ -38,11 +38,15 @@ const isPublicRoute = createRouteMatcher([
   '/terms-of-service',
   '/privacy-policy',
   '/survey(.*)',
-  '/test',
+  '/products(.*)',
 ]);
 
 const isOnboardingRoute = createRouteMatcher([
   '/onboarding(.*)',
+]);
+
+const isAdminRoute = createRouteMatcher([
+  '/admin(.*)',
 ]);
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
@@ -66,4 +70,12 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
 
   // If the user is logged in and the route is protected, let them view.
   if (userId && !isPublicRoute(req)) return NextResponse.next();
+
+  // If the user is admin and the route is protected, let them view.
+  const isAdmin = sessionClaims?.metadata.data.isAdmin || sessionClaims?.metadata.data.isStaff;
+  if (isAdmin && isAdminRoute(req)) return NextResponse.next();
+
+  if (!isAdmin && !isAdminRoute(req)) {
+    return NextResponse.redirect(new URL('/404', req.url));
+  }
 });

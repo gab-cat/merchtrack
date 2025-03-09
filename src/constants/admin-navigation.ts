@@ -10,6 +10,7 @@ import { FaAddressBook } from "react-icons/fa6";
 import { RiSurveyFill } from "react-icons/ri";
 import type { IconType } from 'react-icons';
 import { OrderStatus } from '@prisma/client';
+import { IoTicket } from 'react-icons/io5';
   
 export type AdminNavigation = {
   name: string
@@ -47,6 +48,11 @@ export const AdminLinks: AdminNavigation[] = [
     name: "Insights",
     href: "/admin/insights",
     icon: MdBarChart,
+  },
+  {
+    name: "Tickets",
+    href: "/admin/tickets",
+    icon: IoTicket
   },
   {
     name: "Surveys",

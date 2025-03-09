@@ -17,6 +17,7 @@ import { createOrderSchema, type CreateOrderType } from "@/schema/orders.schema"
 import { useUserStore } from "@/stores/user.store";
 import { Steps } from "@/components/ui/steps";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export function NewOrderForm() {
   const { userId } = useUserStore();
@@ -112,7 +113,7 @@ export function NewOrderForm() {
         showToast({
           type: "success",
           title: "Order Created",
-          message: "The order has been created successfully."
+          message: "The order has been created successfully. The customer will receive payment instructions via email."
         });
         // @ts-expect-error - data is not null
         router.push(`/admin/orders/${data.data?.id}`);
@@ -211,6 +212,12 @@ export function NewOrderForm() {
           </Button>
         </Link>
       </div>
+
+      <Alert>
+        <AlertDescription>
+          Payment is not required during order creation. The customer will receive payment instructions via email and can complete the payment through their My Orders page.
+        </AlertDescription>
+      </Alert>
 
       <Steps steps={steps} currentStep={currentStep} />
 

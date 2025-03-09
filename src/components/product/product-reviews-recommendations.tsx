@@ -3,14 +3,13 @@
 import React, { useState } from "react";
 import { Star } from "lucide-react";
 import ProductRecommendations from "./product-recommendations";
+import ProductReviews from "./product-reviews";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { ExtendedReview } from "@/types/extended";
-import { prettyFormatDate } from "@/utils/format";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import useToast from "@/hooks/use-toast";
-import ProductReviews from "./product-reviews";
 
 interface RecommendedProduct {
   id: string;
@@ -28,10 +27,9 @@ interface ProductReviewsRecommendationsProps {
 }
 
 export default function ProductReviewsRecommendations({
-  reviews = [],
   onReviewSubmit,
   slug
-}: ProductReviewsRecommendationsProps) {
+}: Readonly<ProductReviewsRecommendationsProps>) {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState("");

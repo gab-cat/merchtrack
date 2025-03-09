@@ -1,15 +1,19 @@
 import SyncUserData from "@/components/misc/sync-user-data";
-import Footer from "@/components/public/footer";
-import HeaderLP from "@/components/public/header";
-
+import ProtectedHeader from "@/components/protected/header";
+import ProtectedFooter from "@/components/protected/footer";
+import { CartProvider } from "@/providers/cart-provider";
 
 const Layout = ({children}: Readonly<{ children: React.ReactNode }>) => {
   return (
-    <div className="flex flex-col text-neutral-7">
+    <div className="flex min-h-screen flex-col text-neutral-7">
       <SyncUserData />
-      <HeaderLP />
-      {children}
-      <Footer />
+      <CartProvider>
+        <ProtectedHeader />
+        <main className="flex-1">
+          {children}
+        </main>
+        <ProtectedFooter />
+      </CartProvider>
     </div>
   );
 };

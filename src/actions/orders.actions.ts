@@ -180,6 +180,7 @@ export async function getOrderById({ userId, orderId, limitFields }: GetObjectBy
         where: { id: orderId },
         include: {
           customer: true,
+          customerSatisfactionSurvey: true,
           processedBy: true,
           payments: true,
           orderItems: {
@@ -276,6 +277,8 @@ export async function createOrder(userId: string, data: CreateOrderType): Promis
         totalAmount: validatedData.totalAmount,
         discountAmount: validatedData.discountAmount,
         estimatedDelivery: validatedData.estimatedDelivery,
+        customerNotes: validatedData.customerNotes,
+        paymentPreference: validatedData.paymentPreference,
         orderItems: {
           createMany: {
             data: validatedData.orderItems.map(item => ({
@@ -327,10 +330,11 @@ export async function createOrder(userId: string, data: CreateOrderType): Promis
       success: true,
       data: processActionReturnData(order) as CreateOrderType
     };
+
   } catch (error) {
     return {
       success: false,
-      message: (error as Error).message
+      message: error instanceof Error ? error.message : "An error occurred while creating the order"
     };
   }
 }

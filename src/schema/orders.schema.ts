@@ -80,6 +80,8 @@ export const createOrderSchema = z.object({
   })
     .min(new Date(), "Estimated delivery date must be in the future"),
   processedById: z.string().optional(),
+  customerNotes: z.string().max(1000, "Order notes cannot exceed 1000 characters").optional(),
+  paymentPreference: z.enum(['FULL', 'DOWNPAYMENT']).optional(),
 });
 
 // Schema for updating orders
@@ -93,6 +95,7 @@ export const updateOrderSchema = z.object({
     .min(new Date(), "Estimated delivery date must be in the future")
     .optional(),
   processedById: z.string().optional(),
+  customerNotes: z.string().max(1000, "Order notes cannot exceed 1000 characters").optional(),
 });
 
 // Export types

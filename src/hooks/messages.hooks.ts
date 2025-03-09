@@ -1,7 +1,6 @@
 'use client';
 
 import { useQuery } from "@tanstack/react-query";
-import { getClerkUserImageUrl } from "@/actions/users.action";
 import { useUserStore } from "@/stores/user.store";
 import type { ExtendedMessage } from "@/types/messages";
 import { getMessages, getMessage } from "@/actions/messages.actions";
@@ -83,8 +82,12 @@ export function useUserImageQuery(clerkId: string | undefined) {
     enabled: clerkId !== undefined,
     queryKey: [`users:${clerkId}`],
     queryFn: async () => {
-      const response = await getClerkUserImageUrl(clerkId as string);
-      return response.data;
+      const response = await fetch(`/api/users/image/${clerkId}`);
+      if (!response.ok) {
+        throw new Error('Error fetching user image');
+      }
+      const data = await response.json();
+      return data.data;
     },
   });
 }
