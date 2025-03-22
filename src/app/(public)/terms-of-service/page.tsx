@@ -4,6 +4,8 @@ import { TERMS_OF_SERVICE_CONTENT } from '@/constants';
 import PageTitle from '@/components/public/page-title';
 import PageAnimation from '@/components/public/page-animation';
 
+export const revalidate = 86400;
+
 const Page: React.FC = () => {
   return (
     <PageAnimation className='max-w-6xl'>

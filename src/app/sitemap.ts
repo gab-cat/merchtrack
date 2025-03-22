@@ -9,8 +9,7 @@ type SitemapItem = {
     images?: string[];
 };
 
-// Set revalidation to 1 hour (3600 seconds)
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic'; 
 
 const STATIC_ROUTES = [
   { path: '', priority: 1 },

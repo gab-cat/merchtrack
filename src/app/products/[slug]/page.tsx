@@ -1,10 +1,23 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getProductBySlug } from '@/actions/products.actions';
+import { getProductBySlug, getProducts } from '@/actions/products.actions';
 import ProductListing from "@/components/product/product-listing";
 
 type Props = {
   params: Promise<{ slug: string }>;
+}
+
+export const revalidate = 60; 
+export const dynamicParams = true; 
+
+export async function generateStaticParams() {
+  // Fetch all products to generate static paths
+  const productsResponse = await getProducts('');
+  const products = productsResponse.data?.data || [];
+
+  return products.map(product => ({
+    slug: product.slug,
+  }));
 }
 
 // Generate dynamic metadata for SEO
@@ -12,7 +25,7 @@ export async function generateMetadata(
   { params }: Props,
 ): Promise<Metadata> {
   // Get product data
-  const slug = (await params).slug;
+  const { slug } = await params;
   const productResult = await getProductBySlug({ userId: '', slug });
   
   // If product not found, return basic metadata

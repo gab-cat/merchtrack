@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   description: 'Learn how to use MerchTrack in an interactive step-by-step guide.',
 };
 
+export const revalidate = 86400;
+
 export default function HowItWorksPage() {
   return (
     <PageAnimation className="max-w-5xl">
