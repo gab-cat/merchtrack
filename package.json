@@ -18,7 +18,7 @@
     "@aws-sdk/client-s3": "^3.772.0",
     "@clerk/elements": "^0.22.15",
     "@clerk/nextjs": "^6.10.0",
-    "@clerk/shared": "^2.20.18",
+    "@clerk/shared": "^3.2.0",
     "@datadog/browser-rum": "^5.35.0",
     "@formkit/auto-animate": "^0.8.2",
     "@fortawesome/fontawesome-free": "^6.7.2",
