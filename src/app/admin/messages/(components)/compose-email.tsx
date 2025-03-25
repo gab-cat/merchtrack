@@ -42,10 +42,21 @@ export default function ComposeEmail() {
   const [selectedEmails, setSelectedEmails] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState("");
 
+  const [currentPage, setCurrentPage] = useState(0);
+  const usersPerPage = 10; // Adjust this accordingly based on the number of users to display in the search users scroll view.
+
   // Fetch users for the selection panel
   const { data: usersData, isLoading: isLoadingUsers } = useUsersQuery({
-    take: 100,
+    take: usersPerPage,
   });
+
+  // Function to search all users (fetch directly from the backend)
+  const searchUsers = async (query: string) => {
+    if (!query) return;
+    
+    const allUsers = await fetch(`/api/users?search=${query}`).then(res => res.json());
+    return allUsers;
+  };
 
   const form = useForm({
     reValidateMode: "onBlur",
@@ -107,6 +118,24 @@ export default function ComposeEmail() {
     return query === "" || fullName.includes(query) || email.includes(query);
   }) || [];
 
+  // Paginate users
+  const startIndex = currentPage * usersPerPage;
+  const endIndex = startIndex + usersPerPage;
+  const displayedUsers = searchQuery ? filteredUsers : filteredUsers.slice(startIndex, endIndex);
+
+  // Pagination Handlers
+  const nextPage = () => {
+    if (endIndex < filteredUsers.length) {
+      setCurrentPage(prev => prev + 1);
+    }
+  };
+
+  const prevPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(prev => prev - 1);
+    }
+  };
+
   // Handle adding email from input
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && inputValue) {
@@ -144,7 +173,7 @@ export default function ComposeEmail() {
   // Select all users
   const selectAllUsers = () => {
     if (!usersData?.data.length) return;
-    
+
     const allEmails = usersData.data.map(user => user.email);
     setSelectedEmails(allEmails);
     
@@ -320,7 +349,7 @@ export default function ComposeEmail() {
                   </div>
                 ) : (
                   <div className="space-y-1 p-2">
-                    {filteredUsers.map((user) => (
+                    {displayedUsers.map((user) => (
                       <button 
                         type="button"
                         key={user.id} 
@@ -358,6 +387,25 @@ export default function ComposeEmail() {
                   </div>
                 )}
               </ScrollArea>
+              <div>
+                <div className="flex place-content-around gap-2 m-4">
+                  <button 
+                    onClick={prevPage} 
+                    disabled={currentPage === 0}
+                    className="w-24 h-10 px-4 py-2 bg-blue-500 text-white rounded transition transform active:scale-95 disabled:opacity-50"
+                  >
+                    Previous
+                  </button>
+
+                  <button 
+                    onClick={nextPage} 
+                    disabled={endIndex >= filteredUsers.length}
+                    className="w-24 h-10 px-4 py-2 bg-blue-500 text-white rounded transition transform active:scale-95 disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </Form>
