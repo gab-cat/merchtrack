@@ -199,9 +199,9 @@ export default function MyTickets() {
                           {ticket.id.substring(0, 8)}...
                         </TableCell>
                         <TableCell  className="max-w-[200px] truncate font-medium">
-                          <div onClick={() => handleViewTicket(ticket.id)} className="hover:text-primary hover:cursor-pointer">
+                          <button type='button' onClick={() => handleViewTicket(ticket.id)} className="transition-all hover:cursor-pointer hover:text-primary">
                             {ticket.title}
-                          </div>
+                          </button>
                         </TableCell>
                         <TableCell>{getStatusBadge(ticket.status)}</TableCell>
                         <TableCell>{getPriorityBadge(ticket.priority)}</TableCell>
