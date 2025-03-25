@@ -2,8 +2,9 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+//import { useClerk } from '@clerk/nextjs';
 import { usePathname } from 'next/navigation';
-import { User, CreditCard, Package, LogOut, Ticket, Menu } from 'lucide-react';
+import { User, CreditCard, Package, Ticket, Menu } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useUserStore } from '@/stores/user.store';
@@ -63,6 +64,15 @@ export function MobileSidebarTrigger() {
   );
 }
 
+
+// function handleLogout() {
+//   const { signOut } = useClerk();
+//   const { clearUser } = useUserStore();
+  
+//   signOut({ redirectUrl: "/" });
+//   clearUser();
+// }
+
 // The actual sidebar content, used in both desktop and mobile versions
 function SidebarContent({ 
   userImage, 
@@ -74,7 +84,7 @@ function SidebarContent({
 }>) {
   const { user } = useUserStore();
   const pathname = usePathname();
-  
+
   return (
     <div className='flex size-full flex-col bg-white'>
       <div className='flex flex-col items-center border-b p-6'>
@@ -117,16 +127,16 @@ function SidebarContent({
         })}
       </nav>
       
-      <div className='border-t p-4'>
+      {/* <div className='border-t p-4'>
         <Button 
           variant="ghost" 
           className='w-full justify-start gap-3 text-red-500 hover:bg-red-50 hover:text-red-500'
-          onClick={() => {}} // Add your logout logic here
+          onClick={() => handleLogout()}
         >
           <LogOut className="size-4" />
           Logout
         </Button>
-      </div>
+      </div> */}
     </div>
   );
 }
