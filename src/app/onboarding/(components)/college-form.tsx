@@ -15,6 +15,12 @@ type CollegeAndCourseFormProps = {
 export default function CollegeAndCourseForm({ form }: Readonly<CollegeAndCourseFormProps>) {
   const [focused, setFocused] = useState(false);
   const colleges = Object.values(College);
+  
+  // Reorder colleges to have NOT_APPLICABLE first for better UX
+  const orderedColleges = [
+    College.NOT_APPLICABLE,
+    ...colleges.filter(college => college !== College.NOT_APPLICABLE)
+  ];
 
   return (
     <div className="space-y-6">
@@ -35,7 +41,7 @@ export default function CollegeAndCourseForm({ form }: Readonly<CollegeAndCourse
               </FormLabel>
               <div className="relative">
                 <Select
-                  value={field.value}
+                  value={field.value || ""}
                   onValueChange={(value) => field.onChange(value as College)}
                 >
                   <FormControl>
@@ -44,11 +50,11 @@ export default function CollegeAndCourseForm({ form }: Readonly<CollegeAndCourse
                         ? "border-red-300"
                         : "border-gray-200 focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
                     }`}>
-                      <SelectValue placeholder="Select a college" />
+                      <SelectValue placeholder="Please select a college" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent className="max-h-80 bg-neutral-2">
-                    {colleges.map((college) => (
+                    {orderedColleges.map((college) => (
                       <SelectItem 
                         key={college} 
                         value={college}
@@ -56,7 +62,7 @@ export default function CollegeAndCourseForm({ form }: Readonly<CollegeAndCourse
                       >
                         <div className="flex items-center gap-2">
                           <School className="size-4 text-primary" />
-                          {college.replaceAll("_", " ")}
+                          {college === College.NOT_APPLICABLE ? "Not Applicable (N/A)" : college.replaceAll("_", " ")}
                         </div>
                       </SelectItem>
                     ))}
@@ -66,7 +72,13 @@ export default function CollegeAndCourseForm({ form }: Readonly<CollegeAndCourse
                   <AlertCircle className="absolute right-9 top-1/2 size-5 -translate-y-1/2 text-red-500" />
                 )}
               </div>
-              <FormMessage />
+              <FormMessage  className="text-red-500"/>
+              <p className="mt-1 text-xs text-gray-500">
+                Please select the college you are affiliated with, or &quot;Not Applicable&quot;
+              </p>
+              <p className="mt-1 text-xs text-gray-500">
+                For Alumni, please select your last attended college. For Staff/Faculty, please select your current college.
+              </p>
             </FormItem>
           )}
         />
@@ -84,7 +96,7 @@ export default function CollegeAndCourseForm({ form }: Readonly<CollegeAndCourse
             <FormItem>
               <FormLabel className="flex items-center gap-1.5 text-sm font-medium text-gray-800">
                 <BookOpen className="size-4 text-primary" />
-                Course
+                Course / Program
                 <span className="text-red-500">*</span>
               </FormLabel>
               <div className="relative">
@@ -113,9 +125,9 @@ export default function CollegeAndCourseForm({ form }: Readonly<CollegeAndCourse
                   <AlertCircle className="absolute right-3 top-1/2 size-5 -translate-y-1/2 text-red-500" />
                 )}
               </div>
-              <FormMessage />
+              <FormMessage className="text-red-500"/>
               <p className="mt-1 text-xs text-gray-500">
-                Enter your degree program or course of study. Input N/A if not applicable.
+                Enter your degree program or course of study
               </p>
             </FormItem>
           )}

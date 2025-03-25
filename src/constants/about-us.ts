@@ -63,36 +63,52 @@ We continue to set industry standards while maintaining our focus on what matter
   ]
 };
 
-export const ABOUT_DEVELOPERS_LEAD = {
+// Export type for developer
+export type Developer = {
+  name: string;
+  role: string;
+  image: string;
+  github?: string;
+  linkedin?: string;
+  bio?: string;
+}
+
+// Developer data
+export const ABOUT_DEVELOPERS_LEAD: Developer = {
   name: "Gabriel Angelo Catimbang",
-  role: "Lead Developer",
-  description: "Our leadership team brings together decades of experience in retail technology, software development, and business management. With diverse backgrounds from leading tech companies, they guide our strategic vision and growth.",
-  image: "/img/dev_gab.JPG"
+  role: "Team Lead",
+  image: "/img/dev_gab.JPG",
+  linkedin: "gabrielcatimbang",
+  bio: "Full-stack developer with expertise in React, Node.js, and cloud infrastructure. Passionate about building scalable web applications and mentoring junior developers."
 };
 
-export const ABOUT_DEVELOPERS = [
+export const ABOUT_DEVELOPERS: Developer[] = [
   {
-    name: "Reiven Lee",
-    role: "Developer",
-    description: "Our engineers are passionate about building robust, scalable solutions that make a real difference in how businesses operate. With deep expertise in modern technologies, they ensure MerchTrack remains at the cutting edge.",
-    image: "/img/dev_reiven.png"
+    name: "John Michael Coronel",
+    role: "Full-stack Developer",
+    image: "/img/dev_jm.png",
+    linkedin: "john-michael-coronel-293a0b30b",
+    bio: "Full-stack developer with expertise in database optimization and secure server architectures."
   },
   {
     name: "Kyla Ronquillo",
-    role: "Developer",
-    description: "Our dedicated support team ensures you get the most out of MerchTrack with 24/7 assistance and expert guidance. With extensive product knowledge and a customer-first mindset, they're committed to your success.",
-    image: "/img/dev_kyla.jpg"
+    role: "Full-stack Developer",
+    image: "/img/dev_kyla.jpg",
+    linkedin: "kylaronquillo",
+    bio: "Full-stack developer with a passion for creating beautiful, responsive interfaces using modern web technologies."
   },
   {
-    name: "John Michael Coronel",
-    role: "Developer",
-    description: "Our product team combines deep industry knowledge with user-centered design principles to create intuitive, powerful features that solve real business challenges. They continuously iterate to improve the platform.",
-    image: "/img/dev_jm.png"
+    name: "Reiven Lee",
+    role: "Full-stack Developer",
+    image: "/img/dev_reiven.png",
+    linkedin: "reiven-lee",
+    bio: "Infrastructure and deployment specialist. Expert in containerization, CI/CD pipelines, and cloud platforms."
   },
   {
     name: "Miguel Andre Pajarillo",
-    role: "Contributor",
-    description: "A new team member who brings fresh perspectives and innovative ideas to our projects.",
-    image: "/img/dev_miguel.jpg"
-  }
+    role: "Full-stack Developer",
+    image: "/img/dev_miguel.jpg",
+    linkedin: "miguel-andre-pajarillo-313a08229",
+    bio: "Versatile developer working across the stack. Specializes in TypeScript and modern JavaScript frameworks."
+  },
 ];

@@ -35,7 +35,7 @@ function PrivacyPolicyBody() {
   };
 
   return (
-    <div className="min-h-screen px-4 py-16 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-16">
       <div className="mx-auto max-w-6xl">   
         <motion.div 
           className="overflow-hidden rounded-2xl bg-white shadow-sm"
@@ -44,7 +44,7 @@ function PrivacyPolicyBody() {
           transition={{ duration: 0.5 }}
         >
           {/* Hero Section */}
-          <div className="p-8 sm:p-12">
+          <div className="p-2 sm:p-12">
             {/* Introduction */}
             <motion.div 
               className="mb-12"
@@ -74,7 +74,7 @@ function PrivacyPolicyBody() {
                   </span>
                   {PRIVACY_POLICY_CONTENT.sections[1].title}
                 </h2>
-                <div className="whitespace-pre-line text-gray-600">
+                <div className="whitespace-pre-line text-sm text-gray-600">
                   {PRIVACY_POLICY_CONTENT.sections[1].content}
                 </div>
               </motion.div>
@@ -87,7 +87,7 @@ function PrivacyPolicyBody() {
                   </span>
                   {PRIVACY_POLICY_CONTENT.sections[2].title}
                 </h2>
-                <div className="whitespace-pre-line text-gray-600">
+                <div className="whitespace-pre-line text-sm text-gray-600">
                   {PRIVACY_POLICY_CONTENT.sections[2].content}
                 </div>
               </motion.div>
@@ -103,7 +103,7 @@ function PrivacyPolicyBody() {
                       </span>
                       {PRIVACY_POLICY_CONTENT.sections[3].title}
                     </h3>
-                    <div className="whitespace-pre-line text-gray-600">
+                    <div className="whitespace-pre-line text-sm text-gray-600">
                       {PRIVACY_POLICY_CONTENT.sections[3].content}
                     </div>
                   </div>
@@ -114,7 +114,7 @@ function PrivacyPolicyBody() {
                       </span>
                       {PRIVACY_POLICY_CONTENT.sections[4].title}
                     </h3>
-                    <div className="whitespace-pre-line text-gray-600">
+                    <div className="whitespace-pre-line text-sm text-gray-600">
                       {PRIVACY_POLICY_CONTENT.sections[4].content}
                     </div>
                   </div>
@@ -132,7 +132,7 @@ function PrivacyPolicyBody() {
                       </span>
                       {PRIVACY_POLICY_CONTENT.sections[5].title}
                     </h3>
-                    <div className="whitespace-pre-line text-gray-600">
+                    <div className="whitespace-pre-line text-sm text-gray-600">
                       {PRIVACY_POLICY_CONTENT.sections[5].content}
                     </div>
                   </div>
@@ -143,7 +143,7 @@ function PrivacyPolicyBody() {
                       </span>
                       {PRIVACY_POLICY_CONTENT.sections[6].title}
                     </h3>
-                    <div className="whitespace-pre-line text-gray-600">
+                    <div className="whitespace-pre-line text-sm text-gray-600">
                       {PRIVACY_POLICY_CONTENT.sections[6].content}
                     </div>
                   </div>
@@ -161,7 +161,7 @@ function PrivacyPolicyBody() {
                       </span>
                       {PRIVACY_POLICY_CONTENT.sections[7].title}
                     </h3>
-                    <div className="whitespace-pre-line text-gray-600">
+                    <div className="whitespace-pre-line text-sm text-gray-600">
                       {PRIVACY_POLICY_CONTENT.sections[7].content}
                     </div>
                   </div>
@@ -169,7 +169,7 @@ function PrivacyPolicyBody() {
                     <h3 className="mb-4 text-xl font-semibold text-gray-800">
                       {PRIVACY_POLICY_CONTENT.sections[8].title}
                     </h3>
-                    <div className="whitespace-pre-line text-gray-600">
+                    <div className="whitespace-pre-line text-sm text-gray-600">
                       {PRIVACY_POLICY_CONTENT.sections[8].content}
                     </div>
                   </div>
@@ -181,7 +181,7 @@ function PrivacyPolicyBody() {
                 <h2 className="mb-6 text-2xl font-bold text-gray-800">
                   {PRIVACY_POLICY_CONTENT.sections[9].title}
                 </h2>
-                <div className="whitespace-pre-line text-gray-600">
+                <div className="whitespace-pre-line text-sm text-gray-600">
                   {PRIVACY_POLICY_CONTENT.sections[9].content}
                 </div>
               </motion.div>
@@ -194,7 +194,7 @@ function PrivacyPolicyBody() {
                   </span>
                   {PRIVACY_POLICY_CONTENT.sections[10].title}
                 </h2>
-                <div className="mb-8 whitespace-pre-line text-gray-700">
+                <div className="whitespace-pre-line text-gray-700">
                   {PRIVACY_POLICY_CONTENT.sections[10].content}
                 </div>
                 <div className="space-y-4 rounded-lg bg-white p-6">

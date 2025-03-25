@@ -33,7 +33,7 @@ function TermsOfServiceBody() {
   };
 
   return (
-    <div className="min-h-screen px-4 py-16 sm:px-6 lg:px-8">
+    <div className="min-h-screen px-2 py-16 ">
       <div className="mx-auto max-w-6xl">   
         <motion.div 
           className="overflow-hidden rounded-2xl bg-white shadow-sm"
@@ -41,7 +41,7 @@ function TermsOfServiceBody() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="p-8 sm:p-12">
+          <div className="">
             {/* Introduction */}
             <motion.div 
               className="mb-12"
@@ -72,7 +72,7 @@ function TermsOfServiceBody() {
                   {TERMS_OF_SERVICE_CONTENT.sections[1].title}
                 </h2>
                 <div className="prose prose-blue max-w-none">
-                  <div className="whitespace-pre-line text-gray-600">
+                  <div className="whitespace-pre-line text-sm text-gray-600">
                     {TERMS_OF_SERVICE_CONTENT.sections[1].content}
                   </div>
                 </div>
@@ -86,7 +86,7 @@ function TermsOfServiceBody() {
                   </span>
                   {TERMS_OF_SERVICE_CONTENT.sections[2].title}
                 </h2>
-                <div className="whitespace-pre-line text-gray-600">
+                <div className="whitespace-pre-line text-sm text-gray-600">
                   {TERMS_OF_SERVICE_CONTENT.sections[2].content}
                 </div>
               </motion.div>
@@ -102,7 +102,7 @@ function TermsOfServiceBody() {
                       </span>
                       {TERMS_OF_SERVICE_CONTENT.sections[3].title}
                     </h3>
-                    <div className="whitespace-pre-line text-gray-600">
+                    <div className="whitespace-pre-line text-sm text-gray-600">
                       {TERMS_OF_SERVICE_CONTENT.sections[3].content}
                     </div>
                   </div>
@@ -113,7 +113,7 @@ function TermsOfServiceBody() {
                       </span>
                       {TERMS_OF_SERVICE_CONTENT.sections[4].title}
                     </h3>
-                    <div className="whitespace-pre-line text-gray-600">
+                    <div className="whitespace-pre-line text-sm text-gray-600">
                       {TERMS_OF_SERVICE_CONTENT.sections[4].content}
                     </div>
                   </div>
@@ -131,7 +131,7 @@ function TermsOfServiceBody() {
                       </span>
                       {TERMS_OF_SERVICE_CONTENT.sections[5].title}
                     </h3>
-                    <div className="whitespace-pre-line text-gray-600">
+                    <div className="whitespace-pre-line text-sm text-gray-600">
                       {TERMS_OF_SERVICE_CONTENT.sections[5].content}
                     </div>
                   </div>
@@ -139,7 +139,7 @@ function TermsOfServiceBody() {
                     <h3 className="mb-4 text-xl font-semibold text-gray-800">
                       {TERMS_OF_SERVICE_CONTENT.sections[6].title}
                     </h3>
-                    <div className="whitespace-pre-line text-gray-600">
+                    <div className="whitespace-pre-line text-sm text-gray-600">
                       {TERMS_OF_SERVICE_CONTENT.sections[6].content}
                     </div>
                   </div>
@@ -154,7 +154,7 @@ function TermsOfServiceBody() {
                     <h3 className="mb-4 text-xl font-semibold text-gray-800">
                       {TERMS_OF_SERVICE_CONTENT.sections[7].title}
                     </h3>
-                    <div className="whitespace-pre-line text-gray-600">
+                    <div className="whitespace-pre-line text-sm text-gray-600">
                       {TERMS_OF_SERVICE_CONTENT.sections[7].content}
                     </div>
                   </div>
@@ -162,7 +162,7 @@ function TermsOfServiceBody() {
                     <h3 className="mb-4 text-xl font-semibold text-gray-800">
                       {TERMS_OF_SERVICE_CONTENT.sections[8].title}
                     </h3>
-                    <div className="whitespace-pre-line text-gray-600">
+                    <div className="whitespace-pre-line text-sm text-gray-600">
                       {TERMS_OF_SERVICE_CONTENT.sections[8].content}
                     </div>
                   </div>
@@ -177,7 +177,7 @@ function TermsOfServiceBody() {
                     <h3 className="mb-4 text-xl font-semibold text-gray-800">
                       {TERMS_OF_SERVICE_CONTENT.sections[9].title}
                     </h3>
-                    <div className="whitespace-pre-line text-gray-600">
+                    <div className="whitespace-pre-line text-sm text-gray-600">
                       {TERMS_OF_SERVICE_CONTENT.sections[9].content}
                     </div>
                   </div>
@@ -185,7 +185,7 @@ function TermsOfServiceBody() {
                     <h3 className="mb-4 text-xl font-semibold text-gray-800">
                       {TERMS_OF_SERVICE_CONTENT.sections[10].title}
                     </h3>
-                    <div className="whitespace-pre-line text-gray-600">
+                    <div className="whitespace-pre-line text-sm text-gray-600">
                       {TERMS_OF_SERVICE_CONTENT.sections[10].content}
                     </div>
                   </div>
@@ -200,7 +200,7 @@ function TermsOfServiceBody() {
                   </span>
                   {TERMS_OF_SERVICE_CONTENT.sections[11].title}
                 </h2>
-                <div className="mb-8 whitespace-pre-line text-gray-700">
+                <div className="whitespace-pre-line text-gray-700">
                   {TERMS_OF_SERVICE_CONTENT.sections[11].content}
                 </div>
                 <div className="space-y-4 rounded-lg bg-white p-6">

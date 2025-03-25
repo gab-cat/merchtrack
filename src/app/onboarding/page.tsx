@@ -33,7 +33,7 @@ export default async function OnboardingPage() {
       <div className="container mx-auto px-4 py-10">
         <div className="mx-auto max-w-md">
           {/* Logo Header */}
-          <div className="mb-6 flex flex-col items-center justify-center rounded-md bg-neutral-2/80 py-4 text-center backdrop-blur-sm">
+          <div className="mb-6 flex flex-col items-center justify-center rounded-md border bg-white/80 py-4 text-center shadow-sm backdrop-blur-sm">
             <div className="relative mb-2 size-16">
               <Image
                 src="/img/logo.png"

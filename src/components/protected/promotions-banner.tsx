@@ -64,7 +64,7 @@ export default function PromotionsBanner({ promotions = [] }: Readonly<Promotion
       {/* Close button */}
       <button
         onClick={() => setIsDismissed(true)}
-        className="absolute right-2 top-2 text-gray-500 hover:text-gray-700"
+        className="absolute right-1 top-1 text-gray-500 hover:text-gray-700"
         aria-label="Dismiss promotion"
       >
         <X size={18} />
@@ -89,7 +89,7 @@ export default function PromotionsBanner({ promotions = [] }: Readonly<Promotion
           )}
         </div>
         
-        <Button asChild>
+        <Button className='mt-0 md:mt-4' asChild>
           <Link href={currentPromotion.ctaLink}>
             {currentPromotion.ctaText}
           </Link>
@@ -103,7 +103,7 @@ export default function PromotionsBanner({ promotions = [] }: Readonly<Promotion
             <button
               key={index}
               onClick={() => setCurrentIndex(index)}
-              className={`size-4 rounded-full ${
+              className={`size-3 rounded-full ${
                 index === currentIndex ? 'bg-primary' : 'bg-gray-300'
               }`}
               aria-label={`Go to promotion ${index + 1}`}

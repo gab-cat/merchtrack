@@ -15,7 +15,7 @@ import CollegeAndCourseForm from "./college-form";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { Role, College } from "@/types/Misc";
+import { Role } from "@/types/Misc";
 import { completeOnboarding } from "@/app/onboarding/_actions";
 import { OnboardingForm as OnboardingFormType, OnboardingFormSchema } from "@/schema/user";
 import useToast from "@/hooks/use-toast";
@@ -59,7 +59,7 @@ export default function OnboardingForm() {
       phone: "",
       email: "",
       role: Role.STUDENT,
-      college: College.NOT_APPLICABLE,
+      college: "", // Remove default selection so user must actively choose
       courses: "",
     },
   });
@@ -210,6 +210,7 @@ export default function OnboardingForm() {
       </div>
 
       <Form {...form}>
+        {/* @ts-expect-error - TypeScript doesn't know that form is a FormContext */}
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <AnimatePresence mode="wait">
             <motion.div
@@ -229,6 +230,7 @@ export default function OnboardingForm() {
                 </p>
               </div>
               <div className="flex w-full flex-col space-y-4 rounded-lg border border-gray-100 bg-white p-6 shadow-sm">
+                {/* @ts-expect-error - TypeScript doesn't know that form is a FormContext */}
                 <CurrentStepComponent form={form} />
               </div>
             </motion.div>
