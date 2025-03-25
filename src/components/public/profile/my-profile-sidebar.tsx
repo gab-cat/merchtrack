@@ -63,14 +63,6 @@ export function MobileSidebarTrigger() {
   );
 }
 
-// function handleLogout() {
-//   const { signOut } = useClerk();
-//   const { clearUser } = useUserStore();
-  
-//   signOut({ redirectUrl: "/" });
-//   clearUser();
-// }
-
 // The actual sidebar content, used in both desktop and mobile versions
 function SidebarContent({ 
   userImage, 
@@ -125,16 +117,7 @@ function SidebarContent({
         })}
       </nav>
       
-      {/* <div className='border-t p-4'>
-        <Button 
-          variant="ghost" 
-          className='w-full justify-start gap-3 text-red-500 hover:bg-red-50 hover:text-red-500'
-          onClick={() => handleLogout()}
-        >
-          <LogOut className="size-4" />
-          Logout
-        </Button>
-      </div> */}
+      {/*removal of logout button*/}
     </div>
   );
 }
