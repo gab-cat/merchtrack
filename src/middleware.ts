@@ -22,6 +22,7 @@ export const config = {
  * `isPublicRoute` is a route matcher function that determines
  * whether a given route path corresponds to a publicly accessible route in the application.
  *
+ *
  * Any routes matching these patterns will be identified as public routes.
  */
 const isPublicRoute = createRouteMatcher([
@@ -38,10 +39,7 @@ const isPublicRoute = createRouteMatcher([
   '/faqs',
   '/terms-of-service',
   '/privacy-policy',
-  '/survey(.*)',
-  '/track-order',
-  '/products(.*)',
-  '/how-it-works',
+  '/test'
 ]);
 
 const isOnboardingRoute = createRouteMatcher([
@@ -49,68 +47,13 @@ const isOnboardingRoute = createRouteMatcher([
 ]);
 
 const isAdminRoute = createRouteMatcher([
-  '/admin(.*)',
+  '/admin(.*)', 
 ]);
-
-const isApiRoute = createRouteMatcher([
-  '/api(.*)',
-]);
-
-/**
- * Verifies JWT token from API requests
- * 
- * @param req - The incoming API request
- * @returns NextResponse object or null if verification succeeds
- */
-async function verifyApiJwt(req: NextRequest): Promise<NextResponse | null> {
-  const authorization = req.headers.get("Authorization");
-  if (!authorization) {
-    return NextResponse.json({
-      status: 401,
-      message: "Unauthorized",
-    });
-  }
-  
-  try {
-    const token = authorization.split(" ")[1];
-    const jwtKey = process.env.JWT_KEY ?? '';
-    if (!jwtKey) {
-      return NextResponse.json({
-        status: 500,
-        message: "Server configuration error",
-      }, { status: 500 });
-    }
-    
-    const secret = new TextEncoder().encode(jwtKey);
-    const verifyResult = await jose.jwtVerify(token, secret);
-    
-    // Add the verified payload to request headers for downstream handlers
-    const requestHeaders = new Headers(req.headers);
-    requestHeaders.set('x-auth-user', JSON.stringify(verifyResult.payload));
-    
-    return NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
-    });
-  } catch {
-    return NextResponse.json({
-      status: 401,
-      message: "Invalid token",
-    }, { status: 401 });
-  }
-}
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
 
-  if (isApiRoute(req)) {
-    // Call the extracted verification function
-    const verificationResult = await verifyApiJwt(req);
-    if (verificationResult) {
-      return verificationResult;
-    }
-    // If verificationResult is null, continue with middleware execution
-  }
+  // If visiting a public route, let the user view
+  if (isPublicRoute(req)) return NextResponse.next();
 
   const { userId, sessionClaims, redirectToSignIn } = await auth();
 
@@ -121,25 +64,25 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
 
   // If the user isn't signed in and the route is private, redirect to sign-in
   if (!userId && !isPublicRoute(req)) return redirectToSignIn({ returnBackUrl: req.url });
+  
 
   // Catch users who do not have `onboardingComplete: true` in their publicMetadata
+  // Redirect them to the /onboarding route to complete onboarding
   if (userId && !sessionClaims?.metadata?.isOnboardingCompleted && !isOnboardingRoute(req)) {
-    return NextResponse.redirect(new URL('/onboarding', req.url));
+    console.log('User is not onboarded', sessionClaims?.metadata);
+    const onboardingUrl = new URL('/onboarding', req.url);
+    return NextResponse.redirect(onboardingUrl);
   }
 
-  // If the user is admin and the route is protected, let them view.
-  const isAdmin = sessionClaims?.metadata.data.isAdmin || sessionClaims?.metadata.data.isStaff;
-  if (isAdmin && isAdminRoute(req)) return NextResponse.next();
-
-  if (!isAdmin && isAdminRoute(req)) {
-    return NextResponse.redirect(new URL('/404', req.url));
+  // Check if the user is visiting an admin route but is not a staff member
+  if (userId && isAdminRoute(req) && !sessionClaims?.metadata?.data.isStaff) {
+    return NextResponse.rewrite(new URL('/404', req.url));
   }
 
   // If the user is logged in and the route is protected, let them view.
   if (userId && !isPublicRoute(req)) return NextResponse.next();
-
-  // If visiting a public route, let the user view
-  if (isPublicRoute(req)) return NextResponse.next();
+}, {
+  authorizedParties: ['https://staging.merchtrack.tech', 'https://merchtrack.tech'],
+  afterSignUpUrl: '/onboarding',
 });
-
 

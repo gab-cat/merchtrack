@@ -74,7 +74,7 @@ function SidebarContent({
 }>) {
   const { user } = useUserStore();
   const pathname = usePathname();
-
+  
   return (
     <div className='flex size-full flex-col bg-white'>
       <div className='flex flex-col items-center border-b p-6'>
@@ -117,7 +117,16 @@ function SidebarContent({
         })}
       </nav>
       
-      {/*removal of logout button*/}
+      {/* <div className='border-t p-4'>
+        <Button 
+          variant="ghost" 
+          className='w-full justify-start gap-3 text-red-500 hover:bg-red-50 hover:text-red-500'
+          onClick={() => {}} // Add your logout logic here
+        >
+          <LogOut className="size-4" />
+          Logout
+        </Button>
+      </div> */}
     </div>
   );
 }
