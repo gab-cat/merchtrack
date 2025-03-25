@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import SupportModal from './support-modal';
 import { useTicketsQuery } from '@/hooks/tickets.hooks';
+import { useUserStore } from "@/stores/user.store";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -43,8 +44,12 @@ export default function MyTickets() {
   const [selectedTicket, setSelectedTicket] = useState<string | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+  const { userId } = useUserStore();
   
   const { data: ticketsData, isLoading, refetch } = useTicketsQuery({
+    where : {
+      createdById: userId,
+    },
     page: currentPage,
     take: 5,
     orderBy: { createdAt: 'desc' }
