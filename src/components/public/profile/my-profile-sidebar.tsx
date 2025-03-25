@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-//import { useClerk } from '@clerk/nextjs';
 import { usePathname } from 'next/navigation';
 import { User, CreditCard, Package, Ticket, Menu } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -63,7 +62,6 @@ export function MobileSidebarTrigger() {
     </Sheet>
   );
 }
-
 
 // function handleLogout() {
 //   const { signOut } = useClerk();
