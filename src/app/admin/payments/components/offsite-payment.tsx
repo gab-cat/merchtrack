@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Payment } from "@prisma/client";
+import { Payment, User } from "@prisma/client";
 import { format } from "date-fns";
 import { FaMoneyBillWave, FaCheck, FaTimes } from "react-icons/fa";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -17,7 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 
 type OffsitePaymentProps = {
-  payments: Payment[];
+  payments: (Payment & { user: User })[];
   isLoading: boolean;
   onVerify: (paymentId: string, notes: string) => Promise<void>;
   onReject: (paymentId: string, notes: string) => Promise<void>;
@@ -117,6 +117,9 @@ export function OffsitePayment({ payments, isLoading, onVerify, onReject }: Read
     return dialogType === "verify" ? "Verify Payment" : "Reject Payment";
   };
 
+  // console.log(pendingPayments);
+  // console.log(pendingPayments[0].user.firstName);
+
   return (
     <>
       {pendingPayments && pendingPayments.length > 0 ? (
@@ -130,7 +133,7 @@ export function OffsitePayment({ payments, isLoading, onVerify, onReject }: Read
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium">Order #{payment.orderId}</p>
+                    <p className="font-medium">Placed by {payment.user.firstName} {payment.user.lastName}</p>
                     <p className="text-sm text-gray-500">
                       {format(new Date(payment.createdAt), "MMM d, yyyy 'at' h:mm a")}
                     </p>
