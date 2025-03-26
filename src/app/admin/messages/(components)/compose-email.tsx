@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, KeyboardEvent, useEffect, useRef } from "react";
+import { useState, KeyboardEvent, useEffect, useRef, useMemo } from "react";
 import { MdOutlineEmail, MdClose } from "react-icons/md";
 import { FaSearch } from "react-icons/fa";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,6 +10,7 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { IoIosSend } from "react-icons/io";
 import { RiMailSendFill } from "react-icons/ri";
 import { HiUserGroup } from "react-icons/hi";
+import { useDebounce } from 'use-debounce';
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -26,11 +27,13 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "@/component
 import useToast from "@/hooks/use-toast";
 import { createMessage } from "@/app/admin/messages/_actions";
 import { useUserStore } from "@/stores/user.store";
+
 import { cn } from "@/lib/utils";
 import { useUsersQuery } from "@/hooks/users.hooks";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import UserAvatar from "@/components/shared/user-avatar";
+import { QueryParams } from "@/types/common";
 
 export default function ComposeEmail() {
   const { userId } = useUserStore();
@@ -39,24 +42,43 @@ export default function ComposeEmail() {
 
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch] = useDebounce(searchQuery, 1000);
   const [selectedEmails, setSelectedEmails] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState("");
-
   const [currentPage, setCurrentPage] = useState(0);
   const usersPerPage = 10; // Adjust this accordingly based on the number of users to display in the search users scroll view.
 
   // Fetch users for the selection panel
-  const { data: usersData, isLoading: isLoadingUsers } = useUsersQuery({
-    take: usersPerPage,
-  });
+  
+  const userQueryParams = useMemo(() => {
+    const params: QueryParams = {
+      limit: usersPerPage,
+      take: usersPerPage,
+      skip: (currentPage - 1) * usersPerPage,
+      page: currentPage,
+      orderBy: {
+        createdAt: 'desc'
+      },
+      where: {
+        isDeleted: false
+      }
+    };
 
-  // Function to search all users (fetch directly from the backend)
-  const searchUsers = async (query: string) => {
-    if (!query) return;
+    if (debouncedSearch) {
+      params.where = {
+        ...params.where,
+        OR: [
+          { firstName: { contains: debouncedSearch, mode: 'insensitive' } },
+          { lastName: { contains: debouncedSearch, mode: 'insensitive' } },
+          { email: { contains: debouncedSearch, mode: 'insensitive' } }
+        ]
+      };
+    }
     
-    const allUsers = await fetch(`/api/users?search=${query}`).then(res => res.json());
-    return allUsers;
-  };
+    return params;
+  }, [currentPage,debouncedSearch]);
+
+  const { data: usersData, isLoading: isLoadingUsers } = useUsersQuery(userQueryParams);
 
   const form = useForm({
     reValidateMode: "onBlur",
@@ -388,11 +410,11 @@ export default function ComposeEmail() {
                 )}
               </ScrollArea>
               <div>
-                <div className="flex place-content-around gap-2 m-4">
+                <div className="m-4 flex place-content-around gap-2">
                   <button 
                     onClick={prevPage} 
                     disabled={currentPage === 0}
-                    className="w-24 h-10 px-4 py-2 bg-blue-500 text-white rounded transition transform active:scale-95 disabled:opacity-50"
+                    className="h-10 w-24 rounded bg-blue-500 px-4 py-2 text-white transition active:scale-95 disabled:opacity-50"
                   >
                     Previous
                   </button>
@@ -400,7 +422,7 @@ export default function ComposeEmail() {
                   <button 
                     onClick={nextPage} 
                     disabled={endIndex >= filteredUsers.length}
-                    className="w-24 h-10 px-4 py-2 bg-blue-500 text-white rounded transition transform active:scale-95 disabled:opacity-50"
+                    className="h-10 w-24 rounded bg-blue-500 px-4 py-2 text-white transition active:scale-95 disabled:opacity-50"
                   >
                     Next
                   </button>
