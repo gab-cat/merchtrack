@@ -32,6 +32,7 @@ type NotesFormValues = z.infer<typeof notesSchema>;
 export function OffsitePayment({ payments, isLoading, onVerify, onReject }: Readonly<OffsitePaymentProps>) {
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const [dialogType, setDialogType] = useState<"verify" | "reject" | null>(null);
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const queryClient = useQueryClient();
 
   const form = useForm<NotesFormValues>({
@@ -112,6 +113,15 @@ export function OffsitePayment({ payments, isLoading, onVerify, onReject }: Read
     (payment) => payment.paymentStatus === "PENDING" && payment.paymentSite === "OFFSITE"
   );
 
+  const filteredPayments = payments?.filter((payment) => {
+    const fullName = `${payment.user.firstName} ${payment.user.lastName}`.toLowerCase();
+    const referenceNo = payment.referenceNo?.toLowerCase() || "";
+    return (
+      fullName.includes(searchQuery.toLowerCase()) ||
+      referenceNo.includes(searchQuery.toLowerCase())
+    );
+  });
+
   const getButtonLabel = () => {
     if (isVerifying || isRejecting) return "Processing...";
     return dialogType === "verify" ? "Verify Payment" : "Reject Payment";
@@ -122,10 +132,19 @@ export function OffsitePayment({ payments, isLoading, onVerify, onReject }: Read
 
   return (
     <>
-      {pendingPayments && pendingPayments.length > 0 ? (
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Search by name or reference number"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full rounded-md border border-gray-300 p-2 text-sm focus:border-primary focus:ring-primary"
+        />
+      </div>
+      {filteredPayments && filteredPayments.length > 0 ? (
         <ScrollArea className="h-[300px] pr-4">
           <div className="space-y-3">
-            {pendingPayments.map((payment) => (
+            {filteredPayments.map((payment) => (
               <div
                 key={payment.id}
                 onClick={() => handlePaymentClick(payment)}
@@ -133,7 +152,7 @@ export function OffsitePayment({ payments, isLoading, onVerify, onReject }: Read
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium">Placed by {payment.user.firstName} {payment.user.lastName}</p>
+                    <p className="font-medium">{payment.user.firstName} {payment.user.lastName}</p>
                     <p className="text-sm text-gray-500">
                       {format(new Date(payment.createdAt), "MMM d, yyyy 'at' h:mm a")}
                     </p>
@@ -146,7 +165,7 @@ export function OffsitePayment({ payments, isLoading, onVerify, onReject }: Read
                       </span>
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col gap-2"> {/* Changed to vertical layout */}
                     <Button
                       size="sm"
                       variant="outline"
@@ -191,7 +210,7 @@ export function OffsitePayment({ payments, isLoading, onVerify, onReject }: Read
         <div className="flex h-[300px] items-center justify-center">
           <div className="flex flex-col items-center gap-2 text-center">
             <FaMoneyBillWave className="size-8 text-gray-400" />
-            <p className="text-sm text-gray-500">No pending offsite payments to verify</p>
+            <p className="text-sm text-gray-500">No matching payments found</p>
           </div>
         </div>
       )}
