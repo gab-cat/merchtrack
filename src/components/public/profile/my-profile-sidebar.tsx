@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { User, CreditCard, Package, LogOut, Ticket, Menu } from 'lucide-react';
+import { User, CreditCard, Package, Ticket, Menu } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useUserStore } from '@/stores/user.store';
@@ -117,16 +117,7 @@ function SidebarContent({
         })}
       </nav>
       
-      <div className='border-t p-4'>
-        <Button 
-          variant="ghost" 
-          className='w-full justify-start gap-3 text-red-500 hover:bg-red-50 hover:text-red-500'
-          onClick={() => {}} // Add your logout logic here
-        >
-          <LogOut className="size-4" />
-          Logout
-        </Button>
-      </div>
+      
     </div>
   );
 }
