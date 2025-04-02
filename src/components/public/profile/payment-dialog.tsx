@@ -442,13 +442,13 @@ export function PaymentDialog({ open, onOpenChange, orderId, onPaymentComplete }
                   className="w-full"
                 >
                   <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="ONSITE">On-site Payment</TabsTrigger>
+                    {/* <TabsTrigger value="ONSITE">On-site Payment</TabsTrigger> */}
                     <TabsTrigger value="OFFSITE">Off-site Payment</TabsTrigger>
                   </TabsList>
                   
-                  <TabsContent value="ONSITE" className="py-2">
+                  {/* <TabsContent value="ONSITE" className="py-2">
                     {renderOnsiteInstructions()}
-                  </TabsContent>
+                  </TabsContent> */}
                   
                   <TabsContent value="OFFSITE" className="space-y-4 py-2">
                     {/* Payment Type Selection */}
