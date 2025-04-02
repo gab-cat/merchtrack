@@ -202,7 +202,7 @@ const PAYMENT_DETAILS = {
 export function PaymentDialog({ open, onOpenChange, orderId, onPaymentComplete }: Readonly<PaymentDialogProps>) {
   const { userId } = useUserStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeTab, setActiveTab] = useState<PaymentSite>('ONSITE');
+  const [activeTab, setActiveTab] = useState<PaymentSite>('OFFSITE');
   const [paymentAmount, setPaymentAmount] = useState<number>(0);
   const toast = useToast;
   
@@ -212,7 +212,7 @@ export function PaymentDialog({ open, onOpenChange, orderId, onPaymentComplete }
     resolver: zodResolver(paymentFormSchema),
     defaultValues: {
       paymentMethod: undefined,
-      paymentSite: 'ONSITE',
+      paymentSite: 'OFFSITE',
       paymentType: 'FULL',
       customAmount: undefined,
       referenceNo: '',
