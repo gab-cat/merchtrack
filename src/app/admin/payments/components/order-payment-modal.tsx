@@ -249,7 +249,7 @@ export function OrderPaymentModal({ open, onOpenChange, order }: Readonly<OrderP
                             min={minPayment}
                             max={remaining}
                             step="0.01"
-                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                            onChange={(e) => field.onChange(parseFloat(e.target.value) ?? '')}
                             className={cn(
                               "pr-16",
                               isFullPayment && "border-green-500 focus-visible:ring-green-500",

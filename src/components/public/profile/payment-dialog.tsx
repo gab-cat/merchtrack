@@ -395,6 +395,7 @@ export function PaymentDialog({ open, onOpenChange, orderId, onPaymentComplete }
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const renderOnsiteInstructions = () => renderPaymentDetails('ONSITE');
 
   return (

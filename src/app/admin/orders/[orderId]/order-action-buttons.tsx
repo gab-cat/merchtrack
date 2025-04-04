@@ -23,6 +23,7 @@ export const OrderActionButtons: FC<OrderActionButtonsProps> = ({
   orderId
 }) => {
   const [cancelReason, setCancelReason] = useState("");
+  const [readyReason, setReadyReason] = useState("");
 
   const renderProcessingButton = () => (
     <AlertDialog>
@@ -38,14 +39,30 @@ export const OrderActionButtons: FC<OrderActionButtonsProps> = ({
       <AlertDialogContent className="bg-neutral-2">
         <AlertDialogHeader>
           <AlertDialogTitle>Mark Order as Ready?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This action will mark the order as ready for pickup. Make sure all items are prepared and packaged.
-          </AlertDialogDescription>
+          <span>
+            <AlertDialogDescription>
+              This action will mark the order as ready for pickup. Make sure all items are prepared and packaged.
+            </AlertDialogDescription>
+            <Textarea
+              value={readyReason}
+              onChange={(e) => setReadyReason(e.target.value)}
+              placeholder="Enter notes for the customer..."
+              className="mt-2"
+              required
+            />
+          </span>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
-            onClick={() => onUpdateStatus(OrderStatus.READY)}
+            onClick={() => {
+              if (readyReason.trim()) {
+                onUpdateStatus(OrderStatus.READY, readyReason);
+                setReadyReason("");
+              } else {
+                toast.error("Please provide notes for the customer");
+              }
+            }}
             className="bg-blue-600 hover:bg-blue-700"
           >
             Continue
