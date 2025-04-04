@@ -93,7 +93,7 @@ export function UserManagement() {
     if (currentPage > (usersData?.metadata?.lastPage ?? 1)) {
       setCurrentPage(1);
     }
-  }, [currentPage, usersData]);
+  }, [currentPage, usersData?.metadata?.lastPage]);
 
   const handleSearch = (query: string) => {
     setSearchTerm(query);
