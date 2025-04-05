@@ -17,7 +17,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.772.0",
     "@clerk/elements": "^0.22.15",
-    "@clerk/nextjs": "6.12.12",
+    "@clerk/nextjs": "6.13.0",
     "@clerk/shared": "3.2.3",
     "@datadog/browser-rum": "^5.35.0",
     "@formkit/auto-animate": "^0.8.2",
