@@ -10,7 +10,7 @@ ENV APP_ENV=build
 RUN npm i -g dotenv-cli@8.0.0 && npx next telemetry disable && dotenv -e .env -- npm run build
 
 # Stage: Runner
-FROM node:22.12.0-alpine3.21 AS runner
+FROM node:23.11.0-alpine3.21 AS runner
 LABEL author=gab-cat
 
 WORKDIR /app
