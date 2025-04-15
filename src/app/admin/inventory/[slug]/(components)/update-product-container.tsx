@@ -26,6 +26,7 @@ import { deleteProductImages, uploadProductImages } from '@/actions/media.action
 import { fadeInUp } from '@/constants/animations';
 import { cn } from '@/lib/utils';
 import { ExtendedProduct } from '@/types/extended';
+import { StatusSection } from '@/app/admin/inventory/new/(components)/sections/status';
 
 
 interface UpdateProductContainerProps {
@@ -228,6 +229,7 @@ export default function UpdateProductContainer({ slug }: Readonly<UpdateProductC
           <BasicInformationSection description={product.description as string} categoryId={product.categoryId as string}/>
           <ImagesSection onChange={handleImageChange} isLoading={isPendingImageOp} />
           <InventorySection />
+          <StatusSection /> {/** Latest Change Here */}
           <VariantsSection product={product as ExtendedProduct} />
           <div className="flex justify-end space-x-4">
             <Button 
