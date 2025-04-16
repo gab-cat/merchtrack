@@ -36,6 +36,7 @@ export const createProductSchema = z.object({
   categoryId: z.string({
     required_error: "Category is required"
   }),
+  isDeleted: z.boolean().default(false),
   variants: z.array(variantSchema).min(1, "At least one variant is required")
 });
 
