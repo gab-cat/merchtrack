@@ -52,20 +52,9 @@ jobs:
       - name: Remove Docker image from local
         run: |
           echo "Removing local docker image..."
-          CONTAINER_NAME="merchtrack-preview-${{ github.event.pull_request.number }}"
           IMAGE_NAME="gabcat/merchtrack:preview-${{ github.event.pull_request.number }}"
-
-          # Stop and remove container if exists
-          if sudo docker ps -a | grep -q "$CONTAINER_NAME"; then
-            echo "Container exists. Removing..."
-            sudo docker rm -f "$CONTAINER_NAME" || true
-          fi
-
-          # Remove image if exists
-          if sudo docker images | grep -q "$IMAGE_NAME"; then
-            echo "Image exists. Removing..."
-            sudo docker rmi -f "$IMAGE_NAME" || true
-          fi
+          echo "Image exists. Removing $IMAGE_NAME ..."
+          sudo docker rmi -f "$IMAGE_NAME" || true
 
       - name: Delete Nginx Proxy Manager host
         run: |
@@ -137,11 +126,10 @@ jobs:
             -X DELETE \
             https://hub.docker.com/v2/repositories/$REPO/tags/$TAG/)
 
-          if [ "$HTTP_CODE" -eq 202 ] || [ "$HTTP_CODE" -eq 200 ] || [ "$HTTP_CODE" -eq 404 ]; then
+          if [ "$HTTP_CODE" -eq 202 ] || [ "$HTTP_CODE" -eq 204 ] || [ "$HTTP_CODE" -eq 404 ]; then
             echo "Image tag deleted successfully or was not found (HTTP code: $HTTP_CODE)"
           else
             echo "Failed to delete image tag (HTTP code: $HTTP_CODE)"
-            exit 1
           fi
 
   notify:
