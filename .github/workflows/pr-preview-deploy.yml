@@ -1,0 +1,255 @@
+name: 2. PULL REQUEST - Preview Deployment
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: Development
+    outputs:
+      pr_number: ${{ github.event.pull_request.number }}
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3
+        with:
+          registry: https://index.docker.io/v1/
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Install Doppler CLI
+        uses: dopplerhq/cli-action@v3
+
+      - name: Setup Doppler Configuration
+        run: |
+          doppler setup --no-prompt --token ${{ secrets.DOPPLER_TOKEN }} --project ${{ secrets.DOPPLER_TARGET_PROJECT }} --config ${{ secrets.DOPPLER_TARGET_CONFIG }}
+          echo "Doppler configuration complete for project ${{ secrets.DOPPLER_TARGET_PROJECT }} with config ${{ secrets.DOPPLER_TARGET_CONFIG }}"
+          doppler secrets download --no-file --format env > .env
+          echo "Secrets downloaded to .env file."
+
+      - name: Configure AWS CLI
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set region ${{ secrets.AWS_DEFAULT_REGION }}
+
+      - name: Check Database Public Accessibility
+        id: check-db
+        run: |
+          DB_INFO=$(aws lightsail get-relational-database --relational-database-name merchtrack-db-sgp1)
+          IS_PUBLIC=$(echo "$DB_INFO" | jq -r '.relationalDatabase.publiclyAccessible')
+          echo "is_public=$IS_PUBLIC" >> $GITHUB_OUTPUT
+
+      - name: Open Database to Public Network
+        if: ${{ steps.check-db.outputs.is_public == 'false' }}
+        run: |
+          aws lightsail update-relational-database \
+            --relational-database-name merchtrack-db-sgp1 \
+            --publicly-accessible
+
+      - name: Wait for Database Availability
+        run: |
+          MAX_ATTEMPTS=30
+          ATTEMPT=1
+
+          while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+            DB_STATUS=$(aws lightsail get-relational-database --relational-database-name merchtrack-db-sgp1 | jq -r '.relationalDatabase.state')
+            
+            if [ "$DB_STATUS" = "available" ]; then
+              echo "Database is available!"
+              break
+            fi
+            
+            echo "Attempt $ATTEMPT: Database status is $DB_STATUS. Waiting 10 seconds..."
+            sleep 10
+            ATTEMPT=$((ATTEMPT + 1))
+          done
+
+          if [ $ATTEMPT -gt $MAX_ATTEMPTS ]; then
+            echo "Database did not become available within the timeout period"
+            exit 1
+          fi
+
+      - name: Build client image and push to Docker Hub
+        uses: docker/build-push-action@48aba3b46d1b1fec4febb7c5d0c644b249a11355 # v6.10.0
+        with:
+          context: .
+          file: ./Dockerfile
+          tags: |
+            gabcat/merchtrack:preview-${{ github.event.pull_request.number }}
+          cache-from: |
+            type=registry,ref=gabcat/merchtrack:cache
+          cache-to: type=inline
+          push: true
+
+      - name: Remove env file
+        if: always()
+        run: |
+          if [ -f .env ]; then
+            rm .env || echo "Warning: Failed to remove .env file"
+          fi
+
+      - name: Close Database to Public Network
+        if: always()
+        run: |
+          aws lightsail update-relational-database \
+            --relational-database-name merchtrack-db-sgp1 \
+            --no-publicly-accessible
+
+  deploy:
+    runs-on: self-hosted
+    needs: build
+    environment: Development
+    steps:
+      - name: Navigate to preview directory
+        run: |
+          cd ~
+          mkdir -p preview
+          cd preview
+          mkdir -p ${{ needs.build.outputs.pr_number }}
+          cd ${{ needs.build.outputs.pr_number }}
+
+      - name: Check for existing compose file
+        id: check_compose
+        run: |
+          cd ~/preview/${{ needs.build.outputs.pr_number }}
+          if [ -f "compose.yml" ]; then
+            echo "compose_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "compose_exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create compose file if it doesn't exist
+        if: steps.check_compose.outputs.compose_exists == 'false'
+        run: |
+          cd ~/preview/${{ needs.build.outputs.pr_number }}
+          cat > compose.yml << 'EOF'
+          services:
+            preview-${{ needs.build.outputs.pr_number }}:
+              image: gabcat/merchtrack:preview-${{ needs.build.outputs.pr_number }}
+              container_name: merchtrack-preview-${{ needs.build.outputs.pr_number }}
+              restart: "unless-stopped"
+              environment:
+                NODE_ENV: production
+                APP_ENV: production
+                NEXT_PUBLIC_NODE_ENV: production
+                NEXT_RUNTIME: nodejs
+                NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL: /dashboard
+                NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL: /dashboard
+                NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL: /onboarding
+              volumes:
+                - "/etc/timezone:/etc/timezone:ro"
+                - "/etc/localtime:/etc/localtime:ro"
+
+          networks:
+            default:
+              name: staging
+              external: true
+          EOF
+
+      - name: Setup Doppler Configuration
+        run: |
+          cd ~/preview/${{ needs.build.outputs.pr_number }}
+          doppler setup --no-prompt --token ${{ secrets.DOPPLER_TOKEN }} --project ${{ secrets.DOPPLER_TARGET_PROJECT }} --config ${{ secrets.DOPPLER_TARGET_CONFIG }}
+          echo "Doppler configuration complete for project ${{ secrets.DOPPLER_TARGET_PROJECT }} with config ${{ secrets.DOPPLER_TARGET_CONFIG }}"
+
+      - name: Stop existing container if it exists
+        if: steps.check_compose.outputs.compose_exists == 'true'
+        run: |
+          cd ~/preview/${{ needs.build.outputs.pr_number }}
+          docker compose down || true
+          
+      - name: Delete old image if exists
+        run: |
+          cd ~/preview/${{ needs.build.outputs.pr_number }}
+          # Get the image ID of the old image if it exists
+          OLD_IMAGE_ID=$(docker images -q gabcat/merchtrack:preview-${{ needs.build.outputs.pr_number }} 2>/dev/null)
+          if [ ! -z "$OLD_IMAGE_ID" ]; then
+            echo "Old image found with ID: $OLD_IMAGE_ID"
+            # Remove any containers using the image
+            CONTAINERS=$(docker ps -a --filter ancestor=gabcat/merchtrack:preview-${{ needs.build.outputs.pr_number }} -q)
+            if [ ! -z "$CONTAINERS" ]; then
+              echo "Removing containers using the old image"
+              docker rm -f $CONTAINERS
+            fi
+            # Remove the old image
+            echo "Removing old image"
+            docker rmi -f $OLD_IMAGE_ID
+          else
+            echo "No old image found to remove"
+          fi
+
+      - name: Pull new image and start container
+        run: |
+          cd ~/preview/${{ needs.build.outputs.pr_number }}
+          docker pull gabcat/merchtrack:preview-${{ needs.build.outputs.pr_number }}
+          doppler run -- docker compose up -d
+
+      - name: Create Nginx Proxy Manager host
+        run: |
+          cd ~/npm-api
+          
+          # Check if proxy host already exists
+          DOMAIN="preview-${{ needs.build.outputs.pr_number }}.merchtrack.tech"
+          EXISTING_HOST=$(./npm-api.sh list domains | jq -r ".[] | select(.domain_names[0] == \"$DOMAIN\") | .id")
+          
+          if [ -n "$EXISTING_HOST" ]; then
+            # Update existing host
+            ./npm-api.sh edit domain "$EXISTING_HOST" \
+              --domain_names "[$DOMAIN]" \
+              --forward_scheme "http" \
+              --forward_host "merchtrack-preview-${{ needs.build.outputs.pr_number }}" \
+              --forward_port "3000" \
+              --block_exploits "true" \
+              --websocket_support "true" \
+              --ssl_forced "true" \
+              --ssl_email "admin@merchtrack.tech" \
+              --ssl_letsencrypt "true"
+          else
+            # Create new host
+            ./npm-api.sh add domain \
+              --domain_names "[$DOMAIN]" \
+              --forward_scheme "http" \
+              --forward_host "merchtrack-preview-${{ needs.build.outputs.pr_number }}" \
+              --forward_port "3000" \
+              --block_exploits "true" \
+              --websocket_support "true" \
+              --ssl_forced "true" \
+              --ssl_email "admin@merchtrack.tech" \
+              --ssl_letsencrypt "true"
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: [build, deploy]
+    steps:
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 Preview deployment for PR #${{ needs.build.outputs.pr_number }} is ready!\n\nPreview URL: https://preview-${{ needs.build.outputs.pr_number }}.merchtrack.tech`
+            })
+
+      - name: Purge Cloudflare cache
+        run: |
+          curl https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/purge_cache \
+            -H 'Content-Type: application/json' \
+            -H "X-Auth-Email: ${{ secrets.CLOUDFLARE_EMAIL }}" \
+            -H "X-Auth-Key: ${{ secrets.CLOUDFLARE_API_KEY }}" \
+            -d '{
+              "hosts": ["preview-${{ needs.build.outputs.pr_number }}.merchtrack.tech"]
+            }'

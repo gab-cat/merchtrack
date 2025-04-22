@@ -1,0 +1,21 @@
+services:
+  preview-${{ github.pr.event.pull_request.number }}:
+    image: gabcat/merchtrack:preview-${{ github.pr.event.pull_request.number }}
+    container_name: merchtrack-preview-${{ github.pr.event.pull_request.number }}
+    restart: "unless-stopped"
+    environment:
+      NODE_ENV: production
+      APP_ENV: production
+      NEXT_PUBLIC_NODE_ENV: production
+      NEXT_RUNTIME: nodejs
+      NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL: /dashboard
+      NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL: /dashboard
+      NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL: /onboarding
+    volumes:
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+
+networks:
+  default:
+    name: staging
+    external: true
