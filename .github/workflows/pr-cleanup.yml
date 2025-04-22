@@ -1,0 +1,175 @@
+name: PULL REQUEST - Cleanup
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  cleanup:
+    runs-on: self-hosted
+    environment: Staging
+    outputs:
+      pr_number: ${{ github.event.pull_request.number }}
+      comment_id: ${{ steps.find_comment.outputs.comment-id }}
+    steps:
+      - name: Find Existing Deployment Comment
+        id: find_comment
+        uses: peter-evans/find-comment@v3
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: "github-actions[bot]"
+          body-includes: "Deployment"
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get PR Information
+        id: pr_info
+        run: |
+          echo "pr_number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+          echo "PR Number: ${{ github.event.pull_request.number }}"
+          echo "Is Merged: ${{ github.event.pull_request.merged }}"
+
+      - name: Navigate to preview directory
+        run: |
+          cd ~
+          PREVIEW_DIR="preview/${{ github.event.pull_request.number }}"
+          if [ -d "$PREVIEW_DIR" ]; then
+            echo "Preview directory exists: $PREVIEW_DIR"
+          else
+            echo "Preview directory does not exist: $PREVIEW_DIR"
+          fi
+
+      - name: Stop and remove container
+        run: |
+          cd ~/preview/${{ github.event.pull_request.number }}
+          if [ -f "compose.yml" ]; then
+            echo "Stopping and removing container..."
+            docker compose down || true
+          else
+            echo "No compose file found to stop container"
+          fi
+
+      - name: Remove Docker image from local
+        run: |
+          echo "Removing local docker image..."
+          CONTAINER_NAME="merchtrack-preview-${{ github.event.pull_request.number }}"
+          IMAGE_NAME="gabcat/merchtrack:preview-${{ github.event.pull_request.number }}"
+
+          # Stop and remove container if exists
+          if docker ps -a | grep -q "$CONTAINER_NAME"; then
+            echo "Container exists. Removing..."
+            docker rm -f "$CONTAINER_NAME" || true
+          fi
+
+          # Remove image if exists
+          if docker images | grep -q "$IMAGE_NAME"; then
+            echo "Image exists. Removing..."
+            docker rmi -f "$IMAGE_NAME" || true
+          fi
+
+      - name: Delete Nginx Proxy Manager host
+        run: |
+          cd ~/npm-api
+          DOMAIN="preview-${{ github.event.pull_request.number }}.merchtrack.tech"
+
+          echo "Checking if host for domain $DOMAIN exists..."
+          HOST_SEARCH=$(./npm-api.sh --host-search "$DOMAIN" 2>/dev/null || echo "")
+
+          # Extract host ID if exists
+          if echo "$HOST_SEARCH" | grep -q "$DOMAIN"; then
+            EXISTING_HOST=$(echo "$HOST_SEARCH" | grep -oP 'ID: \K[0-9]+' || echo "")
+            echo "Found existing host with ID: $EXISTING_HOST"
+            
+            if [ -n "$EXISTING_HOST" ]; then
+              # Delete the host
+              echo "Deleting host ID: $EXISTING_HOST"
+              ./npm-api.sh --host-delete "$EXISTING_HOST" -y
+              echo "Host deleted successfully"
+            fi
+          else
+            echo "No host found for domain $DOMAIN"
+          fi
+
+      - name: Delete preview directory
+        run: |
+          cd ~
+          PREVIEW_DIR="preview/${{ github.event.pull_request.number }}"
+          if [ -d "$PREVIEW_DIR" ]; then
+            echo "Removing preview directory: $PREVIEW_DIR"
+            rm -rf "$PREVIEW_DIR"
+            echo "Preview directory removed"
+          else
+            echo "Preview directory does not exist: $PREVIEW_DIR"
+          fi
+
+  delete-docker-hub:
+    runs-on: ubuntu-latest
+    needs: cleanup
+    steps:
+      - name: Delete Docker Hub Image
+        run: |
+          echo "Deleting Docker Hub image..."
+          # Get Docker Hub token
+          TOKEN=$(curl -s -H "Content-Type: application/json" -X POST \
+            -d '{"username": "${{ secrets.DOCKER_USERNAME }}", "password": "${{ secrets.DOCKER_PASSWORD }}"}' \
+            https://hub.docker.com/v2/users/login/ | jq -r .token)
+
+          if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
+            echo "Failed to get Docker Hub token"
+            exit 1
+          fi
+
+          # Delete the image tag
+          REPO="gabcat/merchtrack"
+          TAG="preview-${{ github.event.pull_request.number }}"
+
+          echo "Deleting image tag: $REPO:$TAG"
+
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: JWT $TOKEN" \
+            -X DELETE \
+            https://hub.docker.com/v2/repositories/$REPO/tags/$TAG/)
+
+          if [ "$HTTP_CODE" -eq 202 ] || [ "$HTTP_CODE" -eq 200 ] || [ "$HTTP_CODE" -eq 404 ]; then
+            echo "Image tag deleted successfully or was not found (HTTP code: $HTTP_CODE)"
+          else
+            echo "Failed to delete image tag (HTTP code: $HTTP_CODE)"
+            exit 1
+          fi
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: [cleanup, delete-docker-hub]
+    steps:
+      - name: Find Existing Deployment Comment
+        id: find_comment
+        uses: peter-evans/find-comment@v3
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: "github-actions[bot]"
+          body-includes: "Deployment"
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update Comment for Cleanup
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          comment-id: ${{ steps.find_comment.outputs.comment-id }}
+          edit-mode: replace
+          body: |
+            ## 🧹 Preview Environment Cleaned Up
+
+            The preview environment for PR #${{ github.event.pull_request.number }} has been cleaned up.
+
+            ### ℹ️ Details:
+            - **Status**: ${{ github.event.pull_request.merged == true && '✅ Pull Request Merged' || '❌ Pull Request Closed Without Merging' }}
+            - **Cleaned up at**: ${{ format('{{0, date, EEEE, MMMM d, yyyy HH:mm:ss z}}', github.event.pull_request.closed_at) }}
+
+            All resources associated with this preview environment have been deleted:
+            - Container stopped and removed
+            - Docker image removed from local and Docker Hub
+            - Nginx Proxy Manager host configuration deleted
+            - Preview directory removed
+
+            The preview URL is no longer active: ~~https://preview-${{ github.event.pull_request.number }}.merchtrack.tech~~
