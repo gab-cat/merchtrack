@@ -286,10 +286,20 @@ jobs:
     needs: [build, deploy]
     if: success()
     steps:
+      - name: Find Comment
+        uses: peter-evans/find-comment@v3
+        id: fc
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: 'Deployment Started'
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Update Comment with Success
         uses: peter-evans/create-or-update-comment@v4
         with:
-          comment-id: ${{ needs.build.outputs.comment_id }}
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
           token: ${{ secrets.GITHUB_TOKEN }}
           body: |
             ## 🚀 Preview Deployment Successful!
