@@ -114,7 +114,7 @@ jobs:
       deployments: write
     runs-on: self-hosted
     needs: build
-    environment: Development
+    environment: Staging
     steps:
       - name: Navigate to preview directory
         run: |
