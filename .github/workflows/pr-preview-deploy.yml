@@ -220,23 +220,31 @@ jobs:
       - name: Create Nginx Proxy Manager host
         run: |
           cd ~/npm-api
-          
+          set +e
           # Check if proxy host already exists
           DOMAIN="preview-${{ needs.build.outputs.pr_number }}.merchtrack.tech"
-          EXISTING_HOST=$(./npm-api.sh list domains | jq -r ".[] | select(.domain_names[0] == \"$DOMAIN\") | .id")
           
+          # Use the new --host-search command to check if the host exists
+          HOST_SEARCH=$(./npm-api.sh --host-search "$DOMAIN" 2>/dev/null || echo "")
+          EXISTING_HOST=$(echo "$HOST_SEARCH" | grep -oP 'ID: \K[0-9]+' || echo "")
+          set -e
+
           if [ -n "$EXISTING_HOST" ]; then
-            # Update existing host
-            ./npm-api.sh edit domain "$EXISTING_HOST" \
-              --domain_names "[$DOMAIN]" \
-              --forward_scheme "http" \
-              --forward_host "merchtrack-preview-${{ needs.build.outputs.pr_number }}" \
-              --forward_port "3000" \
-              --block_exploits "true" \
-              --websocket_support "true" \
-              --ssl_forced "true" \
-              --ssl_email "admin@merchtrack.tech" \
-              --ssl_letsencrypt "true"
+            # Skip updating existing host
+            echo "Host for domain $DOMAIN already exists (ID: $EXISTING_HOST). Skipping update."
+          else
+            # Create a new host with the new syntax
+            echo "Creating new host for domain $DOMAIN"
+            ./npm-api.sh --host-create "$DOMAIN" \
+              -i "merchtrack-preview-${{ needs.build.outputs.pr_number }}" \
+              -p "3000" \
+              -f "http" \
+              -b "true" \
+              -w "true" \
+              --cert-generate "$DOMAIN" \
+              --cert-email "admin@merchtrack.tech" \
+              --host-ssl-enable \
+              -y
 
   failure-notification:
     runs-on: ubuntu-latest
