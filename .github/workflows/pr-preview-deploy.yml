@@ -236,15 +236,19 @@ jobs:
             # Create a new host with the new syntax
             echo "Creating new host for domain $DOMAIN"
             ./npm-api.sh --host-create "$DOMAIN" \
-              -i "merchtrack-preview-${{ needs.build.outputs.pr_number }}" \
-              -p "3000" \
+              -i "merchtrack-preview-${{ needs.build.outputs.pr_number }}.merchtrack.tech" \
+              -p 3000 \
               -f "http" \
               -b "true" \
               -w "true" \
               --cert-generate "$DOMAIN" \
               --cert-email "admin@merchtrack.tech" \
+              --dns-provider cloudflare \
+              --dns-credentials '{"dns_cloudflare_email":"${{ secrets.CLOUDFLARE_EMAIL }}","dns_cloudflare_api_key":"${{ secrets.CLOUDFLARE_API_KEY }}"}' \
               --host-ssl-enable \
               -y
+          fi
+          echo "Host created for domain $DOMAIN"
 
   failure-notification:
     runs-on: ubuntu-latest
