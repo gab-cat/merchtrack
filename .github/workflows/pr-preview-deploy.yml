@@ -48,7 +48,7 @@ jobs:
 
       - name: Setup Doppler Configuration
         run: |
-          doppler setup --no-prompt --token ${{ secrets.DOPPLER_TOKEN }} --project ${{ secrets.DOPPLER_TARGET_PROJECT }} --config stg_ci
+          doppler setup --no-prompt --token ${{ secrets.DOPPLER_CI_TOKEN }} --project ${{ secrets.DOPPLER_TARGET_PROJECT }} --config stg_ci
           echo "Doppler configuration complete for project ${{ secrets.DOPPLER_TARGET_PROJECT }} with config ${{ secrets.DOPPLER_TARGET_CONFIG }}"
           doppler secrets download --no-file --format env > .env
           echo "Secrets downloaded to .env file."
@@ -182,7 +182,7 @@ jobs:
       - name: Setup Doppler Configuration
         run: |
           cd ~/preview/${{ needs.build.outputs.pr_number }}
-          doppler setup --no-prompt --token ${{ secrets.DOPPLER_TOKEN }} --project ${{ secrets.DOPPLER_TARGET_PROJECT }} --config stg_ci
+          doppler setup --no-prompt --token ${{ secrets.DOPPLER_CI_TOKEN }} --project ${{ secrets.DOPPLER_TARGET_PROJECT }} --config stg_ci
           echo "Doppler configuration complete for project ${{ secrets.DOPPLER_TARGET_PROJECT }} with config ${{ secrets.DOPPLER_TARGET_CONFIG }}"
           doppler secrets download --no-file --format env > .env
           echo "Secrets downloaded to .env file."
