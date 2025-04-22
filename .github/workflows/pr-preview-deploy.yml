@@ -224,14 +224,27 @@ jobs:
           # Check if proxy host already exists
           DOMAIN="preview-${{ needs.build.outputs.pr_number }}.merchtrack.tech"
           
-          # Use the new --host-search command to check if the host exists
+          echo "Checking if host for domain $DOMAIN already exists..."
+          
+          # Improved host search and validation
           HOST_SEARCH=$(./npm-api.sh --host-search "$DOMAIN" 2>/dev/null || echo "")
-          EXISTING_HOST=$(echo "$HOST_SEARCH" | grep -oP 'ID: \K[0-9]+' || echo "")
+          
+          # More robust pattern matching to extract host ID
+          if echo "$HOST_SEARCH" | grep -q "$DOMAIN"; then
+            EXISTING_HOST=$(echo "$HOST_SEARCH" | grep -oP 'ID: \K[0-9]+' || echo "")
+            echo "Found existing host with ID: $EXISTING_HOST"
+          else
+            EXISTING_HOST=""
+            echo "No existing host found"
+          fi
           set -e
 
           if [ -n "$EXISTING_HOST" ]; then
-            # Skip updating existing host
-            echo "Host for domain $DOMAIN already exists (ID: $EXISTING_HOST). Skipping update."
+            # Skip creating new host when one already exists
+            echo "Host for domain $DOMAIN already exists (ID: $EXISTING_HOST). Skipping creation."
+            
+            # Optionally update the existing host configuration if needed
+            # ./npm-api.sh --host-details "$EXISTING_HOST"
           else
             # Create a new host with the new syntax
             echo "Creating new host for domain $DOMAIN"
@@ -247,8 +260,9 @@ jobs:
               -w "true" \
               --host-ssl-enable \
               -y
+            
+            echo "New host created for domain $DOMAIN"
           fi
-          echo "Host created for domain $DOMAIN"
 
   failure-notification:
     runs-on: ubuntu-latest
