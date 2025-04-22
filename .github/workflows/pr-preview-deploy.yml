@@ -156,6 +156,7 @@ jobs:
               image: gabcat/merchtrack:preview-${{ needs.build.outputs.pr_number }}
               container_name: merchtrack-preview-${{ needs.build.outputs.pr_number }}
               restart: "unless-stopped"
+              env_file: .env
               environment:
                 NODE_ENV: production
                 APP_ENV: production
@@ -179,6 +180,8 @@ jobs:
           cd ~/preview/${{ needs.build.outputs.pr_number }}
           doppler setup --no-prompt --token ${{ secrets.DOPPLER_TOKEN }} --project ${{ secrets.DOPPLER_TARGET_PROJECT }} --config ${{ secrets.DOPPLER_TARGET_CONFIG }}
           echo "Doppler configuration complete for project ${{ secrets.DOPPLER_TARGET_PROJECT }} with config ${{ secrets.DOPPLER_TARGET_CONFIG }}"
+          doppler secrets download --no-file --format env > .env
+          echo "Secrets downloaded to .env file."
 
       - name: Stop existing container if it exists
         if: steps.check_compose.outputs.compose_exists == 'true'
@@ -190,7 +193,9 @@ jobs:
         run: |
           cd ~/preview/${{ needs.build.outputs.pr_number }}
           # Get the image ID of the old image if it exists
+          set +e
           OLD_IMAGE_ID=$(docker images -q gabcat/merchtrack:preview-${{ needs.build.outputs.pr_number }} 2>/dev/null)
+          set -e 
           if [ ! -z "$OLD_IMAGE_ID" ]; then
             echo "Old image found with ID: $OLD_IMAGE_ID"
             # Remove any containers using the image
@@ -210,7 +215,7 @@ jobs:
         run: |
           cd ~/preview/${{ needs.build.outputs.pr_number }}
           docker pull gabcat/merchtrack:preview-${{ needs.build.outputs.pr_number }}
-          doppler run -- docker compose up -d
+          docker compose up -d
 
       - name: Create Nginx Proxy Manager host
         run: |
