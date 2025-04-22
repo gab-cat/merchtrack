@@ -13,6 +13,7 @@ jobs:
     environment: Staging
     outputs:
       pr_number: ${{ github.event.pull_request.number }}
+      comment_id: ${{ steps.initial_comment.outputs.comment_id }}
     
     steps:
       - uses: actions/checkout@v4
@@ -21,16 +22,19 @@ jobs:
           fetch-depth: 0
 
       - name: Initial Deployment Notification
+        id: initial_comment
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.rest.issues.createComment({
+            const { data: comment } = await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: `🔄 **Deployment Started**\n\nThe preview deployment for PR #${{ github.event.pull_request.number }} is now in progress. Please wait while the environment is being prepared.`
-            })
+            });
+            return comment.id;
+          result-encoding: string
 
       - name: Log in to Docker Hub
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3
@@ -44,7 +48,7 @@ jobs:
 
       - name: Setup Doppler Configuration
         run: |
-          doppler setup --no-prompt --token ${{ secrets.DOPPLER_TOKEN }} --project ${{ secrets.DOPPLER_TARGET_PROJECT }} --config ${{ secrets.DOPPLER_TARGET_CONFIG }}
+          doppler setup --no-prompt --token ${{ secrets.DOPPLER_TOKEN }} --project ${{ secrets.DOPPLER_TARGET_PROJECT }} --config stg_ci
           echo "Doppler configuration complete for project ${{ secrets.DOPPLER_TARGET_PROJECT }} with config ${{ secrets.DOPPLER_TARGET_CONFIG }}"
           doppler secrets download --no-file --format env > .env
           echo "Secrets downloaded to .env file."
@@ -178,7 +182,7 @@ jobs:
       - name: Setup Doppler Configuration
         run: |
           cd ~/preview/${{ needs.build.outputs.pr_number }}
-          doppler setup --no-prompt --token ${{ secrets.DOPPLER_TOKEN }} --project ${{ secrets.DOPPLER_TARGET_PROJECT }} --config ${{ secrets.DOPPLER_TARGET_CONFIG }}
+          doppler setup --no-prompt --token ${{ secrets.DOPPLER_TOKEN }} --project ${{ secrets.DOPPLER_TARGET_PROJECT }} --config stg_ci
           echo "Doppler configuration complete for project ${{ secrets.DOPPLER_TARGET_PROJECT }} with config ${{ secrets.DOPPLER_TARGET_CONFIG }}"
           doppler secrets download --no-file --format env > .env
           echo "Secrets downloaded to .env file."
@@ -236,15 +240,15 @@ jobs:
             # Create a new host with the new syntax
             echo "Creating new host for domain $DOMAIN"
             ./npm-api.sh --host-create "$DOMAIN" \
-              -i "merchtrack-preview-${{ needs.build.outputs.pr_number }}.merchtrack.tech" \
-              -p 3000 \
-              -f "http" \
-              -b "true" \
-              -w "true" \
               --cert-generate "$DOMAIN" \
               --cert-email "admin@merchtrack.tech" \
               --dns-provider cloudflare \
               --dns-credentials '{"dns_cloudflare_email":"${{ secrets.CLOUDFLARE_EMAIL }}","dns_cloudflare_api_key":"${{ secrets.CLOUDFLARE_API_KEY }}"}' \
+              -i "merchtrack-preview-${{ needs.build.outputs.pr_number }}" \
+              -p 3000 \
+              -f "http" \
+              -b "true" \
+              -w "true" \
               --host-ssl-enable \
               -y
           fi
@@ -255,24 +259,24 @@ jobs:
     needs: [build, deploy]
     if: failure()
     steps:
-      - name: Notify Deployment Failure
+      - name: Update Deployment Comment with Failure
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
+            github.rest.issues.updateComment({
+              comment_id: ${{ needs.build.outputs.comment_id }},
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: `❌ **Deployment Failed**\n\nThe preview deployment for PR #${{ github.event.pull_request.number }} has failed. Please check the [workflow run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) for more details.`
-            })
+            });
 
   notify:
     runs-on: ubuntu-latest
     needs: [build, deploy]
     if: success()
     steps:
-      - name: Comment on PR
+      - name: Update Comment with Success
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -287,12 +291,11 @@ jobs:
               timeZoneName: 'short'
             });
             
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
+            github.rest.issues.updateComment({
+              comment_id: ${{ needs.build.outputs.comment_id }},
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: |
-              ## 🚀 Preview Deployment Successful!
+              body: `## 🚀 Preview Deployment Successful!
               **PR #${{ needs.build.outputs.pr_number }} has been deployed for preview.**
 
               ### 📌 Details:
@@ -300,8 +303,8 @@ jobs:
               - **Deployed at:** ${currentDate}
               - **Commit:** \`${{ github.event.pull_request.head.sha }}\`
 
-              The preview environment is now ready for testing. Please verify your changes and report any issues.
-                        })
+              The preview environment is now ready for testing. Please verify your changes and report any issues.`
+                          });
 
       - name: Purge Cloudflare cache
         run: |
