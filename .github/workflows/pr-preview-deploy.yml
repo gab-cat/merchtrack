@@ -233,20 +233,24 @@ jobs:
           set +e
           # Check if proxy host already exists
           DOMAIN="preview-${{ needs.build.outputs.pr_number }}.merchtrack.tech"
+          echo "Looking for domain: $DOMAIN in configuration files..."
 
-          echo "Checking if host for domain $DOMAIN already exists..."
+          # Search for the domain in the Nginx Proxy Manager configuration files
+          CONF_DIR="/home/admin/nginxpm/data/nginx/proxy_host"
+          echo "Searching for domain in $CONF_DIR"
 
-          # Improved host search and validation
-          HOST_SEARCH=$(./npm-api.sh --host-search "$DOMAIN" 2>/dev/null || echo "")
+          # Find the configuration file that contains the exact domain name
+          EXISTING_HOST=""
+          for CONF_FILE in $CONF_DIR/*.conf; do
+            if grep -q "server_name $DOMAIN;" "$CONF_FILE"; then
+              # Extract just the number from the filename (remove path and .conf extension)
+              EXISTING_HOST=$(basename "$CONF_FILE" .conf)
+              echo "Found matching configuration file: $CONF_FILE"
+              break
+            fi
+          done
 
-          # More robust pattern matching to extract host ID
-          if echo "$HOST_SEARCH" | grep -q "$DOMAIN"; then
-            EXISTING_HOST=$(echo "$HOST_SEARCH" | grep -oP 'ID: \K[0-9]+' || echo "")
-            echo "Found existing host with ID: $EXISTING_HOST"
-          else
-            EXISTING_HOST=""
-            echo "No existing host found"
-          fi
+          echo "Host ID found: $EXISTING_HOST"
           set -e
 
           if [ -n "$EXISTING_HOST" ]; then

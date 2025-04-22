@@ -9,7 +9,6 @@ on:
 jobs:
   cleanup:
     runs-on: self-hosted
-    environment: Staging
     outputs:
       pr_number: ${{ github.event.pull_request.number }}
       comment_id: ${{ steps.find_comment.outputs.comment-id }}
@@ -45,7 +44,7 @@ jobs:
           cd ~/preview/${{ github.event.pull_request.number }}
           if [ -f "compose.yml" ]; then
             echo "Stopping and removing container..."
-            docker compose down || true
+            sudo docker compose down || true
           else
             echo "No compose file found to stop container"
           fi
@@ -57,36 +56,45 @@ jobs:
           IMAGE_NAME="gabcat/merchtrack:preview-${{ github.event.pull_request.number }}"
 
           # Stop and remove container if exists
-          if docker ps -a | grep -q "$CONTAINER_NAME"; then
+          if sudo docker ps -a | grep -q "$CONTAINER_NAME"; then
             echo "Container exists. Removing..."
-            docker rm -f "$CONTAINER_NAME" || true
+            sudo docker rm -f "$CONTAINER_NAME" || true
           fi
 
           # Remove image if exists
-          if docker images | grep -q "$IMAGE_NAME"; then
+          if sudo docker images | grep -q "$IMAGE_NAME"; then
             echo "Image exists. Removing..."
-            docker rmi -f "$IMAGE_NAME" || true
+            sudo docker rmi -f "$IMAGE_NAME" || true
           fi
 
       - name: Delete Nginx Proxy Manager host
         run: |
           cd ~/npm-api
           DOMAIN="preview-${{ github.event.pull_request.number }}.merchtrack.tech"
+          echo "Looking for domain: $DOMAIN in configuration files..."
 
-          echo "Checking if host for domain $DOMAIN exists..."
-          HOST_SEARCH=$(./npm-api.sh --host-search "$DOMAIN" 2>/dev/null || echo "")
+          # Search for the domain in the Nginx Proxy Manager configuration files
+          CONF_DIR="/home/admin/nginxpm/data/nginx/proxy_host"
+          echo "Searching for domain in $CONF_DIR"
 
-          # Extract host ID if exists
-          if echo "$HOST_SEARCH" | grep -q "$DOMAIN"; then
-            EXISTING_HOST=$(echo "$HOST_SEARCH" | grep -oP 'ID: \K[0-9]+' || echo "")
-            echo "Found existing host with ID: $EXISTING_HOST"
-            
-            if [ -n "$EXISTING_HOST" ]; then
-              # Delete the host
-              echo "Deleting host ID: $EXISTING_HOST"
-              ./npm-api.sh --host-delete "$EXISTING_HOST" -y
-              echo "Host deleted successfully"
+          # Find the configuration file that contains the exact domain name
+          EXISTING_HOST=""
+          for CONF_FILE in $CONF_DIR/*.conf; do
+            if grep -q "server_name $DOMAIN;" "$CONF_FILE"; then
+              # Extract just the number from the filename (remove path and .conf extension)
+              EXISTING_HOST=$(basename "$CONF_FILE" .conf)
+              echo "Found matching configuration file: $CONF_FILE"
+              break
             fi
+          done
+
+          echo "Host ID found: $EXISTING_HOST"
+
+          if [ -n "$EXISTING_HOST" ]; then
+            # Delete the host using the npm-api script
+            echo "Deleting host ID: $EXISTING_HOST"
+            ./npm-api.sh --host-delete "$EXISTING_HOST" -y
+            echo "Host deleted successfully"
           else
             echo "No host found for domain $DOMAIN"
           fi
@@ -111,9 +119,7 @@ jobs:
         run: |
           echo "Deleting Docker Hub image..."
           # Get Docker Hub token
-          TOKEN=$(curl -s -H "Content-Type: application/json" -X POST \
-            -d '{"username": "${{ secrets.DOCKER_USERNAME }}", "password": "${{ secrets.DOCKER_PASSWORD }}"}' \
-            https://hub.docker.com/v2/users/login/ | jq -r .token)
+          TOKEN=$(curl -s -H "Content-Type: application/json" -X POST -d "{\"username\": \"${{ secrets.DOCKER_USERNAME }}\", \"password\": \"${{ secrets.DOCKER_PASSWORD }}\"}" https://hub.docker.com/v2/users/login/ | jq -r .token)
 
           if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
             echo "Failed to get Docker Hub token"
