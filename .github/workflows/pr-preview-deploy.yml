@@ -214,8 +214,8 @@ jobs:
       - name: Pull new image and start container
         run: |
           cd ~/preview/${{ needs.build.outputs.pr_number }}
-          docker pull gabcat/merchtrack:preview-${{ needs.build.outputs.pr_number }}
-          docker compose up -d
+          sudo docker pull gabcat/merchtrack:preview-${{ needs.build.outputs.pr_number }}
+          sudo docker compose up -d
 
       - name: Create Nginx Proxy Manager host
         run: |
