@@ -10,7 +10,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: Development
+    environment: Staging
     outputs:
       pr_number: ${{ github.event.pull_request.number }}
     
@@ -107,6 +107,11 @@ jobs:
             --no-publicly-accessible
 
   deploy:
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
+      deployments: write
     runs-on: self-hosted
     needs: build
     environment: Development
