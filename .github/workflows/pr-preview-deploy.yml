@@ -274,17 +274,17 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `## 🚀 Preview Deployment Successful!
-### 🎉 Deployment Complete
-**PR #${{ needs.build.outputs.pr_number }} has been deployed for preview.**
+              body: |
+              ## 🚀 Preview Deployment Successful!
+              **PR #${{ needs.build.outputs.pr_number }} has been deployed for preview.**
 
-### 📌 Details:
-- **Preview URL:** [https://preview-${{ needs.build.outputs.pr_number }}.merchtrack.tech](https://preview-${{ needs.build.outputs.pr_number }}.merchtrack.tech)
-- **Deployed at:** ${currentDate}
-- **Commit:** \`${{ github.event.pull_request.head.sha }}\`
+              ### 📌 Details:
+              - **Preview URL:** [https://preview-${{ needs.build.outputs.pr_number }}.merchtrack.tech](https://preview-${{ needs.build.outputs.pr_number }}.merchtrack.tech)
+              - **Deployed at:** ${currentDate}
+              - **Commit:** \`${{ github.event.pull_request.head.sha }}\`
 
-The preview environment is now ready for testing. Please verify your changes and report any issues.`
-            })
+              The preview environment is now ready for testing. Please verify your changes and report any issues.
+                        })
 
       - name: Purge Cloudflare cache
         run: |
