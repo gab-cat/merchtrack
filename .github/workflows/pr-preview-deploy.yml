@@ -28,7 +28,6 @@ jobs:
           comment-author: "github-actions[bot]"
           body-includes: "Deployment"
           token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Initial Deployment Notification
         id: initial_comment
         uses: peter-evans/create-or-update-comment@v4
@@ -37,9 +36,35 @@ jobs:
           comment-id: ${{ steps.find_comment.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            🔄 **Deployment Started**
+            # 🔄 Preview Deployment in Progress
 
-            The preview deployment for PR #${{ github.event.pull_request.number }} is now in progress. Please wait while the environment is being prepared.
+            <div style="background-color: #e8f5fd; padding: 15px; border-radius: 8px; border-left: 5px solid #2196F3; margin-bottom: 20px;">
+              <h2 style="color: #0d47a1; margin-top: 0;">Building Your Preview Environment</h2>
+              <p style="font-size: 16px; margin-bottom: 0;">
+                The preview deployment for PR #${{ github.event.pull_request.number }} is now being prepared.
+              </p>
+            </div>
+
+            <table style="width: 100%; border-collapse: separate; border-spacing: 0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+              <tr style="background-color: #f5f5f5;">
+                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; width: 200px;">🔄 <b>Status:</b></td>
+                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;"><b style="color: #2196F3;">Building & Deploying</b></td>
+              </tr>
+              <tr style="background-color: #ffffff;">
+                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">⏱️ <b>Started at:</b></td>
+                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;"><code>${{ format('%.19s', github.event.pull_request.updated_at) }} UTC</code></td>
+              </tr>
+              <tr style="background-color: #f5f5f5;">
+                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">📝 <b>Commit:</b></td>
+                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;"><code>${{ github.event.pull_request.head.sha }}</code></td>
+              </tr>
+            </table>
+
+            <div style="margin-top: 16px; padding: 12px; background-color: #fffde7; border-left: 4px solid #ffc107; border-radius: 4px;">
+              <p style="margin: 0; font-size: 14px;">
+                <b>Please wait</b> while we build and deploy your preview environment. This process typically takes 3-5 minutes to complete.
+              </p>
+            </div>
           edit-mode: ${{ steps.find_comment.outputs.comment-id != '' && 'replace' || 'append' }}
 
       - name: Log in to Docker Hub
@@ -289,11 +314,41 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           edit-mode: replace
           body: |
-            ## ❌ Deployment Failed
+            # ❌ Deployment Failed
 
-            The preview deployment for PR #${{ github.event.pull_request.number }} has failed. 
+            <div style="background-color: #fbe9e7; padding: 15px; border-radius: 8px; border-left: 5px solid #ff5722; margin-bottom: 20px;">
+              <h2 style="color: #d84315; margin-top: 0;">Preview Deployment Issues</h2>
+              <p style="font-size: 16px; margin-bottom: 0;">
+                The preview deployment for PR #${{ github.event.pull_request.number }} has encountered errors and could not be completed.
+              </p>
+            </div>
 
-            Please check the [workflow run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) for more details.
+            <table style="width: 100%; border-collapse: separate; border-spacing: 0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+              <tr style="background-color: #f5f5f5;">
+                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; width: 200px;">🔄 <b>Status:</b></td>
+                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;"><b style="color: #f44336;">❌ Failed</b></td>
+              </tr>
+              <tr style="background-color: #ffffff;">
+                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">⏱️ <b>Failed at:</b></td>
+                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;"><code>${{ format('%.19s', github.event.pull_request.updated_at) }} UTC</code></td>
+              </tr>
+              <tr style="background-color: #f5f5f5;">
+                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">📝 <b>Commit:</b></td>
+                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;"><code>${{ github.event.pull_request.head.sha }}</code></td>
+              </tr>
+            </table>
+
+            <div style="margin-top: 16px; padding: 12px; background-color: #fff8e1; border-radius: 4px; border-left: 4px solid #ffc107;">
+              <p style="margin: 0; font-size: 16px;">
+                📢 <b>Next Steps:</b> Please check the <a href="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" style="color: #1976d2; text-decoration: none; font-weight: bold;">workflow run</a> for detailed error logs and diagnostic information. Most deployment issues can be fixed by addressing code errors or configuration problems in your PR.
+              </p>
+            </div>
+
+            <div style="margin-top: 16px; padding: 12px; background-color: #f5f5f5; border-radius: 4px;">
+              <p style="margin: 0; font-size: 14px;">
+                <i>If you need assistance troubleshooting this issue, please reach out to the DevOps team or leave a comment in this PR.</i>
+              </p>
+            </div>
   notify:
     runs-on: ubuntu-latest
     needs: [build, deploy]
@@ -306,15 +361,34 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           edit-mode: replace
           body: |
-            ## 🚀 Preview Deployment Successful!
-            **PR #${{ needs.build.outputs.pr_number }} has been deployed for preview.**
+            # 🚀 Preview Deployment Successful! 
 
-            ### 📌 Details:
-            - **Preview URL:** [https://preview-${{ needs.build.outputs.pr_number }}.merchtrack.tech](https://preview-${{ needs.build.outputs.pr_number }}.merchtrack.tech)
-            - **Deployed at:** ${{ format('{{0, date, EEEE, MMMM d, yyyy HH:mm:ss z}}', github.event.pull_request.updated_at) }}
-            - **Commit:** `${{ github.event.pull_request.head.sha }}`
+            <div align="center">
+              <h2 style="color: #4CAF50; background-color: #e8f5e9; padding: 10px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                PR #${{ needs.build.outputs.pr_number }} has been successfully deployed for preview testing
+              </h2>
+            </div>
 
-            The preview environment is now ready for testing. Please verify your changes and report any issues.
+            <table style="width: 100%; border-collapse: separate; border-spacing: 0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+            <tr style="background-color: #f0f4f8;">
+              <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">📌 <b>Preview URL:</b></td>
+              <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;"><a href="https://preview-${{ needs.build.outputs.pr_number }}.merchtrack.tech" style="color: #2196F3; text-decoration: none; font-weight: bold;">https://preview-${{ needs.build.outputs.pr_number }}.merchtrack.tech</a></td>
+            </tr>
+            <tr style="background-color: #ffffff;">
+              <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">⏰ <b>Deployed at:</b></td>
+              <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;"><code>${{ format('%.19s', github.event.pull_request.updated_at) }} UTC</code></td>
+            </tr>
+            <tr style="background-color: #f0f4f8;">
+              <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">📝 <b>Commit:</b></td>
+              <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;"><code>${{ github.event.pull_request.head.sha }}</code></td>
+            </tr>
+            </table>
+
+            <div style="margin-top: 16px; padding: 12px; background-color: #e3f2fd; border-left: 4px solid #2196F3; border-radius: 4px;">
+              <p style="margin: 0; font-size: 16px;">
+                📣 <b>The preview environment is now ready for testing!</b> Please verify your changes thoroughly and report any issues in the PR discussion. This environment is an exact replica of production, allowing you to test your changes in isolation before merging.
+              </p>
+            </div>
 
       - name: Purge Cloudflare cache
         run: |
