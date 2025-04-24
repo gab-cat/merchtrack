@@ -2,11 +2,29 @@
 
 import { FiFilter } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-const ORDER_STATUSES = ['PENDING', 'PROCESSING', 'READY', 'COMPLETED', 'CANCELLED'] as const;
-const PAYMENT_STATUSES = ['PENDING', 'PAID', 'REFUNDED', 'FAILED'] as const;
-const CUSTOMER_TYPES = ['PLAYER', 'STUDENT', 'STAFF_FACULTY', 'ALUMNI', 'OTHERS'] as const;
+const ORDER_STATUSES = [
+  "PENDING",
+  "PROCESSING",
+  "READY",
+  "DELIVERED",
+  "CANCELLED",
+] as const;
+const PAYMENT_STATUSES = ["PENDING", "PAID", "REFUNDED", "FAILED"] as const;
+const CUSTOMER_TYPES = [
+  "PLAYER",
+  "STUDENT",
+  "STAFF_FACULTY",
+  "ALUMNI",
+  "OTHERS",
+] as const;
 
 type OrdersTableFiltersProps = {
   filters: {
@@ -14,14 +32,24 @@ type OrdersTableFiltersProps = {
     paymentStatus: string;
     customerType: string;
   };
-  onFilterChange: (key: keyof OrdersTableFiltersProps['filters'], value: string) => void;
+  onFilterChange: (
+    key: keyof OrdersTableFiltersProps["filters"],
+    value: string
+  ) => void;
   onReset: () => void;
 };
 
-export function OrdersTableFilters({ filters, onFilterChange, onReset }: Readonly<OrdersTableFiltersProps>) {
+export function OrdersTableFilters({
+  filters,
+  onFilterChange,
+  onReset,
+}: Readonly<OrdersTableFiltersProps>) {
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <Select value={filters.orderStatus} onValueChange={(value) => onFilterChange('orderStatus', value)}>
+      <Select
+        value={filters.orderStatus}
+        onValueChange={(value) => onFilterChange("orderStatus", value)}
+      >
         <SelectTrigger className="w-[140px]">
           <SelectValue defaultValue="PENDING" placeholder="Order Status" />
         </SelectTrigger>
@@ -34,7 +62,10 @@ export function OrdersTableFilters({ filters, onFilterChange, onReset }: Readonl
         </SelectContent>
       </Select>
 
-      <Select value={filters.paymentStatus} onValueChange={(value) => onFilterChange('paymentStatus', value)}>
+      <Select
+        value={filters.paymentStatus}
+        onValueChange={(value) => onFilterChange("paymentStatus", value)}
+      >
         <SelectTrigger className="w-[140px]">
           <SelectValue defaultValue="PENDING" placeholder="Payment Status" />
         </SelectTrigger>
@@ -47,7 +78,10 @@ export function OrdersTableFilters({ filters, onFilterChange, onReset }: Readonl
         </SelectContent>
       </Select>
 
-      <Select value={filters.customerType} onValueChange={(value) => onFilterChange('customerType', value)}>
+      <Select
+        value={filters.customerType}
+        onValueChange={(value) => onFilterChange("customerType", value)}
+      >
         <SelectTrigger className="w-[140px]">
           <SelectValue placeholder="Customer Type" />
         </SelectTrigger>
@@ -60,11 +94,7 @@ export function OrdersTableFilters({ filters, onFilterChange, onReset }: Readonl
         </SelectContent>
       </Select>
 
-      <Button 
-        variant="outline" 
-        size="icon"
-        onClick={onReset}
-      >
+      <Button variant="outline" size="icon" onClick={onReset}>
         <FiFilter className="size-4" />
       </Button>
     </div>
