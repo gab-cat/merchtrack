@@ -1,4 +1,4 @@
-'use server';
+"use server";
 
 import { revalidatePath } from "next/cache";
 import { Order, OrderPaymentStatus, OrderStatus, Prisma } from "@prisma/client";
@@ -9,49 +9,56 @@ import { validateCartItems } from "@/lib/cart";
 import { processActionReturnData } from "@/utils";
 import { sendOrderConfirmationEmail } from "@/lib/email-service";
 import { calculateRoleBasedPrice, RolePricing } from "@/utils/pricing";
+import serverSideEffect from "@/utils/serverSideEffect";
 
 const checkoutSchema = z.object({
   userId: z.string(),
-  items: z.array(z.object({
-    variantId: z.string(),
-    quantity: z.number(),
-    price: z.number(),
-    note: z.string().max(500).optional(),
-  })),
-  customerNotes: z.string().max(500, 'Note cannot exceed 500 characters').optional()
+  items: z.array(
+    z.object({
+      variantId: z.string(),
+      quantity: z.number(),
+      price: z.number(),
+      note: z.string().max(500).optional(),
+    })
+  ),
+  customerNotes: z
+    .string()
+    .max(500, "Note cannot exceed 500 characters")
+    .optional(),
 });
 
 type CheckoutInput = z.infer<typeof checkoutSchema>;
 
-export async function processCheckout(input: CheckoutInput): Promise<ActionsReturnType<Order>> {
+export async function processCheckout(
+  input: CheckoutInput
+): Promise<ActionsReturnType<Order>> {
   try {
     // Validate input
     const validatedInput = checkoutSchema.parse(input);
-    console.log('Validated input:', validatedInput);
 
     // Get user details for role-based pricing
     const user = await prisma.user.findUnique({
       where: { id: validatedInput.userId },
-      select: { 
-        role: true, 
+      select: {
+        role: true,
         college: true,
         firstName: true,
         lastName: true,
-        email: true
-      }
+        email: true,
+      },
     });
 
     if (!user) {
       return {
         success: false,
-        message: "User not found"
+        message: "User not found",
       };
     }
 
     // Get variants with product and seller info for pricing
     const variants = await prisma.productVariant.findMany({
       where: {
-        id: { in: validatedInput.items.map(item => item.variantId) }
+        id: { in: validatedInput.items.map((item) => item.variantId) },
       },
       include: {
         product: {
@@ -61,17 +68,17 @@ export async function processCheckout(input: CheckoutInput): Promise<ActionsRetu
             inventoryType: true,
             postedBy: {
               select: {
-                college: true
-              }
-            }
-          }
-        }
-      }
+                college: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     // Calculate correct prices based on role and college
-    const itemsWithPricing = validatedInput.items.map(item => {
-      const variant = variants.find(v => v.id === item.variantId);
+    const itemsWithPricing = validatedInput.items.map((item) => {
+      const variant = variants.find((v) => v.id === item.variantId);
       if (!variant) throw new Error(`Variant ${item.variantId} not found`);
 
       const { price, appliedRole } = calculateRoleBasedPrice({
@@ -79,16 +86,16 @@ export async function processCheckout(input: CheckoutInput): Promise<ActionsRetu
         rolePricing: variant.rolePricing as RolePricing,
         customerInfo: {
           role: user.role,
-          college: user.college
+          college: user.college,
         },
-        productCollege: variant.product.postedBy.college
+        productCollege: variant.product.postedBy.college,
       });
 
       return {
         ...item,
         variant,
         price, // Use calculated price
-        appliedRole
+        appliedRole,
       };
     });
 
@@ -98,7 +105,7 @@ export async function processCheckout(input: CheckoutInput): Promise<ActionsRetu
       0
     );
 
-    const cartItems = itemsWithPricing.map(item => ({
+    const cartItems = itemsWithPricing.map((item) => ({
       variantId: item.variantId,
       selected: true,
       variant: {
@@ -108,23 +115,28 @@ export async function processCheckout(input: CheckoutInput): Promise<ActionsRetu
           inventoryType: item.variant.product.inventoryType,
           postedBy: item.variant.product.postedBy,
         },
-        rolePricing: typeof item.variant.rolePricing === 'object' ? 
-          { 
-            price: item.price, 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            roleId: (item.variant.rolePricing as any)?.roleId || item.appliedRole || 'default'
-          } : 
-          null
+        rolePricing:
+          typeof item.variant.rolePricing === "object"
+            ? {
+              price: item.price,
+
+              roleId:
+                  (item.variant.rolePricing as {roleId: string})?.roleId ||
+                  item.appliedRole ||
+                  "default",
+            }
+            : null,
       },
       quantity: item.quantity,
-      note: item.note
+      note: item.note,
     }));
 
+    // @ts-expect-error - cartItems is not a CartItem type
     const validation = validateCartItems(cartItems);
     if (!validation.valid) {
       return {
         success: false,
-        message: validation.error!
+        message: validation.error!,
       };
     }
 
@@ -137,7 +149,7 @@ export async function processCheckout(input: CheckoutInput): Promise<ActionsRetu
           totalAmount,
           status: OrderStatus.PENDING,
           paymentStatus: OrderPaymentStatus.PENDING,
-          estimatedDelivery: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), 
+          estimatedDelivery: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
           customerNotes: validatedInput.customerNotes,
           orderItems: {
             create: itemsWithPricing.map((item) => ({
@@ -159,42 +171,44 @@ export async function processCheckout(input: CheckoutInput): Promise<ActionsRetu
                     select: {
                       title: true,
                       imageUrl: true,
-                      inventoryType: true
-                    }
-                  }
-                }
-              } 
-            }
+                      inventoryType: true,
+                    },
+                  },
+                },
+              },
+            },
           },
           customer: true,
           processedBy: true,
-          payments: true
+          payments: true,
         },
       });
 
       // Update inventory only for STOCK items
       await Promise.all(
         itemsWithPricing.map(async (item) => {
-          if (item.variant.product.inventoryType === 'STOCK') {
+          if (item.variant.product.inventoryType === "STOCK") {
             return tx.productVariant.update({
               where: { id: item.variantId },
               data: {
                 inventory: {
-                  decrement: item.quantity
-                }
-              }
+                  decrement: item.quantity,
+                },
+              },
             });
           }
           return Promise.resolve();
         })
       );
 
-      await sendOrderConfirmationEmail({
-        // @ts-expect-error - no need for other fields
-        order,
-        customerName: `${user.firstName} ${user.lastName}`,
-        customerEmail: user.email
-      });
+      serverSideEffect(() =>
+        sendOrderConfirmationEmail({
+          // @ts-expect-error - no need for other fields
+          order,
+          customerName: `${user.firstName} ${user.lastName}`,
+          customerEmail: user.email,
+        })
+      );
 
       return order;
     });
@@ -208,18 +222,19 @@ export async function processCheckout(input: CheckoutInput): Promise<ActionsRetu
       userText: "Order created successfully",
     });
 
-    revalidatePath('/my-account/orders');
-    revalidatePath('/checkout');
+    revalidatePath("/my-account/orders");
+    revalidatePath("/checkout");
 
     return {
       success: true,
       data: processActionReturnData(result) as Order,
     };
   } catch (error) {
-    console.error('Checkout error:', error);
+    console.error("Checkout error:", error);
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'Failed to process checkout',
+      message:
+        error instanceof Error ? error.message : "Failed to process checkout",
     };
   }
 }

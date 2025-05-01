@@ -8,6 +8,7 @@ import { GetObjectByTParams } from "@/types/extended";
 import { createOrderSchema, CreateOrderType } from "@/schema/orders.schema";
 import { sendOrderConfirmationEmail } from "@/lib/email-service";
 import { verifyPermission, calculatePagination, processActionReturnData } from "@/utils";
+import serverSideEffect from "@/utils/serverSideEffect";
 
 
 /**
@@ -290,13 +291,13 @@ export async function createOrder(userId: string, data: CreateOrderType): Promis
       }
     });
 
-    // Send order confirmation email
-    await sendOrderConfirmationEmail({
-      // @ts-expect-error - Prisma types are incorrect
-      order,
-      customerName: `${order.customer.firstName} ${order.customer.lastName}`,
-      customerEmail: order.customer.email
-    });
+    serverSideEffect(
+      () => sendOrderConfirmationEmail({
+        // @ts-expect-error - Prisma types are incorrect
+        order,
+        customerName: `${order.customer.firstName} ${order.customer.lastName}`,
+        customerEmail: order.customer.email
+      }));
 
     revalidatePath('/admin/orders');
     
