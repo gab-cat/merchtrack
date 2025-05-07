@@ -13,7 +13,7 @@ const Scripts = memo(() => {
       <Script id="chatwoot-sdk" strategy="afterInteractive">
         {`window.chatwootSettings = {"position":"right","type":"expanded_bubble","launcherTitle":"Chat with us"};
           (function(d,t) {
-          var BASE_URL="https://chat.merchtrack.tech";
+          var BASE_URL=${process.env.NEXT_PUBLIC_CHATWOOT_BASE_URL};
           var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
           g.src=BASE_URL+"/packs/js/sdk.js";
           g.defer = true;
@@ -21,7 +21,7 @@ const Scripts = memo(() => {
           s.parentNode.insertBefore(g,s);
           g.onload=function(){
             window.chatwootSDK.run({
-              websiteToken: 'Vieh6PsUTGGFKdYR6NS3sTnG',
+              websiteToken: ${process.env.NEXT_PUBLIC_CHATWOOT_WEBSITE_TOKEN},
               baseUrl: BASE_URL
             })
           }
