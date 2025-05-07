@@ -256,7 +256,7 @@ export function CheckoutForm() {
             <Button 
               type="submit" 
               className="w-full" 
-              disabled={isPending || !form.getValues('termsAccepted') || !hasReadTerms}
+              disabled
             >
               {isPending ? (
                 <>
