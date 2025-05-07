@@ -1,3 +1,5 @@
+'use client';
+
 import Script from "next/script";
 import { memo } from "react";
 import { CF_BEACON_TOKEN } from "@/config";
@@ -10,23 +12,33 @@ const Scripts = memo(() => {
         src='https://static.cloudflareinsights.com/beacon.min.js' 
         data-cf-beacon={`{"token": "${CF_BEACON_TOKEN}"}`} 
       />
-      <Script id="chatwoot-sdk" strategy="afterInteractive">
-        {`window.chatwootSettings = {"position":"right","type":"expanded_bubble","launcherTitle":"Chat with us"};
-          (function(d,t) {
-          var BASE_URL=${process.env.NEXT_PUBLIC_CHATWOOT_BASE_URL};
-          var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-          g.src=BASE_URL+"/packs/js/sdk.js";
-          g.defer = true;
-          g.async = true;
-          s.parentNode.insertBefore(g,s);
-          g.onload=function(){
+      <Script
+        id="chatwoot-settings"
+        strategy="lazyOnload"
+        dangerouslySetInnerHTML={{
+          __html: `
+            window.chatwootSettings = {
+                "position": "right",
+                "type": "expanded_bubble",
+                "launcherTitle": "Chat with us"
+            };
+        `,
+        }}
+      />
+      <Script
+        src={`${process.env.NEXT_PUBLIC_CHATWOOT_BASE_URL}/packs/js/sdk.js`}
+        strategy="afterInteractive"
+        onLoad={() => {
+          // @ts-expect-error - ignore
+          if (typeof window !== "undefined" && window.chatwootSDK) {
+            // @ts-expect-error - ignore
             window.chatwootSDK.run({
-              websiteToken: ${process.env.NEXT_PUBLIC_CHATWOOT_WEBSITE_TOKEN},
-              baseUrl: BASE_URL
-            })
+              websiteToken: process.env.NEXT_PUBLIC_CHATWOOT_WEBSITE_TOKEN,
+              baseUrl: process.env.NEXT_PUBLIC_CHATWOOT_BASE_URL,
+            });
           }
-        })(document,"script");`}
-      </Script>
+        }}
+      />
     </>
   );
 });
