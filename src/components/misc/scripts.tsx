@@ -44,17 +44,17 @@ declare global {
 
 const Scripts = memo(() => {
   // Effect to ensure Chatwoot is properly initialized and available globally
-  useEffect(() => {
-    const chatWootInterval = setInterval(() => {
-      if (typeof window !== "undefined" && window.$chatwoot) {
-        clearInterval(chatWootInterval);
-        console.log("Chatwoot initialized successfully");
-      }
-    }, 1000);
+  // useEffect(() => {
+  //   const chatWootInterval = setInterval(() => {
+  //     if (typeof window !== "undefined" && window.$chatwoot) {
+  //       clearInterval(chatWootInterval);
+  //       console.log("Chatwoot initialized successfully");
+  //     }
+  //   }, 1000);
 
-    // Clean up interval on component unmount
-    return () => clearInterval(chatWootInterval);
-  }, []);
+  //   // Clean up interval on component unmount
+  //   return () => clearInterval(chatWootInterval);
+  // }, []);
 
   return (
     <>
