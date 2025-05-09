@@ -8,6 +8,7 @@ import { sendOrderStatusEmail, sendPaymentStatusEmail } from "@/lib/email-servic
 import { generateSurvey } from "@/actions/survey.actions";
 import { formatCurrency } from "@/utils";
 import { createLog } from "@/actions/logs.actions";
+import serverSideEffect from "@/utils/serverSideEffect";
 
 /**
  * Updates the status of an order and notifies the customer of the change.
@@ -145,17 +146,18 @@ export async function updateOrderStatus(
         }
       }
 
-      // Send email notification with reason if provided
-      const email = await sendOrderStatusEmail({
-        orderNumber: updatedOrder.id,
-        customerName: `${updatedOrder.customer.firstName} ${updatedOrder.customer.lastName}`,
-        customerEmail: updatedOrder.customer.email,
-        newStatus,
-        surveyLink,
-        order: updatedOrder as ExtendedOrder,
-        reason: reason
-      });
-      console.log('Order status email sent:', email); 
+      serverSideEffect(
+        // Send email notification with reason if provided
+        () => sendOrderStatusEmail({
+          orderNumber: updatedOrder.id,
+          customerName: `${updatedOrder.customer.firstName} ${updatedOrder.customer.lastName}`,
+          customerEmail: updatedOrder.customer.email,
+          newStatus,
+          surveyLink,
+          order: updatedOrder as ExtendedOrder,
+          reason: reason
+        })
+      );
     });
 
     revalidatePath(`/admin/orders/${orderId}`);
@@ -606,14 +608,16 @@ export async function removeOrderItem(
       });
 
       // Send detailed email notification
-      await sendOrderStatusEmail({
-        orderNumber: orderId,
-        customerName: `${item.order.customer.firstName} ${item.order.customer.lastName}`,
-        customerEmail: item.order.customer.email,
-        newStatus: item.order.status,
-        order: newOrder as ExtendedOrder,
-        reason: `Item removed: ${item.variant.product.title} - ${item.variant.variantName}\nReason: ${reason}`
-      });
+      serverSideEffect(
+        () => sendOrderStatusEmail({
+          orderNumber: orderId,
+          customerName: `${item.order.customer.firstName} ${item.order.customer.lastName}`,
+          customerEmail: item.order.customer.email,
+          newStatus: item.order.status,
+          order: newOrder as ExtendedOrder,
+          reason: `Item removed: ${item.variant.product.title} - ${item.variant.variantName}\nReason: ${reason}`
+        })
+      );
     });
 
     revalidatePath(`/admin/orders/${orderId}`);

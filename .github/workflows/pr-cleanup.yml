@@ -25,14 +25,23 @@ jobs:
             echo "pr_number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Add Comment to PR
-        if: github.event_name == 'pull_request'
-        uses: peter-evans/create-or-update-comment@v4
+      - name: Find Existing Deployment Comment
+        id: find_comment
+        uses: peter-evans/find-comment@v3
         with:
           issue-number: ${{ github.event.pull_request.number }}
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Add Comment to PR
+        if: github.event_name == 'pull_request'
+        id: initial-comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.find_comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           body: |
-            # 🧹 Cleanup Process Started
+            # 🧹 Preview Environment Cleanup
 
             <div style="background-color: #fff3e0; padding: 15px; border-radius: 8px; border-left: 5px solid #ff9800; margin-bottom: 20px;">
               <h2 style="color: #e65100; margin-top: 0;">Preview Environment Cleanup</h2>
@@ -40,7 +49,7 @@ jobs:
                 The preview environment for PR #${{ github.event.pull_request.number }} is being removed as this pull request has been ${{ github.event.pull_request.merged && '✅ <b>merged</b>' || '❌ <b>closed</b>' }}.
               </p>
               <p style="font-size: 14px; margin-bottom: 0;">
-                Cleanup timestamp: <code>${{ format('%.19s', github.event.pull_request.closed_at) }} UTC</code>
+                Cleanup timestamp: <code>${{ github.event.pull_request.closed_at }} UTC</code>
               </p>
             </div>
 
@@ -59,7 +68,7 @@ jobs:
         run: |
           cd ~/preview/${{ steps.pr-number.outputs.pr_number }}
           if [ -f "compose.yml" ]; then
-            docker compose down || true
+            sudo docker compose down || true
             echo "Container stopped and removed"
           else
             echo "No compose.yml file found, skipping container removal"
@@ -68,7 +77,7 @@ jobs:
       - name: Remove Docker image
         run: |
           # Try to remove the Docker image
-          docker rmi gabcat/merchtrack:preview-${{ steps.pr-number.outputs.pr_number }} || true
+          sudo docker rmi gabcat/merchtrack:preview-${{ steps.pr-number.outputs.pr_number }} || true
           echo "Docker image removal attempted"
 
       - name: Find and remove Nginx proxy host
@@ -110,16 +119,17 @@ jobs:
             -d '{
               "hosts": ["preview-${{ steps.pr-number.outputs.pr_number }}.merchtrack.tech"]
             }'
-          echo "Cloudflare cache purged"
-
+          echo "Cloudflare cache purged"      
+      
       - name: Update Comment with Success
         if: github.event_name == 'pull_request' && success()
         uses: peter-evans/create-or-update-comment@v4
         with:
-          issue-number: ${{ github.event.pull_request.number }}
+          comment-id: ${{ steps.find_comment.outputs.comment-id }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          edit-mode: replace
           body: |
-            # 🧹 Cleanup Completed Successfully
+            # 🧹 Preview Environment Cleanup - Completed
 
             <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; border-left: 5px solid #4caf50; margin-bottom: 20px;">
               <h2 style="color: #2e7d32; margin-top: 0;">Preview Environment Removed</h2>
@@ -127,7 +137,7 @@ jobs:
                 The preview environment for PR #${{ github.event.pull_request.number }} has been successfully cleaned up.
               </p>
               <p style="font-size: 14px; margin-bottom: 0;">
-                Completed at: <code>${{ format('%.19s', github.event.pull_request.closed_at) }} UTC</code>
+                Completed at: <code>${{ github.event.pull_request.closed_at }} UTC</code>
               </p>
             </div>
 

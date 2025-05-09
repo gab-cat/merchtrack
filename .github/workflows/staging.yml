@@ -2,6 +2,10 @@ name: 3. STAGING - Build
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Export Secrets to Doppler"]
+    types:
+      - completed
   push:
     branches:
       - main
@@ -12,7 +16,7 @@ permissions:
 
 jobs:
   build:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     runs-on: "ubuntu-latest"
     environment: Staging
 

@@ -7,6 +7,7 @@ import { GetObjectByTParams } from "@/types/extended";
 import { createLog } from '@/actions/logs.actions';
 import { sendOrderStatusEmail, sendPaymentStatusEmail } from "@/lib/email-service";
 import { calculatePagination, processActionReturnData, verifyPermission } from "@/utils";
+import serverSideEffect from "@/utils/serverSideEffect";
 
 
 /**
@@ -456,39 +457,43 @@ export async function processPayment({
 
       // Send payment notification email for verified payments only
       try {
-        await sendPaymentStatusEmail({
-          orderNumber: orderId,
-          customerName: `${order.customer.firstName} ${order.customer.lastName}`,
-          customerEmail: order.customer.email,
-          amount,
-          status: 'verified'
-        });
+        serverSideEffect(
+          () => sendPaymentStatusEmail({
+            orderNumber: orderId,
+            customerName: `${order.customer.firstName} ${order.customer.lastName}`,
+            customerEmail: order.customer.email,
+            amount,
+            status: 'verified'
+          })
+        );
       } catch (emailError) {
-        await createLog({
-          userId: order.customerId,
-          createdById: userId,
-          reason: "Payment Notification Email Error",
-          systemText: `Error sending payment notification email for order ${orderId}: ${emailError instanceof Error ? emailError.message : 'Unknown error'}`,
-          userText: "An error occurred while sending the payment notification email."
-        });
+        serverSideEffect(
+          () => createLog({
+            userId: order.customerId,
+            createdById: userId,
+            reason: "Payment Notification Email Error",
+            systemText: `Error sending payment notification email for order ${orderId}: ${emailError instanceof Error ? emailError.message : 'Unknown error'}`,
+            userText: "An error occurred while sending the payment notification email."
+          })
+        );
       }
     } else {
-      await Promise.all([
-        sendPaymentStatusEmail({
+      serverSideEffect(
+        () => sendPaymentStatusEmail({
           orderNumber: orderId,
           customerName: `${order.customer.firstName} ${order.customer.lastName}`,
           customerEmail: order.customer.email,
           amount,
           status: 'submitted',
         }),
-        createLog({
+        () => createLog({
           userId: order.customerId,
           createdById: userId,
           reason: "Offsite Payment Submitted",
           systemText: `Offsite payment of ₱${amount} submitted for order ${orderId} via ${paymentMethod}. Awaiting verification.`,
           userText: `Your payment submission of ₱${amount} has been received and is awaiting verification by our team.`
         })
-      ]);
+      );
     }
     
     return {
@@ -496,13 +501,15 @@ export async function processPayment({
       data: processActionReturnData(payment, limitFields) as Payment
     };
   } catch (error) {
-    await createLog({
-      userId: userId,
-      createdById: userId,
-      reason: "Payment Processing Error",
-      systemText: `Error processing payment for order ${orderId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      userText: "An error occurred while processing the payment."
-    });
+    serverSideEffect(
+      () => createLog({
+        userId: userId,
+        createdById: userId,
+        reason: "Payment Processing Error",
+        systemText: `Error processing payment for order ${orderId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        userText: "An error occurred while processing the payment."
+      })
+    );
     
     return {
       success: false,
@@ -542,13 +549,15 @@ export async function refundPayment(
       payments: { canRead: true, canUpdate: true },
     }
   })) {
-    await createLog({
-      userId,
-      createdById: userId,
-      reason: "Payment Refund Failed - Unauthorized",
-      systemText: `Unauthorized attempt to refund payment ${paymentId}`,
-      userText: "You are not authorized to process refunds."
-    });
+    serverSideEffect(
+      () => createLog({
+        userId,
+        createdById: userId,
+        reason: "Payment Refund Failed - Unauthorized",
+        systemText: `Unauthorized attempt to refund payment ${paymentId}`,
+        userText: "You are not authorized to process refunds."
+      })
+    );
     return {
       success: false,
       message: "You are not authorized to process refunds."
@@ -565,13 +574,15 @@ export async function refundPayment(
     });
 
     if (!payment) {
-      await createLog({
-        userId,
-        createdById: userId,
-        reason: "Payment Refund Failed - Not Found",
-        systemText: `Attempted to refund non-existent payment ${paymentId}`,
-        userText: "Payment not found."
-      });
+      serverSideEffect(
+        () => createLog({
+          userId,
+          createdById: userId,
+          reason: "Payment Refund Failed - Not Found",
+          systemText: `Attempted to refund non-existent payment ${paymentId}`,
+          userText: "Payment not found."
+        })
+      );
       return {
         success: false,
         message: "Payment not found"
@@ -580,13 +591,15 @@ export async function refundPayment(
 
     // Check if amount to refund is valid
     if (amount > Number(payment.amount)) {
-      await createLog({
-        userId: payment.userId,
-        createdById: userId,
-        reason: "Payment Refund Failed - Invalid Amount",
-        systemText: `Attempted to refund ${amount} which exceeds original payment amount ${payment.amount} for payment ${paymentId}`,
-        userText: "Refund amount cannot exceed the original payment amount."
-      });
+      serverSideEffect(
+        () => createLog({
+          userId: payment.userId,
+          createdById: userId,
+          reason: "Payment Refund Failed - Invalid Amount",
+          systemText: `Refund amount ${amount} exceeds original payment amount ${payment.amount} for payment ${paymentId}`,
+          userText: "Refund amount cannot exceed the original payment amount."
+        })
+      );
       return {
         success: false,
         message: "Refund amount cannot exceed the original payment amount"
@@ -641,37 +654,38 @@ export async function refundPayment(
       }
     });
 
-    // Create success log
-    await createLog({
-      userId: payment.userId,
-      createdById: userId,
-      reason: "Payment Refunded Successfully",
-      systemText: `Refunded ₱${amount} from payment ${paymentId} for order ${payment.orderId}. Reason: ${reason}`,
-      userText: `Refund of ₱${amount} has been processed successfully. Reason: ${reason}`
-    });
-
-    // Send refund notification email
-    await sendPaymentStatusEmail({
-      orderNumber: refund.order.id,
-      customerName: `${refund.order.customer.firstName} ${refund.order.customer.lastName}`,
-      customerEmail: refund.order.customer.email,
-      amount: Number(refund.amount),
-      status: 'refunded',
-      refundReason: reason
-    });
+    serverSideEffect(
+      () => createLog({
+        userId: payment.userId,
+        createdById: userId,
+        reason: "Payment Refunded",
+        systemText: `Refund of ₱${amount} processed for payment ${paymentId}. Reason: ${reason}`,
+        userText: `Refund of ₱${amount} has been processed successfully. Reason: ${reason}`
+      }),
+      () => sendPaymentStatusEmail({
+        orderNumber: refund.order.id,
+        customerName: `${refund.order.customer.firstName} ${refund.order.customer.lastName}`,
+        customerEmail: refund.order.customer.email,
+        amount: Number(refund.amount),
+        status: 'refunded',
+        refundReason: reason
+      })
+    );
 
     return {
       success: true,
       data: processActionReturnData(refund) as Payment
     };
   } catch (error) {
-    await createLog({
-      userId,
-      createdById: userId,
-      reason: "Payment Refund Error",
-      systemText: `Error refunding payment ${paymentId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      userText: "An error occurred while processing the refund."
-    });
+    serverSideEffect(
+      () => createLog({
+        userId,
+        createdById: userId,
+        reason: "Payment Refund Error",
+        systemText: `Error refunding payment ${paymentId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        userText: "An error occurred while processing the refund."
+      })
+    );
     
     return {
       success: false,
@@ -724,13 +738,15 @@ export async function validatePayment(
       payments: { canRead: true, canUpdate: true },
     }
   })) {
-    await createLog({
-      userId,
-      createdById: userId,
-      reason: "Payment Validation Failed - Unauthorized",
-      systemText: `Unauthorized attempt to validate payment for order ${orderId}`,
-      userText: "You are not authorized to validate payments."
-    });
+    serverSideEffect(
+      () => createLog({
+        userId,
+        createdById: userId,
+        reason: "Payment Validation Failed - Unauthorized",
+        systemText: `Unauthorized attempt to validate payment for order ${orderId}`,
+        userText: "You are not authorized to validate payments."
+      })
+    );
     return {
       success: false,
       message: "You are not authorized to validate payments."
@@ -748,13 +764,15 @@ export async function validatePayment(
     });
 
     if (!order) {
-      await createLog({
-        userId,
-        createdById: userId,
-        reason: "Payment Validation Failed - Order Not Found",
-        systemText: `Attempted to validate payment for non-existent order ${orderId}`,
-        userText: "Order not found."
-      });
+      serverSideEffect(
+        () => createLog({
+          userId,
+          createdById: userId,
+          reason: "Payment Validation Failed - Order Not Found",
+          systemText: `Attempted to validate payment for non-existent order ${orderId}`,
+          userText: "Order not found."
+        })
+      );
       return {
         success: false,
         message: "Order not found."
@@ -767,13 +785,15 @@ export async function validatePayment(
     });
 
     if (!existingPayment) {
-      await createLog({
-        userId,
-        createdById: userId,
-        reason: "Payment Validation Failed - Payment Not Found",
-        systemText: `Attempted to validate non-existent payment ${paymentId}`,
-        userText: "Payment not found."
-      });
+      serverSideEffect(
+        () => createLog({
+          userId,
+          createdById: userId,
+          reason: "Payment Validation Failed - Payment Not Found",
+          systemText: `Attempted to validate non-existent payment ${paymentId}`,
+          userText: "Payment not found."
+        })
+      );
       return {
         success: false,
         message: "Payment not found."
@@ -865,15 +885,17 @@ export async function validatePayment(
         }
       });
 
+      serverSideEffect(
+        () => sendOrderStatusEmail({
+          customerEmail: fullypaidOrder.customer.email,
+          customerName: `${fullypaidOrder.customer.firstName} ${fullypaidOrder.customer.lastName}`,
+          orderNumber: fullypaidOrder.id,
+          newStatus: fullypaidOrder.status,
+          // @ts-expect-error - data is enough already
+          order: fullypaidOrder
+        }),
+      );
 
-      await sendOrderStatusEmail({
-        customerEmail: fullypaidOrder.customer.email,
-        customerName: `${fullypaidOrder.customer.firstName} ${fullypaidOrder.customer.lastName}`,
-        orderNumber: fullypaidOrder.id,
-        newStatus: fullypaidOrder.status,
-        // @ts-expect-error - data is enough already
-        order: fullypaidOrder
-      });
     } else {
       await prisma.order.update({
         where: { id: orderId },
@@ -883,35 +905,36 @@ export async function validatePayment(
       });
     }
 
-    // Create success log
-    await createLog({
-      userId: order.customerId,
-      createdById: userId,
-      reason: "Payment Validated Successfully",
-      systemText: `Validated payment of ₱${existingPayment.amount} for order ${orderId}. Payment ID: ${paymentId}. Transaction ID: ${transactionDetails.transactionId}`,
-      userText: "Payment has been validated successfully."
-    });
-
-    // Send payment verification email with order status
-    await sendPaymentStatusEmail({
-      orderNumber: verifiedPayment.order.id,
-      customerName: `${verifiedPayment.order.customer.firstName} ${verifiedPayment.order.customer.lastName}`,
-      customerEmail: verifiedPayment.order.customer.email,
-      amount: Number(verifiedPayment.amount),
-      status: 'verified',
-    });
+    serverSideEffect(
+      () => createLog({
+        userId: order.customerId,
+        createdById: userId,
+        reason: "Payment Validated Successfully",
+        systemText: `Validated payment of ₱${existingPayment.amount} for order ${orderId}. Payment ID: ${paymentId}. Transaction ID: ${transactionDetails.transactionId}`,
+        userText: "Payment has been validated successfully."
+      }),
+      () => sendPaymentStatusEmail({
+        orderNumber: verifiedPayment.order.id,
+        customerName: `${verifiedPayment.order.customer.firstName} ${verifiedPayment.order.customer.lastName}`,
+        customerEmail: verifiedPayment.order.customer.email,
+        amount: Number(verifiedPayment.amount),
+        status: 'verified',
+      })
+    );
 
     return {
       success: true
     };
   } catch (error) {
-    await createLog({
-      userId,
-      createdById: userId,
-      reason: "Payment Validation Error",
-      systemText: `Error validating payment for order ${orderId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      userText: "An error occurred while validating the payment."
-    });
+    serverSideEffect(
+      () => createLog({
+        userId,
+        createdById: userId,
+        reason: "Payment Validation Error",
+        systemText: `Error validating payment for order ${orderId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        userText: "An error occurred while validating the payment."
+      })
+    );
 
     return {
       success: false,
@@ -954,13 +977,15 @@ export async function rejectPayment(
       payments: { canRead: true, canUpdate: true },
     }
   })) {
-    await createLog({
-      userId,
-      createdById: userId,
-      reason: "Payment Rejection Failed - Unauthorized",
-      systemText: `Unauthorized attempt to reject payment for order ${orderId}`,
-      userText: "You are not authorized to reject payments."
-    });
+    serverSideEffect(
+      () => createLog({
+        userId,
+        createdById: userId,
+        reason: "Payment Rejection Failed - Unauthorized",
+        systemText: `Unauthorized attempt to reject payment for order ${orderId}`,
+        userText: "You are not authorized to reject payments."
+      })
+    );
     return {
       success: false,
       message: "You are not authorized to reject payments."
@@ -976,13 +1001,15 @@ export async function rejectPayment(
     });
 
     if (!order) {
-      await createLog({
-        userId,
-        createdById: userId,
-        reason: "Payment Rejection Failed - Order Not Found",
-        systemText: `Attempted to reject payment for non-existent order ${orderId}`,
-        userText: "Order not found."
-      });
+      serverSideEffect(
+        () => createLog({
+          userId,
+          createdById: userId,
+          reason: "Payment Rejection Failed - Order Not Found",
+          systemText: `Attempted to reject payment for non-existent order ${orderId}`,
+          userText: "Order not found."
+        })
+      );
       return {
         success: false,
         message: "Order not found."
@@ -995,13 +1022,15 @@ export async function rejectPayment(
     });
 
     if (!existingPayment) {
-      await createLog({
-        userId,
-        createdById: userId,
-        reason: "Payment Rejection Failed - Payment Not Found",
-        systemText: `Attempted to reject non-existent payment ${paymentId}`,
-        userText: "Payment not found."
-      });
+      serverSideEffect(
+        () => createLog({
+          userId,
+          createdById: userId,
+          reason: "Payment Rejection Failed - Payment Not Found",
+          systemText: `Attempted to reject non-existent payment ${paymentId}`,
+          userText: "Payment not found."
+        })
+      );
       return {
         success: false,
         message: "Payment not found."
@@ -1020,35 +1049,36 @@ export async function rejectPayment(
       }
     });
 
-    // Create rejection log
-    await createLog({
-      userId: order.customerId,
-      createdById: userId,
-      reason: "Payment Rejected",
-      systemText: `Rejected payment for order ${orderId}. Payment ID: ${paymentId}. Reason: ${rejectionReason}`,
-      userText: `Payment has been rejected. Reason: ${rejectionReason}`
-    });
-
-    // Send rejection email to customer
-    await sendPaymentStatusEmail({
-      orderNumber: orderId,
-      customerName: `${order.customer.firstName} ${order.customer.lastName}`,
-      customerEmail: order.customer.email,
-      amount: Number(existingPayment.amount),
-      status: 'declined'
-    });
+    serverSideEffect(
+      () => createLog({
+        userId: order.customerId,
+        createdById: userId,
+        reason: "Payment Rejected",
+        systemText: `Rejected payment for order ${orderId}. Payment ID: ${paymentId}. Reason: ${rejectionReason}`,
+        userText: `Payment has been rejected. Reason: ${rejectionReason}`
+      }),
+      () => sendPaymentStatusEmail({
+        orderNumber: orderId,
+        customerName: `${order.customer.firstName} ${order.customer.lastName}`,
+        customerEmail: order.customer.email,
+        amount: Number(existingPayment.amount),
+        status: 'declined'
+      })
+    );
 
     return {
       success: true
     };
   } catch (error) {
-    await createLog({
-      userId,
-      createdById: userId,
-      reason: "Payment Rejection Error",
-      systemText: `Error rejecting payment for order ${orderId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      userText: "An error occurred while rejecting the payment."
-    });
+    serverSideEffect(
+      () => createLog({
+        userId,
+        createdById: userId,
+        reason: "Payment Rejection Error",
+        systemText: `Error rejecting payment for order ${orderId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        userText: "An error occurred while rejecting the payment."
+      })
+    );
 
     return {
       success: false,
