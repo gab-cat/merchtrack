@@ -1,6 +1,7 @@
 'use client';
 
-import { getSurveyById, getSurveyCategories, getSurveys } from "@/actions/survey.actions";
+import { getSurveyById, getSurveys } from "@/actions/survey.actions";
+import { getSurveyCategories } from "@/features/admin/surveys/actions";
 import { useResourceByIdQuery, useResourceQuery } from "@/hooks/index.hooks";
 import { QueryParams } from "@/types/common";
 
@@ -8,22 +9,8 @@ export function useSurveyCategoriesQuery(params: QueryParams = {}) {
   const { where, include, orderBy, take, skip, page, limit } = params;
   return useResourceQuery({
     resource: 'surveyCategories',
-    fetcher: async (userId: string, params: QueryParams) => {
-      const response = await getSurveyCategories(userId, params);
-      return {
-        success: response.success,
-        data: {
-          data: response.data || [],
-          metadata: {
-            total: response.data?.length ?? 0,
-            page: 1,
-            lastPage: 1,
-            hasNextPage: false,
-            hasPrevPage: false
-          }
-        }
-      };
-    },
+    // @ts-expect-error - This is a workaround to get the correct type for the fetcher function
+    fetcher: async (userId: string, params: QueryParams) => getSurveyCategories(userId, params),
     params: {
       where: {
         isDeleted: false,

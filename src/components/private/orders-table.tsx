@@ -16,7 +16,7 @@ import type { ExtendedOrder } from "@/types/orders";
 import { useOrdersQuery } from "@/hooks/orders.hooks";
 import { useDebouncedValue } from "@/hooks";
 import { SearchInput } from "@/components/ui/search-input";
-import { PaginationFooter } from "@/app/admin/survey/components/pagination-footer";
+import { PaginationFooter } from "@/components/shared/pagination-footer";
 
 const ITEMS_PER_PAGE = 10;
 

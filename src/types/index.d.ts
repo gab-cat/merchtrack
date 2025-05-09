@@ -135,12 +135,12 @@ declare enum College {
   AXI = "AXI"
 }
 
-declare type ActionsReturnType<T> = {
+declare type ActionsReturnType<T> = Promise<{
   success: boolean
   message?: string
   data?: T
   errors?: Record<string, unknown>
-}
+}>
 
 declare type TicketUpdate = {
   status: "OPEN" | "CLOSED" | "IN_PROGRESS" | "RESOLVED" 

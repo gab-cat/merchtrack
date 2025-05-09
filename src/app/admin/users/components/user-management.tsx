@@ -11,7 +11,7 @@ import { QueryParams } from "@/types/common";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { College } from "@/types/Misc";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PaginationFooter } from "@/app/admin/survey/components/pagination-footer";
+import { PaginationFooter } from "@/components/shared/pagination-footer";
 
 const ITEMS_PER_PAGE = 10;
 

@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import UpdateProductContainer from './(components)/update-product-container';
+import { UpdateProductContainer } from '@/features/admin/inventory/components';
 import PageAnimation from '@/components/public/page-animation';
 import PageTitle from '@/components/private/page-title';
 

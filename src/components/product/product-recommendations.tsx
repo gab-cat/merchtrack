@@ -4,7 +4,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useProductsQuery } from "@/hooks/products.hooks";
 import { ExtendedProduct } from "@/types/extended";
-import { PaginationFooter } from "@/app/admin/survey/components/pagination-footer";
+import { PaginationFooter } from "@/components/shared/pagination-footer";
 import ProductRecommendationSkeleton from "@/components/product/product-recommendation-skeleton";
 
 import ProductCard from "@/components/protected/product-card";

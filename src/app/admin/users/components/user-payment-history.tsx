@@ -6,7 +6,7 @@ import { PaymentStatus } from "@prisma/client";
 import { FaSearch, FaMoneyBill, FaCheck, FaClock, FaTimes, FaFileInvoiceDollar, FaCreditCard } from "react-icons/fa";
 import { format } from "date-fns";
 import { usePaymentsQuery } from "@/hooks/payments.hooks";
-import { PaginationNav } from "@/components/pagination-nav";
+import { PaginationNav } from "@/components/shared/pagination-nav";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
