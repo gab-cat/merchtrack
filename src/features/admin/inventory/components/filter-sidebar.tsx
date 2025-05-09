@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from "react";
 import { FaBoxes, FaTags, FaBoxOpen } from "react-icons/fa";
 import { FaPesoSign } from "react-icons/fa6";

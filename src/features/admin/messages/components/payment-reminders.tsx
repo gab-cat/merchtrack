@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
-import { sendPaymentReminders } from "../_actions/reminders";
+import { sendPaymentReminders } from "@/features/admin/messages/actions";
 import { usePendingPaymentOrdersQuery } from "@/hooks/reminders.hooks";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";

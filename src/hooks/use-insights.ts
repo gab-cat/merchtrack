@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { OrderStatus, PaymentStatus } from '@prisma/client';
-import { getInsights } from '@/features/admin/insights/_actions';
+import { getInsights } from '@/features/admin/insights/actions';
 import { useUserStore } from '@/stores/user.store';
 
 export interface InsightsData {
