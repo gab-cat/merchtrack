@@ -13,7 +13,7 @@ RUN npm i -g dotenv-cli@8.0.0 corepack && \
     dotenv -e .env -- pnpm run build
 
 # Stage: Runner
-FROM node:22.12.0-alpine3.21 AS runner
+FROM node:23.11.0-alpine3.21 AS runner
 LABEL author=gab-cat
 
 WORKDIR /app
