@@ -17,7 +17,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { PaginationFooter } from "@/app/admin/survey/components/pagination-footer";
+import { PaginationFooter } from "@/components/shared/pagination-footer";
 import { usePaymentsQuery } from "@/hooks/payments.hooks";
 
 type OffsitePaymentProps = {

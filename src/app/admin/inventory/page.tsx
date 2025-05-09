@@ -4,8 +4,7 @@ import Link from 'next/link';
 import PageAnimation from '@/components/public/page-animation';
 import PageTitle from '@/components/private/page-title';
 import { Button } from '@/components/ui/button';
-import ProductsGrid from '@/app/admin/inventory/(components)/products-grid';
-import { CreateCategoryModal } from '@/app/admin/inventory/(components)/create-category-modal';
+import { ProductsGrid, CreateCategoryModal } from '@/features/admin/inventory/components';
 
 export const metadata = {
   title: 'Inventory | Admin Dashboard',

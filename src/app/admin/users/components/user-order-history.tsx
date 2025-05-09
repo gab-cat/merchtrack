@@ -6,7 +6,7 @@ import { FaSearch, FaShoppingBag, FaExternalLinkAlt, FaClock, FaBox, FaShippingF
 import Link from "next/link";
 import { format } from "date-fns";
 import { useOrdersQuery } from "@/hooks/orders.hooks";
-import { PaginationNav } from "@/components/pagination-nav";
+import { PaginationNav } from "@/components/shared/pagination-nav";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";

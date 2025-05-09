@@ -1,6 +1,5 @@
 import { Metadata } from "next";
-import { SurveyCategoriesList } from "./components/survey-categories-list";
-import { SurveyResponsesList } from "./components/survey-responses-list";
+import { SurveyCategoriesList, SurveyResponsesList } from "@/features/admin/surveys/components";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PageAnimation from "@/components/public/page-animation";
 import PageTitle from "@/components/private/page-title";

@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useTicketsQuery } from "@/hooks/tickets.hooks";
 import { useUserStore } from "@/stores/user.store";
-import { PaginationFooter } from "@/app/admin/survey/components/pagination-footer";
+import { PaginationFooter } from "@/components/shared/pagination-footer";
 
 const ITEMS_PER_PAGE = 5; 
 

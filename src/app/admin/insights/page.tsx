@@ -1,6 +1,6 @@
 import PageTitle from '@/components/private/page-title';
 import PageAnimation from '@/components/public/page-animation';
-import InsightsTabs from '@/app/admin/insights/components/insights-tabs';
+import { InsightsTabs } from '@/features/admin/insights/components';
 
 export const metadata = {  
   title: 'Business Insights | Admin Dashboard',  

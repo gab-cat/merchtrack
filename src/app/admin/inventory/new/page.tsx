@@ -1,11 +1,11 @@
 import type { FC } from 'react';
 import PageAnimation from '@/components/public/page-animation';
 import PageTitle from '@/components/private/page-title';
-import NewProductContainer from '@/app/admin/inventory/new/(components)/new-product-container';
+import { NewProductContainer } from '@/features/admin/inventory/components';
 
 export const metadata = {
   title: 'Create Product | Admin Dashboard',
-  description: 'View and manage products'
+  description: 'Create a new product'
 };  
 
 const Page: FC = () => {

@@ -17,7 +17,7 @@ import { manilaTime } from "@/utils/formatTime";
 import { ExtendedOrder } from "@/types/orders";
 import { Button } from "@/components/ui/button";
 import { fadeInUp } from "@/constants/animations";
-import { PaginationFooter } from "@/app/admin/survey/components/pagination-footer";
+import { PaginationFooter } from "@/components/shared/pagination-footer";
 
 interface OrdersPaymentTableProps {
   orders?: ExtendedOrder[];

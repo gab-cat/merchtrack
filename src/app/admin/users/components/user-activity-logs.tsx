@@ -8,7 +8,7 @@ import { FaSearch, FaListAlt, FaUser, FaTag, FaClock, FaCog, FaShoppingBag, FaCr
 import { format } from "date-fns";
 import { LogDetailsModal } from "../../../../features/admin/logs/components/log-details-modal";
 import { useLogsQuery } from "@/hooks/logs.hooks";
-import { PaginationNav } from "@/components/pagination-nav";
+import { PaginationNav } from "@/components/shared/pagination-nav";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
