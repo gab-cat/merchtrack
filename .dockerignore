@@ -6,3 +6,7 @@ npm-debug.log
 !.next/static
 !.next/standalone
 .git
+.github
+.devcontainer
+.vscode
+docs
