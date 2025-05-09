@@ -1,11 +1,9 @@
 "use client";
 
 import { useQuery } from '@tanstack/react-query';
-import { getAnnouncements } from '../_actions';
-import { SystemMessageForm } from './system-message-form';
-import { AnnouncementList } from './announcement-list';
-import { AnnouncementForm } from './announcement-form';
+import { AnnouncementList, AnnouncementForm, SystemMessageForm } from '.';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getAnnouncements } from '@/features/admin/dashboard/actions';
 
 
 interface SettingsContainerProps {
@@ -16,7 +14,7 @@ export function SettingsContainer({ userId }: Readonly<SettingsContainerProps>) 
   const { data, refetch } = useQuery({
     queryKey: ['announcements'],
     queryFn: async () => {
-      const result = await getAnnouncements();
+      const result = await getAnnouncements(10);
       if (!result.success) {
         throw new Error(result.message);
       }

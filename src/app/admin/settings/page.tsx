@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { SettingsContainer } from './components/settings-container';
+import { SettingsContainer } from '@/features/admin/announcements/components';
 import { getSessionData, getUserId } from '@/lib/auth';
 import PageTitle from '@/components/private/page-title';
 import PageAnimation from '@/components/public/page-animation';

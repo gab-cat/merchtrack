@@ -25,6 +25,14 @@ interface SaleData {
   totalAmount: number | string;
 }
 
+const ORDER_STATUS_COLORS: Record<OrderStatus, string> = {
+  PENDING: '#FFA500',
+  PROCESSING: '#9333EA',
+  READY: '#10B981',
+  DELIVERED: '#059669',
+  CANCELLED: '#EF4444',
+};
+
 // Helper functions specific to getInsights
 function calculateCollectionMetrics(salesData: SaleData[], totalPayableAmount: number): Array<{date: string, collectionRate: number}> {
   const dailyStats = salesData.reduce<DailyStats[]>((acc, sale) => {
@@ -89,176 +97,242 @@ type ProductDataForInsights = Product & {
 export async function getInsights(
   userId: string,
   params: { startDate?: string; endDate?: string }
-): ActionsReturnType<InsightsData> {
-  if (!await verifyPermission({ 
-    userId, 
-    permissions: { reports: { canRead: true } } 
-  })) {
-    return { success: false, message: "Permission denied" };
-  }
-
-  const { startDate, endDate } = params;
-  const dateFilter: { gte?: Date; lte?: Date } = {};
-  if (startDate) dateFilter.gte = new Date(startDate);
-  if (endDate) dateFilter.lte = new Date(endDate);
-
+): Promise<ActionsReturnType<InsightsData>> {
   try {
-    const transactionPromises = [
-      prisma.order.aggregate({
-        _sum: { totalAmount: true },
-        where: { createdAt: dateFilter, status: OrderStatus.DELIVERED, isDeleted: false },
-      }),
+    if (!userId) {
+      return {
+        success: false,
+        message: 'Unauthorized'
+      };
+    }
+
+    const isAuthorized = await verifyPermission({
+      userId,
+      permissions: {
+        dashboard: { canRead: true },
+        reports: { canRead: true },
+      }
+    });
+
+    if (!isAuthorized) {
+      return {
+        success: false,
+        message: 'Forbidden'
+      };
+    }
+
+    const dateFilter = {
+      ...(params.startDate && { gte: new Date(params.startDate) }),
+      ...(params.endDate && { lte: new Date(params.endDate) }),
+    };
+
+    // Ensure we have valid dates before proceeding
+    if ((dateFilter.gte && isNaN(dateFilter.gte.getTime())) || 
+        (dateFilter.lte && isNaN(dateFilter.lte.getTime()))) {
+      return {
+        success: false,
+        message: 'Invalid date format'
+      };
+    }
+
+    const [
+      ordersData,
+      salesData,
+      customersCount,
+      topProducts,
+      topCustomers,
+      ordersByStatus,
+      paymentsByStatus,
+      totalPayableAmount,
+      surveyData
+    ] = await Promise.all([
+      // Get total orders
       prisma.order.count({
-        where: { createdAt: dateFilter, isDeleted: false },
-      }),
-      prisma.user.count({
-        where: { createdAt: dateFilter, orders: { some: {} } },
-      }),
-      prisma.product.findMany({
         where: {
+          createdAt: Object.keys(dateFilter).length > 0 ? dateFilter : undefined,
           isDeleted: false,
-          variants: {
-            some: {
-              OrderItem: {
-                some: {
-                  order: {
-                    createdAt: dateFilter,
-                    isDeleted: false,
-                  },
-                },
-              },
-            },
-          },
-        },
-        include: {
-          variants: {
-            include: {
-              OrderItem: {
-                include: {
-                  order: true,
-                },
-              },
-            },
-          },
-          category: true,
         },
       }),
+      // Get total sales and recent sales
       prisma.order.findMany({
         where: {
-          createdAt: dateFilter,
-          status: OrderStatus.DELIVERED,
+          createdAt: Object.keys(dateFilter).length > 0 ? dateFilter : undefined,
           isDeleted: false,
+          paymentStatus: 'PAID',
         },
         select: {
+          totalAmount: true,
           createdAt: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      // Get total customers
+      prisma.user.count({
+        where: {
+          role: 'STUDENT',
+          orders: {
+            some: {
+              createdAt: Object.keys(dateFilter).length > 0 ? dateFilter : undefined,
+            },
+          },
+        },
+      }),
+      // Get top selling products
+      prisma.orderItem.groupBy({
+        by: ['variantId'],
+        where: {
+          order: {
+            createdAt: Object.keys(dateFilter).length > 0 ? dateFilter : undefined,
+            isDeleted: false,
+          },
+        },
+        _sum: {
+          quantity: true,
+          price: true,
+        },
+        take: 10,
+        orderBy: {
+          _sum: {
+            quantity: 'desc',
+          },
+        },
+      }).then(items => 
+        Promise.all(items.map(async item => {
+          const variant = await prisma.productVariant.findUnique({
+            where: { id: item.variantId },
+            include: { product: true },
+          });
+          return {
+            id: variant?.product.id ?? '',
+            title: variant?.product.title ?? 'Unknown Product',
+            totalSold: item._sum.quantity ?? 0,
+            revenue: item._sum.price ?? 0,
+          };
+        }))
+      ),
+      // Get top customers
+      prisma.user.findMany({
+        where: {
+          role: 'STUDENT',
+          orders: {
+            some: {
+              createdAt: Object.keys(dateFilter).length > 0 ? dateFilter : undefined,
+            },
+          },
+        },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          orders: {
+            where: {
+              createdAt: Object.keys(dateFilter).length > 0 ? dateFilter : undefined,
+              isDeleted: false,
+            },
+            select: {
+              totalAmount: true,
+            },
+          },
+        },
+        take: 10,
+      }).then(customers =>
+        customers.map(customer => ({
+          id: customer.id,
+          name: `${customer.firstName} ${customer.lastName}`,
+          totalSpent: customer.orders.reduce((sum, order) => sum + Number(order.totalAmount), 0),
+          ordersCount: customer.orders.length,
+        }))
+      ),
+      // Get orders by status
+      prisma.order.groupBy({
+        by: ['status'],
+        where: {
+          createdAt: Object.keys(dateFilter).length > 0 ? dateFilter : undefined,
+          isDeleted: false,
+        },
+        _count: true,
+      }),
+      // Get payments by status
+      prisma.order.groupBy({
+        by: ['paymentStatus'],
+        where: {
+          createdAt: Object.keys(dateFilter).length > 0 ? dateFilter : undefined,
+          isDeleted: false,
+        },
+        _count: true,
+        _sum: {
           totalAmount: true,
         },
       }),
+      // Get total payable amount for collection rate
+      prisma.order.aggregate({
+        where: {
+          createdAt: Object.keys(dateFilter).length > 0 ? dateFilter : undefined,
+          isDeleted: false,
+        },
+        _sum: {
+          totalAmount: true,
+        },
+      }),
+      // Get survey data
       prisma.customerSatisfactionSurvey.findMany({
         where: {
-          createdAt: dateFilter,
-          metadata: {
-            path: ['isSubmitted'],
-            equals: true,
-          },
+          submitDate: Object.keys(dateFilter).length > 0 ? dateFilter : undefined,
         },
         include: {
           category: true,
         },
-      }),
-      prisma.order.aggregate({
-        _sum: { totalAmount: true },
-        where: {
-          createdAt: dateFilter,
-          isDeleted: false,
-          status: { notIn: [OrderStatus.CANCELLED /*, OrderStatus.REFUNDED */] }, 
+        orderBy: {
+          submitDate: 'asc',
         },
       }),
-    ] as const;
-    
-    const [totalRevenueRes, totalOrders, totalCustomers, productsData, salesData, surveyData, totalPayableRes]: [
-      Prisma.GetOrderAggregateType<{_sum: {totalAmount: true}}>,
-      number,
-      number,
-      ProductDataForInsights[],
-      SaleData[],
-      Prisma.CustomerSatisfactionSurveyGetPayload<{include: {category: true}}>[],
-      Prisma.GetOrderAggregateType<{_sum: {totalAmount: true}}>
-    ] = await prisma.$transaction([...transactionPromises]);
+    ]);
 
-    const collectionRateMetrics = calculateCollectionMetrics(salesData, Number(totalPayableRes._sum.totalAmount) || 0);
-    const surveyResultMetrics = processSurveyMetrics(surveyData);
+    const totalAmount = Number(totalPayableAmount._sum.totalAmount ?? 0);
+    const totalSales = salesData.reduce((sum, order) => sum + Number(order.totalAmount), 0);
+    const averageOrderValue = totalSales / (ordersData ?? 1);
+    const collectionRate = totalAmount > 0 ? (totalSales / totalAmount) * 100 : 0;
 
-    const totalCollectedOverPeriod = salesData.reduce((sum, sale) => sum + Number(sale.totalAmount), 0);
-    const overallTotalPayableAmount = Number(totalPayableRes._sum.totalAmount) || 0;
-    const overallCollectionRate = overallTotalPayableAmount > 0 ? (totalCollectedOverPeriod / overallTotalPayableAmount) * 100 : 0;
+    // Process the metrics using helper functions
+    const collectionTrends = calculateCollectionMetrics(salesData, totalAmount);
+    const surveyMetrics = processSurveyMetrics(surveyData);
 
-    const productSalesMapped = productsData.map((p: ProductDataForInsights) => ({
-      id: p.id,
-      title: p.title,
-      totalSold: p.variants.reduce((variantSum: number, v: typeof p.variants[0]) => 
-        variantSum + v.OrderItem.reduce((orderItemSum: number, oi: typeof v.OrderItem[0]) => {
-          if (oi.order?.createdAt) {
-            const orderDate = new Date(oi.order.createdAt);
-            const gteDate = dateFilter.gte || new Date(0);
-            const lteDate = dateFilter.lte || new Date();
-            if (orderDate >= gteDate && orderDate <= lteDate) {
-              return orderItemSum + oi.quantity;
-            }
-          }
-          return orderItemSum;
-        }, 0)
-      , 0),
-      revenue: p.variants.reduce((variantSum: number, v: typeof p.variants[0]) => 
-        variantSum + v.OrderItem.reduce((orderItemSum: number, oi: typeof v.OrderItem[0]) => {
-          if (oi.order.createdAt) {
-            const orderDate = new Date(oi.order.createdAt);
-            const gteDate = dateFilter.gte || new Date(0);
-            const lteDate = dateFilter.lte || new Date();
-            if (orderDate >= gteDate && orderDate <= lteDate) {
-              return orderItemSum + (Number(oi.price) * oi.quantity);
-            }
-          }
-          return orderItemSum;
-        }, 0)
-      , 0),
-    })).sort((a: { revenue: number; }, b: { revenue: number; }) => b.revenue - a.revenue);
-
-    const recentSalesMapped = salesData.map((s: SaleData) => ({
-      createdAt: new Date(s.createdAt),
-      amount: Number(s.totalAmount),
-    }));
-
-    const surveyMetricsMapped = surveyResultMetrics.map(sm => ({
-      categoryName: sm.categoryName,
-      avgScore: sm.avgScore,
-      count: sm.count,
-    }));
-
-    const currentTotalOrders = totalOrders || 0;
-    const currentTotalSales = Number(totalRevenueRes._sum.totalAmount) || 0;
-
-    const insights: InsightsData = {
-      totalSales: currentTotalSales,
-      totalOrders: currentTotalOrders,
-      totalCustomers: totalCustomers || 0,
-      averageOrderValue: currentTotalOrders > 0 ? currentTotalSales / currentTotalOrders : 0,
-      topSellingProducts: productSalesMapped,
-      recentSales: recentSalesMapped,
-      collectionRate: overallCollectionRate,
-      collectionTrends: collectionRateMetrics,
-      surveyMetrics: surveyMetricsMapped,
-      salesByStatus: [],
-      paymentsByStatus: [],
-      topCustomers: [],
-    };
-
-    return { 
-      success: true, 
-      data: processActionReturnData(insights) as unknown as InsightsData 
+    return {
+      success: true,
+      //@ts-expect-error - TS doesn't recognize the data transformation
+      data: processActionReturnData({
+        totalSales,
+        totalOrders: ordersData,
+        averageOrderValue,
+        collectionRate,
+        totalCustomers: customersCount,
+        topSellingProducts: topProducts,
+        recentSales: salesData.map(sale => ({
+          amount: Number(sale.totalAmount),
+          createdAt: sale.createdAt,
+        })),
+        salesByStatus: ordersByStatus.map(status => ({
+          status: status.status,
+          count: status._count,
+          color: ORDER_STATUS_COLORS[status.status]
+        })),
+        paymentsByStatus: paymentsByStatus.map(status => ({
+          status: status.paymentStatus,
+          count: status._count,
+          total: Number(status._sum.totalAmount ?? 0),
+        })),
+        topCustomers: topCustomers.toSorted((a, b) => b.totalSpent - a.totalSpent),
+        collectionTrends,
+        surveyMetrics,
+      }) as InsightsData
     };
   } catch (error) {
-    console.error("Error in getInsights:", error);
-    return { success: false, message: error instanceof Error ? error.message : "Failed to fetch insights" };
+    console.error('Error fetching insights:', error);
+    return {
+      success: false,
+      message: 'Failed to fetch insights data'
+    };
   }
-} 
+}

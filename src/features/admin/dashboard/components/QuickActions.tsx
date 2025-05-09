@@ -12,14 +12,14 @@ export function QuickActions() {
             <Users className="mr-2 size-4" /> Manage Users
           </Button>
         </Link>
-        <Link href="/admin/products" className="w-full">
+        <Link href="/admin/inventory" className="w-full">
           <Button className="w-full bg-primary-500 text-white transition-colors duration-300 hover:bg-primary-600">
-            <ShoppingCart className="mr-2 size-4" /> Manage Products
+            <ShoppingCart className="mr-2 size-4" /> Manage Inventory
           </Button>
         </Link>
-        <Link href="/admin/analytics" className="w-full">
+        <Link href="/admin/insights" className="w-full">
           <Button className="w-full bg-primary-500 text-white transition-colors duration-300 hover:bg-primary-600">
-            <BarChart className="mr-2 size-4" /> View Analytics
+            <BarChart className="mr-2 size-4" /> View Insights
           </Button>
         </Link>
         <Link href="/admin/settings" className="w-full">

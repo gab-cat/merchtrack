@@ -1,7 +1,9 @@
+'use client';
+
 import { useState } from "react";
 import { toast } from "sonner";
-import { deleteAnnouncement } from "../_actions";
-import { AnnouncementForm } from "./announcement-form";
+import { deleteAnnouncement } from "../actions";
+import { AnnouncementForm } from ".";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";

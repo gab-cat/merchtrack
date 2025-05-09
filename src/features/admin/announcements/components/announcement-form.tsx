@@ -6,7 +6,7 @@ import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Info, AlertTriangle, AlertOctagon } from "lucide-react";
 import { toast } from "sonner";
-import { createAnnouncement, updateAnnouncement } from "../_actions";
+import { createAnnouncement, updateAnnouncement } from "../actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {

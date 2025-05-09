@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import useToast from "@/hooks/use-toast";
-import { getAnnouncements } from "@/app/admin/settings/_actions";
+import { getAnnouncements } from "@/features/admin/announcements/_actions";
 
 
 export function useAnnouncementsQuery(limit: number = 10) {
