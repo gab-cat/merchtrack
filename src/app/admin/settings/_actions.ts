@@ -3,7 +3,6 @@ import prisma from "@/lib/db";
 import { verifyPermission } from "@/utils/permissions";
 import { processActionReturnData } from "@/utils";
 import { createLog } from "@/actions/logs.actions";
-import { ExtendedAnnouncement } from "@/types/announcement";
 
 export async function createAnnouncement({
   userId,
@@ -66,35 +65,6 @@ export async function createAnnouncement({
   }
 }
 
-export async function getAnnouncements(limit?: number): Promise<ActionsReturnType<ExtendedAnnouncement[]>> {
-  try {
-    const announcements = await prisma.announcement.findMany({
-      take: limit,
-      orderBy: {
-        updatedAt: 'desc'
-      },
-      include: {
-        publishedBy: {
-          select: {
-            firstName: true,
-            lastName: true,
-            email: true
-          }
-        }
-      }
-    });
-
-    return {
-      success: true,
-      data: processActionReturnData(announcements) as ExtendedAnnouncement[]
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: error instanceof Error ? error.message : "Failed to fetch announcements"
-    };
-  }
-}
 
 export async function updateAnnouncement({
   userId,

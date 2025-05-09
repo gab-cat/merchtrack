@@ -1,15 +1,14 @@
 import { FaUserFriends, FaShoppingCart } from "react-icons/fa";
 import { FaChartSimple } from "react-icons/fa6";
 import { MdSettings } from "react-icons/md";
-import { getAnnouncements } from "./settings/_actions";
 import { getSessionData } from "@/lib/auth";
-import { getDashboardStats } from "@/actions/dashboard.actions";
-import { AnnouncementsCard } from "@/app/admin/components/AnnouncementsCard";
-import { MessageOfTheDayCard } from "@/app/admin/components/MessageOfTheDayCard";
-import { QuickActions } from "@/app/admin/components/QuickActions";
-import { StatCard } from "@/app/admin/components/StatCard";
+import { AnnouncementsCard } from "@/features/admin/dashboard/components/AnnouncementsCard";
+import { MessageOfTheDayCard } from "@/features/admin/dashboard/components/MessageOfTheDayCard";
+import { QuickActions } from "@/features/admin/dashboard/components/QuickActions";
+import { StatCard } from "@/features/admin/dashboard/components/StatCard";
 import PageAnimation from "@/components/public/page-animation";
 import { ExtendedAnnouncement } from "@/types/announcement";
+import { getAnnouncements, getDashboardStats } from "@/features/admin/dashboard/actions";
 
 export const metadata = {
   title: "Admin Dashboard",

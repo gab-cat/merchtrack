@@ -4,8 +4,7 @@ import * as React from "react";
 import { FaListAlt, FaSearch } from "react-icons/fa";
 import { useDebounce } from 'use-debounce';
 
-import { LogsTable } from "./logs-table";
-import { LogDetailsModal } from "./log-details-modal";
+import { LogsTable, LogDetailsModal } from ".";
 import { Input } from "@/components/ui/input";
 import { useLogsQuery } from "@/hooks/logs.hooks";
 import { DatePicker } from "@/components/ui/date-picker";

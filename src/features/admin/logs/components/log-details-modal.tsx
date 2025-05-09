@@ -4,13 +4,13 @@ import { ExtendedLogs } from "@/types/logs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
-interface LogDetailsModalProps {
+type LogDetailsModalProps = {
   log: ExtendedLogs | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function LogDetailsModal({ log, open, onOpenChange }: LogDetailsModalProps) {
+export function LogDetailsModal({ log, open, onOpenChange }: Readonly<LogDetailsModalProps>) {
   if (!log) return null;
 
   return (

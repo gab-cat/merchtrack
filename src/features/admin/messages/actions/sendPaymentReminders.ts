@@ -5,13 +5,14 @@ import { verifyPermission } from "@/utils/permissions";
 import { sendPaymentReminderEmail } from "@/lib/email-service";
 import { paymentReminderSchema } from "@/schema/reminders.schema";
 
+
 type SendPaymentReminderParams = {
   userId: string;
   orderIds: string[];
   dueDate: Date;
 }
 
-export const sendPaymentReminders = async ({ userId, orderIds, dueDate }: SendPaymentReminderParams): Promise<ActionsReturnType<never>> => {
+const sendPaymentReminders = async ({ userId, orderIds, dueDate }: SendPaymentReminderParams): ActionsReturnType<never> => {
   const authResult = await verifyPermission({
     userId,
     permissions: {
@@ -31,7 +32,6 @@ export const sendPaymentReminders = async ({ userId, orderIds, dueDate }: SendPa
   }
 
   try {
-    // Validate the input
     paymentReminderSchema.parse({
       orderIds,
       dueDate
@@ -59,7 +59,6 @@ export const sendPaymentReminders = async ({ userId, orderIds, dueDate }: SendPa
 
     await Promise.all(sendPromises);
 
-    // Log successful reminders
     await prisma.log.createMany({
       data: orders.map(order => ({
         reason: "Payment Reminder Sent",
@@ -81,3 +80,5 @@ export const sendPaymentReminders = async ({ userId, orderIds, dueDate }: SendPa
     };
   }
 };
+
+export default sendPaymentReminders; 

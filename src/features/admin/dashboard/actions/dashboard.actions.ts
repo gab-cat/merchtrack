@@ -21,7 +21,7 @@ type DashboardReturnType = {
     };
 }
 
-export async function getDashboardStats(): Promise<ActionsReturnType<DashboardReturnType>> {
+export default async function getDashboardStats(): Promise<ActionsReturnType<DashboardReturnType>> {
   try {
     // Check if cached data exists
     const cachedData = await getCached<DashboardReturnType>('dashboard-stats');

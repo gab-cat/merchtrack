@@ -2,7 +2,7 @@ import { MdOutlineEmail } from "react-icons/md";
 import { CiCalendar } from "react-icons/ci";
 import { manilaTime } from "@/utils/formatTime";
 import type { ExtendedMessage } from "@/types/messages";
-import MessageReply from "@/app/admin/messages/(components)/msg-detail-reply";
+import { MessageDetailReply } from "@/features/admin/messages/components";
 
 interface MessageHeaderContentProps {
   message: ExtendedMessage
@@ -31,7 +31,7 @@ export default function MessageHeaderContent({ message, mode }: Readonly<Message
           <p className="whitespace-pre-wrap text-gray-700 dark:text-gray-300">{message.message}</p>
         </div>
       ): (
-        <MessageReply replyMessage={message}/>
+        <MessageDetailReply replyMessage={message}/>
       )}
     </>
   );

@@ -6,7 +6,7 @@ interface MessageOfTheDayCardProps {
   message: string;
 }
 
-export function MessageOfTheDayCard({ title, message }: MessageOfTheDayCardProps) {
+export function MessageOfTheDayCard({ title, message }: Readonly<MessageOfTheDayCardProps>) {
   return (
     <Card className="bg-white shadow-none transition-all duration-300 ease-in-out hover:shadow-lg">
       <CardHeader>

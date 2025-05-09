@@ -7,7 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ExtendedAnnouncement } from "@/types/announcement";
 
-interface AnnouncementsCardProps {
+type AnnouncementsCardProps = {
   announcements: ExtendedAnnouncement[];
 }
 

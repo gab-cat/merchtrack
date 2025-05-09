@@ -22,10 +22,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { createMessageSchema, CreateMessageType } from "@/schema/messages";
+import { createMessageSchema, CreateMessageType } from "@/features/admin/messages/messages.schema";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import useToast from "@/hooks/use-toast";
-import { createMessage } from "@/app/admin/messages/_actions";
 import { useUserStore } from "@/stores/user.store";
 
 import { cn } from "@/lib/utils";
@@ -34,6 +33,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import UserAvatar from "@/components/shared/user-avatar";
 import { QueryParams } from "@/types/common";
+import { createMessage } from "@/features/admin/messages/actions";
 
 export default function ComposeEmail() {
   const { userId } = useUserStore();
@@ -93,7 +93,6 @@ export default function ComposeEmail() {
 
   // Update form value when selectedEmails changes
   useEffect(() => {
-    // @ts-expect-error - TS doesn't recognize the type of setValue
     form.setValue("emails", selectedEmails, { shouldValidate: true });
   }, [selectedEmails, form]);
 

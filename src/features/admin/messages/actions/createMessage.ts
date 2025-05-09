@@ -5,95 +5,16 @@ import { render } from "@react-email/components";
 import prisma from "@/lib/db";
 import { verifyPermission } from "@/utils/permissions";
 import { sendEmail } from "@/lib/mailgun";
-import ReplyEmailTemplate from "@/app/admin/messages/(components)/email-template";
-import { CreateMessageType, createMessageSchema } from "@/schema/messages";
-import { processActionReturnData } from "@/utils";
+import { ReplyEmailTemplate } from "@/features/admin/messages/components";
+import { CreateMessageType, createMessageSchema } from "@/features/admin/messages/messages.schema";
 
-type ReplyToMessageParams = {
-  userId: string
-  messageId: string
-  reply: string
-}
-
-export const replyToMessage = async ({userId, messageId, reply}: ReplyToMessageParams): Promise<ActionsReturnType<Message>> => {
-  const authResult = await verifyPermission({
-    userId,
-    permissions: {
-      messages: { canRead: true, canCreate: true },
-    },
-    logDetails: {
-      actionDescription: "Reply to message",
-      userText: `Attempted to reply to message ID: ${messageId}`
-    }
-  });
-
-  if (!authResult) {
-    return {
-      success: false,
-      message: "Unauthorized access."
-    };
-  }
-
-  const messageToUpdate = await prisma.message.update({
-    where: {
-      id: messageId
-    },
-    data: {
-      isRead: true
-    },
-  });
-
-  const replyMessage = await prisma.message.create({
-    data: {
-      subject: `Re: ${messageToUpdate.subject}`,
-      message: reply,
-      isRead: true,
-      isSentByAdmin: true,
-      repliesToId: messageToUpdate.id,
-      email: messageToUpdate.email,
-      sentBy: userId,
-    },
-    include: {
-      user: true
-    }
-  });
-
-  // Log successful reply
-  await prisma.log.create({
-    data: {
-      reason: "Message Reply Sent",
-      systemText: `Admin replied to message ID: ${messageId}`,
-      userText: `Reply sent to: ${messageToUpdate.email}`,
-      createdBy: {
-        connect: { id: userId }
-      }
-    }
-  });
-
-  await sendEmail({
-    to: messageToUpdate.email,
-    subject: `Re: ${messageToUpdate.subject}`,
-    html: await render(ReplyEmailTemplate({ 
-      replyContent: reply,
-      customerName: messageToUpdate.email,
-      subject: messageToUpdate.subject
-    })),
-    from: 'MerchTrack Support'
-  });
-
-  return {
-    success: true,
-    data: processActionReturnData(replyMessage) as Message,
-    message: "Message replied successfully."
-  };
-};
 
 type CreateMessageParams = {
   userId: string
   formData: CreateMessageType
 }
 
-export const createMessage = async (params: CreateMessageParams): Promise<ActionsReturnType<Message>> => {
+const createMessage = async (params: CreateMessageParams): ActionsReturnType<Message> => {
   const authResult = await verifyPermission({
     userId: params.userId,
     permissions: {
@@ -113,7 +34,6 @@ export const createMessage = async (params: CreateMessageParams): Promise<Action
   }
 
   try {
-    // Use the correct schema for validation
     const result = createMessageSchema.safeParse(params.formData);
 
     if (!result.success) {
@@ -129,7 +49,6 @@ export const createMessage = async (params: CreateMessageParams): Promise<Action
       };
     }
     
-    // Create multiple message records at once using createMany
     await prisma.message.createMany({
       data: result.data.emails.map(email => ({
         message: result.data.message,
@@ -141,7 +60,6 @@ export const createMessage = async (params: CreateMessageParams): Promise<Action
       }))
     });
     
-    // Create log entries for all messages
     await prisma.log.createMany({
       data: result.data.emails.map(email => ({
         reason: "New Message Created",
@@ -151,13 +69,12 @@ export const createMessage = async (params: CreateMessageParams): Promise<Action
       }))
     });
     
-    // Send emails to all recipients
     sendEmail({
       to: result.data.emails,
       subject: result.data.subject,
       html: await render(ReplyEmailTemplate({
         replyContent: result.data.message,
-        customerName: result.data.customerName,
+        customerName: result.data.customerName, // This might be an issue if customerName is not part of CreateMessageType
         subject: result.data.subject
       })),
       from: 'MerchTrack Support'
@@ -175,3 +92,5 @@ export const createMessage = async (params: CreateMessageParams): Promise<Action
     };
   }
 };
+
+export default createMessage; 

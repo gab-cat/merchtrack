@@ -2,7 +2,7 @@ import React from "react";
 import { Metadata } from "next";
 import PageAnimation from "@/components/public/page-animation";
 import PageTitle from "@/components/private/page-title";
-import { LogsContent } from "@/app/admin/logs/components/logs-content";
+import { LogsContent } from "@/features/admin/logs/components";
 
 
 
