@@ -4,10 +4,9 @@ LABEL author=gab-cat
 
 WORKDIR /app
 
-# Install pnpm
-RUN npm install -g pnpm@9.15.2
-
 # Copy package files and install dependencies
 COPY pnpm-lock.yaml package.json ./
 COPY prisma ./prisma
-RUN pnpm install --shamefully-hoist
+
+RUN apk add --no-cache libc6-compat
+RUN corepack enable pnpm && pnpm install 
