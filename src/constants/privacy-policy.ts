@@ -33,7 +33,8 @@ We automatically collect certain information when you use our platform:
 • Analyzing usage patterns
 • Detecting and preventing fraud
 • Complying with legal obligations
-• Communicating about new features or updates`
+• Communicating about new features or updates
+• Marketing and promotional purposes `
     },
     {
       title: "Data Security",
