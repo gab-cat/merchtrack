@@ -42,6 +42,6 @@ jobs:
           context: .
           file: ./Dockerfile.cache
           tags: gabcat/merchtrack:cache
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=registry,ref=gabcat/merchtrack:cache
+          cache-to: type=registry,ref=gabcat/merchtrack:cache, mode=max
           push: true

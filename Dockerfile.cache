@@ -9,5 +9,4 @@ COPY pnpm-lock.yaml package.json ./
 COPY prisma ./prisma
 
 RUN apk add --no-cache libc6-compat
-RUN npm install -g corepack
-RUN corepack enable pnpm && pnpm install 
+RUN npm install -g bun && bun install
