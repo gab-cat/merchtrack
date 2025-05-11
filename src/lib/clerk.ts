@@ -1,4 +1,5 @@
 import { clerkClient } from "@clerk/nextjs/server";
+import { NODE_ENV } from "@/config";
 
 const clerkClientSingleton = async () => {
   return await clerkClient();
@@ -12,4 +13,4 @@ const clerk = globalThis.clerkGlobal ?? clerkClientSingleton();
 
 export default clerk;
 
-if (process.env.NODE_ENV !== 'production') {globalThis.clerkGlobal = clerk;}
+if (NODE_ENV !== 'production') {globalThis.clerkGlobal = clerk;}

@@ -24,6 +24,7 @@ import { useOrderQuery } from '@/hooks/orders.hooks';
 import { formatCurrency, formatDate } from "@/utils/format";
 import { PaymentDialog } from '@/components/public/profile/payment-dialog';
 import { cn } from '@/lib/utils';
+import { NEXT_PUBLIC_APP_URL, NODE_ENV } from '@/config';
 
 // Animation variants
 const fadeIn = {
@@ -101,7 +102,7 @@ function TrackOrderBody() {
     }
   };
 
-  const baseUrl = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_APP_URL : 'http://localhost:3000';
+  const baseUrl = NODE_ENV === 'production' ? NEXT_PUBLIC_APP_URL : 'http://localhost:3000';
   const surveyLink = `${baseUrl}/survey?id=${order?.customerSatisfactionSurvey?.id}`;
 
   return (

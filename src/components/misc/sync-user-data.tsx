@@ -1,10 +1,11 @@
 'use client';
 
+import crypto from "crypto";
 import { useUser } from "@clerk/nextjs";
 import { useEffect } from "react";
 import { User } from "@prisma/client";
 import { useUserStore } from "@/stores/user.store";
-import crypto from "crypto";
+import { NEXT_PUBLIC_CHATWOOT_KEY } from '@/config';
 
 const SyncUserData = () => {
   const { user, isSignedIn } = useUser();
@@ -14,7 +15,7 @@ const SyncUserData = () => {
   const setChatwootUser = () => {
     if (userData && typeof window !== 'undefined' && window.$chatwoot) {
       const { id, firstName, lastName, email, phone, role } = userData;
-      const key = process.env.NEXT_PUBLIC_CHATWOOT_KEY;
+      const key = NEXT_PUBLIC_CHATWOOT_KEY;
       if (!key) {
         console.error('Chatwoot key is not defined');
         return;

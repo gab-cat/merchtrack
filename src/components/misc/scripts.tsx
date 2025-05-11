@@ -2,8 +2,12 @@
 'use client';
 
 import Script from "next/script";
-import { memo, useEffect } from "react";
-import { CF_BEACON_TOKEN } from "@/config";
+import { memo } from "react";
+import { CF_BEACON_TOKEN , 
+  NEXT_PUBLIC_APP_URL, 
+  NEXT_PUBLIC_CHATWOOT_BASE_URL,
+  NEXT_PUBLIC_CHATWOOT_WEBSITE_TOKEN
+} from "@/config";
 
 // Add TypeScript declaration for the Chatwoot SDK
 declare global {
@@ -73,20 +77,20 @@ const Scripts = memo(() => {
                 "position": "right",
                 "type": "expanded_bubble",
                 "launcherTitle": "Chat with us",
-                "baseDomain": "${process.env.NEXT_PUBLIC_URL}",
+                "baseDomain": "${NEXT_PUBLIC_APP_URL}",
             };
         `,
         }}
       />
       <Script
         id="chatwoot-sdk"
-        src={`${process.env.NEXT_PUBLIC_CHATWOOT_BASE_URL}/packs/js/sdk.js`}
+        src={`${NEXT_PUBLIC_CHATWOOT_BASE_URL}/packs/js/sdk.js`}
         strategy="afterInteractive"
         onLoad={() => {
           if (typeof window !== "undefined" && window.chatwootSDK) {
             window.chatwootSDK.run({
-              websiteToken: process.env.NEXT_PUBLIC_CHATWOOT_WEBSITE_TOKEN!,
-              baseUrl: process.env.NEXT_PUBLIC_CHATWOOT_BASE_URL!,
+              websiteToken: NEXT_PUBLIC_CHATWOOT_WEBSITE_TOKEN!,
+              baseUrl: NEXT_PUBLIC_CHATWOOT_BASE_URL!,
             });
           }
         }}

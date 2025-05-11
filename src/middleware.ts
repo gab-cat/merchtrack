@@ -1,6 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import * as jose from 'jose';
+import { JWT_KEY } from '@/config';
 
 /**
  * Configuration object used to define routing and matching rules.
@@ -73,7 +74,7 @@ async function verifyApiJwt(req: NextRequest): Promise<NextResponse | null> {
   
   try {
     const token = authorization.split(" ")[1];
-    const jwtKey = process.env.JWT_KEY ?? '';
+    const jwtKey = JWT_KEY ?? '';
     if (!jwtKey) {
       return NextResponse.json({
         status: 500,

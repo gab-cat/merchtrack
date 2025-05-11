@@ -6,6 +6,7 @@ import type { ExtendedMessage } from "@/types/messages";
 import { getMessages, getMessage } from "@/actions/messages.actions";
 import { QueryParams } from "@/types/common";
 import { useResourceQuery } from "@/hooks/index.hooks";
+import { NEXT_PUBLIC_API_KEY } from '@/config';
 
 /**
  * Fetches all messages for the current user.
@@ -85,7 +86,7 @@ export function useUserImageQuery(clerkId: string | undefined) {
       const response = await fetch(`/api/users/image/${clerkId}`, {
         method: 'GET',
         headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_KEY}`,
+          Authorization: `Bearer ${NEXT_PUBLIC_API_KEY}`,
         },
       });
       if (!response.ok) {

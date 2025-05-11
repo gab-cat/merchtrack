@@ -3,6 +3,7 @@
 import { PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { verifyPermission } from '@/utils/permissions';
 import s3Client from '@/lib/s3';
+import { CLOUDFLARE_R2_BUCKET_NAME, CLOUDFLARE_R2_PUBLIC_URL } from '@/config';
 
 export async function deleteProductImages(userId: string, imageUrls: string[]): Promise<ActionsReturnType<void>> {
   if (!await verifyPermission({
@@ -28,7 +29,7 @@ export async function deleteProductImages(userId: string, imageUrls: string[]): 
     await Promise.all(
       keys.map(key => 
         s3Client.send(new DeleteObjectCommand({
-          Bucket: process.env.CLOUDFLARE_R2_BUCKET_NAME,
+          Bucket: CLOUDFLARE_R2_BUCKET_NAME,
           Key: key,
         }))
       )
@@ -64,13 +65,13 @@ export async function uploadProductImages(userId: string, files: File[]): Promis
       const arrayBuffer = await file.arrayBuffer();
       
       await s3Client.send(new PutObjectCommand({
-        Bucket: process.env.CLOUDFLARE_R2_BUCKET_NAME,
+        Bucket: CLOUDFLARE_R2_BUCKET_NAME,
         Key: key,
         Body: Buffer.from(arrayBuffer),
         ContentType: file.type,
       }));
 
-      return `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/${key}`;
+      return `${CLOUDFLARE_R2_PUBLIC_URL}/${key}`;
     });
 
     const uploadedUrls = await Promise.all(uploadPromises);
