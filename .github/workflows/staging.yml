@@ -49,8 +49,8 @@ jobs:
           file: ./Dockerfile
           tags: |
             gabcat/merchtrack:staging
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=registry,ref=gabcat/merchtrack:staging
+          cache-to: type=registry,ref=gabcat/merchtrack:staging, mode=max
           push: true
 
       - name: Remove env file
