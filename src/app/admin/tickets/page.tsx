@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import PageTitle from "@/components/private/page-title";
 import PageAnimation from "@/components/public/page-animation";
-import TicketsContent from "@/app/admin/tickets/components/tickets-content";
+import { TicketsContent } from "@/features/admin/tickets/components";
 
 export const metadata: Metadata = {
   title: "Support Tickets | MerchTrack",

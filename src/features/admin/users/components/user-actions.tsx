@@ -8,8 +8,7 @@ import {
   FaUnlock, 
   FaExclamationTriangle 
 } from "react-icons/fa";
-import { UserManagerDialog } from "./user-manager-dialog";
-import { ResetPasswordDialog } from "./reset-password-dialog";
+import { UserManagerDialog , ResetPasswordDialog } from "@/features/admin/users/components";
 import { useUserQuery } from "@/hooks/users.hooks";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

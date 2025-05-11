@@ -2,7 +2,7 @@
 
 import { useResourceByIdQuery, useResourceQuery } from "@/hooks/index.hooks";
 import { QueryParams } from "@/types/common";
-import { getTickets, getTicketById } from "@/actions/ticket.actions";
+import { getTickets, getTicketById } from "@/features/admin/tickets/actions";
 
 /**
  * Retrieves a paginated list of tickets for the authenticated user.

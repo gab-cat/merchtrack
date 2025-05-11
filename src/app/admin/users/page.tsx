@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import PageTitle from "@/components/private/page-title";
-import { UserManagement } from "@/app/admin/users/components/user-management";
+import { UserManagement } from "@/features/admin/users/components/user-management";
 import PageAnimation from "@/components/public/page-animation";
 
 export const metadata: Metadata = {  

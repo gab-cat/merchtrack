@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -5,10 +7,10 @@ import { useMutation } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { resetPasswordForUser } from '@/app/admin/users/[email]/_actions';
+import { resetPasswordForUser } from '@/features/admin/users/actions/resetPasswordForUser';
 import { useUserStore } from '@/stores/user.store';
 import useToast from '@/hooks/use-toast';
-import { resetUserPasswordSchema, ResetUserPasswordType } from '@/schema/user';
+import { resetUserPasswordSchema, ResetUserPasswordType } from '@/features/admin/users/users.schema';
 import { Form } from '@/components/ui/form';
 
 interface ResetPasswordDialogProps {
@@ -27,7 +29,6 @@ export function ResetPasswordDialog({ open, onOpenChange, userId, email }: Reset
     mode: 'onBlur',
     defaultValues: {
       newPassword: '',
-      userId: requesterId,
       clerkId: userId,
       skipLegalChecks: false,
       signOutOfOtherSessions: true

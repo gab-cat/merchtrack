@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateUserDetails } from "../[email]/_actions";
+import { updateUserDetails } from "@/features/admin/users/actions";
 import { College, Role } from "@/types/Misc";
 import { useUserQuery } from "@/hooks/users.hooks";
 import { useUserImageQuery } from "@/hooks/messages.hooks";
@@ -19,7 +19,7 @@ import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { updateUserSchema, type UpdateUserType } from "@/schema/user";
+import { updateUserSchema, type UpdateUserType } from "@/features/admin/users/users.schema";
 import { useUserStore } from "@/stores/user.store";
 import UserAvatar from "@/components/shared/user-avatar";
 

@@ -3,7 +3,7 @@ import { OrderPaymentStatus } from "@prisma/client";
 import { FaListAlt, FaRegClock } from "react-icons/fa";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { motion } from "framer-motion";
-import { OrderPaymentModal } from "@/app/admin/payments/components/order-payment-modal";
+import { OrderPaymentModal } from "@/features/admin/payments/components";
 import {
   Table,
   TableBody,

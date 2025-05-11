@@ -2,7 +2,7 @@ import { User } from "@prisma/client";
 import { FaUser } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { UserRow } from "./user-row";
+import { UserRow } from "@/features/admin/users/components";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fadeInUp } from "@/constants/animations";

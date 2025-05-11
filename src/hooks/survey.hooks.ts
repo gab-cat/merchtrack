@@ -1,29 +1,21 @@
 'use client';
 
+import { useQuery } from "@tanstack/react-query";
 import { getSurveyById, getSurveys } from "@/actions/survey.actions";
 import { getSurveyCategories } from "@/features/admin/surveys/actions";
 import { useResourceByIdQuery, useResourceQuery } from "@/hooks/index.hooks";
+import { useUserStore } from "@/stores/user.store";
 import { QueryParams } from "@/types/common";
 
 export function useSurveyCategoriesQuery(params: QueryParams = {}) {
-  const { where, include, orderBy, take, skip, page, limit } = params;
-  return useResourceQuery({
-    resource: 'surveyCategories',
-    // @ts-expect-error - This is a workaround to get the correct type for the fetcher function
-    fetcher: async (userId: string, params: QueryParams) => getSurveyCategories(userId, params),
-    params: {
-      where: {
-        isDeleted: false,
-        ...where
-      },
-      include,
-      orderBy,
-      take,
-      skip,
-      page,
-      limit
-    }
-
+  const { userId } = useUserStore();
+  return useQuery({
+    queryKey: ['surveyCategories:all'],
+    queryFn: async () => {
+      const response = await getSurveyCategories(userId!, params);
+      return response.data;
+    },
+    staleTime: Infinity
   });
 }
 

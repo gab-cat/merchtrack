@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useDebounce } from "use-debounce";
 import { Mail } from "lucide-react";
-import { TicketList } from "./ticket-list";
+import { TicketList } from "@/features/admin/tickets/components";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -14,7 +14,7 @@ import { PaginationFooter } from "@/components/shared/pagination-footer";
 
 const ITEMS_PER_PAGE = 5; 
 
-export default function TicketsContent() {
+export function TicketsContent() {
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch] = useDebounce(searchInput, 500);
   const [statusFilter, setStatusFilter] = useState("ALL");
@@ -35,7 +35,10 @@ export default function TicketsContent() {
       ...(debouncedSearch && {
         OR: [
           { title: { contains: debouncedSearch, mode: 'insensitive' } },
-          { description: { contains: debouncedSearch, mode: 'insensitive' } }
+          { description: { contains: debouncedSearch, mode: 'insensitive' } },
+          { createdBy: { email: { contains: debouncedSearch, mode: 'insensitive' } } },
+          { createdBy: { firstName: { contains: debouncedSearch, mode: 'insensitive' } } },
+          { createdBy: { lastName: { contains: debouncedSearch, mode: 'insensitive' } } },
         ]
       })
     },

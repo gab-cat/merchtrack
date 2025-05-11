@@ -61,7 +61,7 @@ export function SurveyCategoriesList() {
   };
 
   const { data: response, isLoading, refetch } = useSurveyCategoriesQuery(queryParams);
-  const categories = response?.data as SurveyCategory[] ?? [];
+  const categories = response?.data ?? [];
   const totalPages = response?.metadata ? Math.ceil(response.metadata.total / ITEMS_PER_PAGE) : 0;
 
   const handleDelete = async (id: string) => {

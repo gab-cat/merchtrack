@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { FaSave } from "react-icons/fa";
 import { useMutation } from "@tanstack/react-query";
 import { useUserQuery } from "@/hooks/users.hooks";
-import { updateUserPermissions } from "@/actions/users.action";
+import { updateUserPermissions } from "@/features/admin/users/actions/updateUserPermissions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";

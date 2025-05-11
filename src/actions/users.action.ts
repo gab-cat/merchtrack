@@ -1,8 +1,7 @@
 'use server';
 
 import { type User } from "@clerk/nextjs/server";
-import { User as PrismaUser, UserPermission, Role } from "@prisma/client";
-import { revalidatePath } from "next/cache";
+import { User as PrismaUser } from "@prisma/client";
 import { PaginatedResponse, QueryParams } from "@/types/common";
 import { verifyPermission } from "@/utils/permissions";
 import { calculatePagination } from "@/utils/query.utils";
@@ -11,7 +10,8 @@ import { GetObjectByTParams } from "@/types/extended";
 import { ExtendedUser } from "@/types/users";
 import { processActionReturnData } from "@/utils";
 import clerk from "@/lib/clerk";
-import { invalidateCache } from "@/lib/redis";
+
+// The updateUserPermissions function has been moved to src/features/admin/users/actions/updateUserPermissions.ts
 
 export const getClerkUserPublicData = async (userId: string): Promise<ActionsReturnType<User>> => {
   const clerkClient = await clerk;
@@ -240,174 +240,6 @@ export async function getUser({userId, limitFields, userLookupId, include}: GetO
     return {
       success: false,
       message: (error as Error).message
-    };
-  }
-}
-
-type UpdateUserRoleParams = {
-  userId: string;
-  currentUserId: string;
-  role: Role;
-};
-
-/**
- * Updates a user's role.
- *
- * This asynchronous function first verifies that the current user has the required permissions to update user roles.
- * If the permission check passes, it updates the specified user's role in the database, creates a log entry for the update,
- * and invalidates the corresponding cache. If any step fails, it returns a failure response with an appropriate error message.
- *
- * @param userId - The ID of the user whose role is to be updated.
- * @param currentUserId - The ID of the user performing the update, used for permission verification and logging.
- * @param role - The new role to assign to the user.
- * @returns A promise that resolves to an object indicating whether the operation was successful. On success,
- *          the object contains the updated user data; on failure, it contains an error message and error details.
- *
- * @example
- * const response = await updateUserRole({ userId: "user-123", currentUserId: "admin-456", role: "admin" });
- * if (response.success) {
- *   console.log("User role updated:", response.data);
- * } else {
- *   console.error("Failed to update user role:", response.message);
- * }
- */
-export async function updateUserRole({ userId, currentUserId, role }: UpdateUserRoleParams): Promise<ActionsReturnType<PrismaUser>> {
-  if (!await verifyPermission({
-    userId: currentUserId,
-    permissions: {
-      users: { canUpdate: true }
-    }
-  })) {
-    return {
-      success: false,
-      message: "You are not authorized to update user roles."
-    };
-  }
-
-  try {
-    const updatedUser = await prisma.user.update({
-      where: { id: userId },
-      data: { role }
-    });
-    
-    // Log the role update
-    await prisma.log.create({
-      data: {
-        reason: 'USER_ROLES',
-        systemText: `Updated role for user ${userId} to ${role}`,
-        userText: `Updated user role to ${role}`,
-        createdBy: {
-          connect: {
-            id: currentUserId
-          }
-        },
-        user: {
-          connect: {
-            id: userId
-          }
-        }
-      }
-    });
-
-    revalidatePath('/admin/users/[email]');
-
-    return {
-      success: true,
-      data: processActionReturnData(updatedUser, []) as PrismaUser
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: "Failed to update user role",
-      errors: { error }
-    };
-  }
-}
-
-type UpdateUserPermissionsParams = {
-  userId: string;
-  currentUserId: string;
-  permissions: Record<string, Partial<UserPermission>>;
-};
-
-/**
- * Updates the permissions for a specified user.
- *
- * This function verifies that the current user has the required permission to update user permissions. It then performs an upsert operation within a transaction for each permission provided, ensuring that existing records are updated and new records are created when necessary. After updating, a corresponding log is recorded, the relevant cache is invalidated, and the administration path is revalidated.
- *
- * @param userId - The ID of the user whose permissions are being updated.
- * @param currentUserId - The ID of the user attempting to perform the update. This user must have permission to update user permissions.
- * @param permissions - An object containing the permission updates, where each key is a permission ID and its value contains the update details.
- * @returns A promise that resolves to an object indicating success or failure. On success, the updated permissions are returned; on failure, an error message and details are provided.
- */
-export async function updateUserPermissions({ userId, currentUserId, permissions }: UpdateUserPermissionsParams): Promise<ActionsReturnType<UserPermission[]>> {
-  if (!await verifyPermission({
-    userId: currentUserId,
-    permissions: {
-      users: { canUpdate: true }
-    },
-    logDetails: {
-      actionDescription: 'update user permissions',
-      userText: `Attempted to update permissions for user ${userId}`
-    }
-  })) {
-    return {
-      success: false,
-      message: "You are not authorized to update user permissions."
-    };
-  }
-
-  try {
-    const updates = Object.entries(permissions).map(([permissionId, permission]) => 
-      prisma.userPermission.upsert({
-        where: {
-          userId_permissionId: {
-            userId: userId,
-            permissionId
-          }
-        },
-        update: permission,
-        create: {
-          userId: userId,
-          permissionId,
-          ...permission
-        }
-      })
-    );
-
-    const updatedPermissions = await prisma.$transaction(updates);
-    
-    // Log the permission update
-    await prisma.log.create({
-      data: {
-        reason: 'USER_PERMISSIONS',
-        systemText: `Updated permissions for user ${userId}`,
-        userText: `Updated user permissions`,
-        createdBy: {
-          connect: {
-            id: currentUserId
-          }
-        },
-        user: {
-          connect: {
-            id: userId
-          }
-        }
-      }
-    });
-
-    revalidatePath('/admin/users/[email]');
-    invalidateCache([`permissions:${userId}`]);
-    return {
-      success: true,
-      data: updatedPermissions
-    };
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to update user permissions";
-    return {
-      success: false,
-      message,
-      errors: { error }
     };
   }
 }

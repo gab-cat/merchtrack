@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { TicketPriority, TicketStatus } from "@prisma/client";
+import { addTicketUpdate, updateTicket } from "@/features/admin/tickets/actions";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ExtendedTicket } from "@/types/tickets";
 import { useUserStore } from "@/stores/user.store";
-import { addTicketUpdate, updateTicket } from "@/actions/ticket.actions";
 import { prettyFormatDate } from "@/utils";
 
 interface TicketDialogProps {

@@ -7,15 +7,13 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useDebounce } from "use-debounce";
-import { OrdersPaymentTable } from "./orders-payment-table";
-import { OffsitePayment } from "./offsite-payment";
-import { OrderPaymentModalWithQueryParams } from "./order-payment-modal";
+import { OrdersPaymentTable , OffsitePayment , OrderPaymentModalWithQueryParams } from "@/features/admin/payments/components";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useOrdersQuery } from "@/hooks/orders.hooks";
 import { usePaymentsQuery } from "@/hooks/payments.hooks";
 import { Badge } from "@/components/ui/badge";
-import { validatePayment, rejectPayment } from "@/actions/payments.actions";
+import { validatePayment, rejectPayment } from "@/features/admin/payments/actions";
 import { useUserStore } from "@/stores/user.store";
 
 export function PaymentsContent() {
@@ -130,18 +128,17 @@ export function PaymentsContent() {
       const payment = offsitePaymentsResponse?.data?.find(p => p.id === paymentId);
       if (!payment) throw new Error("Payment not found");
 
-      const result = await validatePayment(
+      const result = await validatePayment({
         userId,
-        payment.orderId,
-        Number(payment.amount),
-        {
+        orderId: payment.orderId,
+        paymentId,
+        transactionDetails: {
           transactionId: payment.transactionId ?? `manual-${Date.now()}`,
           referenceNo: payment.referenceNo ?? "",
           paymentMethod: payment.paymentMethod,
           paymentSite: payment.paymentSite,
-        },
-        paymentId
-      );
+        }
+      });
 
       if (!result.success) {
         throw new Error(result.message ?? "Failed to verify payment");
@@ -167,12 +164,12 @@ export function PaymentsContent() {
       const payment = offsitePaymentsResponse?.data?.find(p => p.id === paymentId);
       if (!payment) throw new Error("Payment not found");
 
-      const result = await rejectPayment(
+      const result = await rejectPayment({
         userId,
-        payment.orderId,
+        orderId: payment.orderId,
         paymentId,
-        notes ?? "Payment rejected by administrator"
-      );
+        rejectionReason: notes ?? "Payment rejected by administrator"
+      });
 
       if (!result.success) {
         throw new Error(result.message ?? "Failed to reject payment");

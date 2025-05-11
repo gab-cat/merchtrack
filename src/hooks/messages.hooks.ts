@@ -78,7 +78,7 @@ export function useMessageQuery(messageId: string | null, enabled: boolean) {
 }
 
 export function useUserImageQuery(clerkId: string | undefined) {
-  return useQuery({
+  return useQuery<string, Error>({
     enabled: clerkId !== undefined,
     queryKey: [`users:${clerkId}`],
     queryFn: async () => {

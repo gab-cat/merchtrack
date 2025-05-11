@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Metadata } from "next";
-import { PaymentsContent } from "./components/payments-content";
+import { PaymentsContent } from "@/features/admin/payments/components";
 import PageAnimation from "@/components/public/page-animation";
 import PageTitle from "@/components/private/page-title";
 

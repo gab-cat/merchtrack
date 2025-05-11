@@ -4,8 +4,8 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { Role } from "@prisma/client";
 import { useDebounce } from 'use-debounce';
 import { useRouter } from "next/navigation";
-import { SearchBar } from "./search-bar";
-import { UserList } from "./user-list";
+import { SearchBar , UserList } from "@/features/admin/users/components";
+
 import { useUsersQuery } from "@/hooks/users.hooks";
 import { QueryParams } from "@/types/common";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";

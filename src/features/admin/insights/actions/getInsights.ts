@@ -1,6 +1,6 @@
 'use server';
 
-import { OrderStatus, Product, ProductVariant, OrderItem, Order as PrismaOrder, Category as PrismaCategory, Prisma } from '@prisma/client';
+import { OrderStatus, Prisma } from '@prisma/client';
 import prisma from '@/lib/db';
 import { verifyPermission } from '@/utils/permissions';
 import { InsightsData } from '@/hooks/use-insights';
@@ -83,16 +83,6 @@ function processSurveyMetrics(surveyData: Prisma.CustomerSatisfactionSurveyGetPa
 
   return Object.values(surveyMetrics);
 }
-
-// Define a more specific type for product data included in the transaction
-type ProductDataForInsights = Product & {
-  category: PrismaCategory | null;
-  variants: (ProductVariant & {
-    OrderItem: (OrderItem & {
-      order: PrismaOrder;
-    })[];
-  })[];
-};
 
 export async function getInsights(
   userId: string,

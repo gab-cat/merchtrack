@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from "react";
 import { FaSearch, FaBox } from "react-icons/fa";
 import { orders, type Order } from "@/types/Misc";

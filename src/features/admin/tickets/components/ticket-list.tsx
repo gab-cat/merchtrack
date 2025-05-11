@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { TicketDialog } from "./ticket-dialog";
+import { TicketDialog } from "@/features/admin/tickets/components";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ExtendedTicket } from "@/types/tickets";

@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from "react";
 import { FaSearch, FaUserShield } from "react-icons/fa";
 import { Shield } from "lucide-react";
@@ -12,7 +14,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { assignManager } from "@/app/admin/users/[email]/_actions";
+import { assignManager } from "@/features/admin/users/actions/assignManager";
 
 interface UserManagerDialogProps {
   open: boolean;

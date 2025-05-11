@@ -6,7 +6,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useDebounce } from "use-debounce";
 import { FaSearch, FaListAlt, FaUser, FaTag, FaClock, FaCog, FaShoppingBag, FaCreditCard } from "react-icons/fa";
 import { format } from "date-fns";
-import { LogDetailsModal } from "../../../../features/admin/logs/components/log-details-modal";
+import { LogDetailsModal } from "@/features/admin/logs/components/log-details-modal";
 import { useLogsQuery } from "@/hooks/logs.hooks";
 import { PaginationNav } from "@/components/shared/pagination-nav";
 import { Input } from "@/components/ui/input";

@@ -1,3 +1,5 @@
+'use client';
+
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { processPayment } from "@/actions/payments.actions";
+import { processPayment } from "@/features/admin/payments/actions";
 import { useUserStore } from "@/stores/user.store";
 import { ExtendedOrder } from "@/types/orders";
 import { cn } from "@/lib/utils";
