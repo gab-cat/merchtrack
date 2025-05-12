@@ -101,8 +101,8 @@ jobs:
           file: ./Dockerfile
           tags: |
             gabcat/merchtrack:preview-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
-          cache-from: type=registry,ref=gabcat/merchtrack:cache
-          cache-to: type=registry,ref=gabcat/merchtrack:cache, mode=max
+          cache-from: type=registry,ref=gabcat/merchtrack:staging
+          cache-to: type=registry,ref=gabcat/merchtrack:staging, mode=max
           push: true
 
       - name: Remove env file

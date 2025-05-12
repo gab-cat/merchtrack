@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { PaymentMethod, PaymentSite } from '@prisma/client';
 import { useOrderQuery } from '@/hooks/orders.hooks';
 import { useUserStore } from '@/stores/user.store';
-import { processPayment } from '@/actions/payments.actions';
+import { processPayment } from '@/features/admin/payments/actions';
 import { formatCurrency } from '@/utils/format';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';

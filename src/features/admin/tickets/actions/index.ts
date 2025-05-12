@@ -1,4 +1,4 @@
-export * from './createTicket';
+
 export * from './updateTicket';
 export * from './addTicketUpdate';
 export * from '../tickets.schema';

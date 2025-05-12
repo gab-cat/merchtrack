@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { createTicket } from "@/actions/ticket.actions";
+import { createTicket } from "@/features/customer/tickets/actions";
 import { useUserStore } from '@/stores/user.store';
 
 const supportFormSchema = z.object({
