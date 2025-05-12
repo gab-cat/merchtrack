@@ -28,10 +28,11 @@ RUN npm i -g dotenv-cli@8.0.0 bun && npx next telemetry disable
 COPY . .
 
 ENV NODE_ENV=production
-
 RUN dotenv -e .env -- bun run build
 
-# Stage: Runner
+
+
+# STAGE 3: Runner
 FROM base AS runner
 LABEL author=gab-cat
 
