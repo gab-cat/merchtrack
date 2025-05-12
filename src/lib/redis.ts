@@ -1,12 +1,13 @@
 import Redis from 'ioredis';
-import { REDIS_HOST, REDIS_PORT, REDIS_PASSWORD, NODE_ENV, REDIS_DEV_MODE } from '@/config';
+
+const { REDIS_HOST, REDIS_PORT, REDIS_PASSWORD, NODE_ENV } = process.env;
 
 const redisClientSingleton = () => {
   return new Redis({
     host: REDIS_HOST,
     port: Number(REDIS_PORT),
     password: REDIS_PASSWORD
-  });   
+  });
 };
 
 declare const globalThis: {
@@ -25,7 +26,7 @@ export default redis;
 if (NODE_ENV !== 'production') {globalThis.redisGlobal = redis;}
 
 export const getCached = async <T>(key: string): Promise<T | null> => {
-  if (NODE_ENV === 'development' && REDIS_DEV_MODE !== '1') return null;
+  if (NODE_ENV === 'development') return null;
   const cachedData = await redis.get(key);
   // if (!cachedData) console.log({
   //   message: 'Cache miss',
@@ -56,7 +57,7 @@ const expirationLengths: Record<ExpirationLength, number> = {
 };
 
 export const setCached = <T>(key: string, data: T, expirationInSeconds: number | ExpirationLength = 3600) => {
-  if (NODE_ENV === 'development' && REDIS_DEV_MODE !== '1') return null;
+  if (NODE_ENV === 'development' ) return null;
   const duration = typeof expirationInSeconds === 'number' 
     ? expirationInSeconds 
     : expirationLengths[expirationInSeconds];

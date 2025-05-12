@@ -1,6 +1,5 @@
 import type { MetadataRoute } from 'next';
 import prisma from '@/lib/db';
-import { NEXT_PUBLIC_APP_URL } from '@/config';
 
 type SitemapItem = {
     url: string;
@@ -24,7 +23,7 @@ const STATIC_ROUTES = [
 ];
  
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = NEXT_PUBLIC_APP_URL ?? 'https://merchtrack.tech';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://merchtrack.tech';
       
   // Get all published products
   const products = await prisma.product.findMany({

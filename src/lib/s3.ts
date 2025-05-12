@@ -1,22 +1,15 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { 
-  CLOUDFLARE_R2_BUCKET_NAME, 
-  CLOUDFLARE_R2_ENDPOINT, 
-  CLOUDFLARE_R2_ACCESS_KEY_ID, 
-  CLOUDFLARE_R2_SECRET_ACCESS_KEY,
-  CLOUDFLARE_R2_PUBLIC_URL
-} from '@/config';
 
-if (!CLOUDFLARE_R2_BUCKET_NAME) {
+if (!process.env.CLOUDFLARE_R2_BUCKET_NAME) {
   throw new Error('R2 bucket name is not configured');
 }
 
 const s3Client = new S3Client({
   region: 'auto',
-  endpoint: CLOUDFLARE_R2_ENDPOINT,
+  endpoint: process.env.CLOUDFLARE_R2_ENDPOINT,
   credentials: {
-    accessKeyId: CLOUDFLARE_R2_ACCESS_KEY_ID!,
-    secretAccessKey: CLOUDFLARE_R2_SECRET_ACCESS_KEY!,
+    accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY!,
   },
 });
 
@@ -41,14 +34,14 @@ export async function uploadToR2(file: File, key: string) {
   try {
     const arrayBuffer = await file.arrayBuffer();
     const command = new PutObjectCommand({
-      Bucket: CLOUDFLARE_R2_BUCKET_NAME,
+      Bucket: process.env.CLOUDFLARE_R2_BUCKET_NAME,
       Key: key,
       Body: Buffer.from(arrayBuffer),
       ContentType: file.type,
     });
 
     await s3Client.send(command);
-    return `${CLOUDFLARE_R2_PUBLIC_URL}/${key}`;
+    return `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/${key}`;
   } catch (error) {
     // no-dd-sa:typescript-best-practices/no-console
     console.error('Error uploading to R2:', error);
@@ -57,3 +50,4 @@ export async function uploadToR2(file: File, key: string) {
 }
 
 export default s3Client;
+

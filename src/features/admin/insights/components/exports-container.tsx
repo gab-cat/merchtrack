@@ -17,7 +17,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { NEXT_PUBLIC_API_KEY } from '@/config';
 
 const EXPORT_OPTIONS = [
   {
@@ -77,7 +76,7 @@ export default function ExportsContainer() {
     queryFn: async () => {
       const response = await fetch('/api/products/list', {
         headers: {
-          Authorization: `Bearer ${NEXT_PUBLIC_API_KEY}`,
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_KEY}`,
         }
       });
       if (!response.ok) throw new Error('Failed to fetch products');

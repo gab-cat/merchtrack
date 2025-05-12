@@ -1,6 +1,5 @@
 import {withSentryConfig} from '@sentry/nextjs';
 import type { NextConfig } from 'next';
-import { CLOUDFLARE_R2_PUBLIC_DOMAIN, NEXT_PUBLIC_APP_URL } from '@/config';
 
 const nextConfig: NextConfig = {
   output: 'standalone',
@@ -18,7 +17,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: CLOUDFLARE_R2_PUBLIC_DOMAIN,
+        hostname: process.env.CLOUDFLARE_R2_PUBLIC_DOMAIN!,
       },
       {
         protocol: 'https',
@@ -43,7 +42,7 @@ const nextConfig: NextConfig = {
       allowedOrigins: [
         'https://merchtrack.tech',
         'https://staging.merchtrack.tech',
-        NEXT_PUBLIC_APP_URL,
+        process.env.NEXT_PUBLIC_APP_URL!,
         'cuddly-succotash-5795q6qxrj627w7-3000.app.github.dev',
         'localhost:3000',
       ]

@@ -9,7 +9,6 @@ import { generateSurvey } from "@/actions/survey.actions";
 import { formatCurrency } from "@/utils";
 import { createLog } from "@/actions/logs.actions";
 import serverSideEffect from "@/utils/serverSideEffect";
-import { NEXT_PUBLIC_APP_URL, NODE_ENV } from '@/config';
 
 /**
  * Updates the status of an order and notifies the customer of the change.
@@ -122,7 +121,7 @@ export async function updateOrderStatus(
         }
       }
 
-      let surveyLink = NEXT_PUBLIC_APP_URL;
+      let surveyLink = process.env.NEXT_PUBLIC_APP_URL;
       // Only generate survey for delivered orders
       if (newStatus === OrderStatus.DELIVERED) {
         const surveyCategory = await tx.surveyCategory.findFirst({
@@ -139,7 +138,7 @@ export async function updateOrderStatus(
           });
 
           if (surveyResponse.success && surveyResponse.data) {
-            const baseUrl =  NODE_ENV === 'production' ? NEXT_PUBLIC_APP_URL : 'http://localhost:3000';
+            const baseUrl = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_APP_URL : 'http://localhost:3000';
             surveyLink = `${baseUrl}/survey?id=${surveyResponse.data.id}`;
           } else {
             console.error('Failed to generate survey:', surveyResponse.message);

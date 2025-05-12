@@ -1,18 +1,17 @@
 import formData from 'form-data';
 import Mailgun, { type MessagesSendResult } from 'mailgun.js';
-import { MAILGUN_API_KEY, MAILGUN_DOMAIN, NODE_ENV } from '@/config';
 
 const mailgunClientSingleton = () => {
-  if (!MAILGUN_API_KEY) {
+  if (!process.env.MAILGUN_API_KEY) {
     throw new Error('MAILGUN_API_KEY is not defined');
   }
-  if (!MAILGUN_DOMAIN) {
+  if (!process.env.MAILGUN_DOMAIN) {
     throw new Error('MAILGUN_DOMAIN is not defined');
   }
   const mailgun = new Mailgun(formData);
   return mailgun.client({
     username: 'api',
-    key: MAILGUN_API_KEY,
+    key: process.env.MAILGUN_API_KEY,
   });
 };
 
@@ -24,7 +23,7 @@ const mailgunClient = globalThis.mailgunGlobal ?? mailgunClientSingleton();
 
 export default mailgunClient;
 
-if (NODE_ENV !== 'production') {globalThis.mailgunGlobal = mailgunClient;}
+if (process.env.NODE_ENV !== 'production') {globalThis.mailgunGlobal = mailgunClient;}
 
 type EmailOptions = {
   to: string | string[]
@@ -40,8 +39,8 @@ export const sendEmail = async ({
   from = 'MerchTrack Support'
 }: EmailOptions): Promise<ActionsReturnType<MessagesSendResult>> => {
   try {
-    const result = await mailgunClient.messages.create(MAILGUN_DOMAIN, {
-      from: `${from} <no-reply@${MAILGUN_DOMAIN}>`,
+    const result = await mailgunClient.messages.create(process.env.MAILGUN_DOMAIN as string, {
+      from: `${from} <no-reply@${process.env.MAILGUN_DOMAIN}>`,
       to,
       subject,
       html

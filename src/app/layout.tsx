@@ -8,7 +8,6 @@ import { SEO } from '@/constants';
 import Scripts from '@/components/misc/scripts';
 import { Toaster } from '@/components/ui/sonner';
 import Providers from '@/components/misc/providers';
-import { NODE_ENV } from '@/config';
 
 const DatadogInit = dynamic(() => import('@/components/misc/datadog-init'));
 
@@ -90,7 +89,7 @@ export default function RootLayout({
         >
           <Providers>
             {children}
-            {NODE_ENV === 'production' && (
+            {process.env.NODE_ENV === 'production' && (
               <>
                 <DatadogInit />
                 <Scripts />

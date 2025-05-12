@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-import { NODE_ENV } from "@/config";
 
 
 const prismaClientSingleton = () => {
@@ -14,4 +13,4 @@ const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
 
 export default prisma;
 
-if (NODE_ENV !== 'production') {globalThis.prismaGlobal = prisma;}
+if (process.env.NODE_ENV !== 'production') {globalThis.prismaGlobal = prisma;}
