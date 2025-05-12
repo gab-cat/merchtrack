@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useUserStore } from "@/stores/user.store";
 import useToast from "@/hooks/use-toast";
-import type { CreateSurveyCategoryType } from "@/schema/survey.schema";
+import type { CreateSurveyCategoryType } from "@/features/admin/surveys/survey.schema";
 import { useSurveyCategoriesQuery } from "@/hooks/survey.hooks";
 import type { QueryParams } from "@/types/common";
 import { deleteSurveyCategory } from "@/features/admin/surveys/actions";

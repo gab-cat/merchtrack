@@ -1,6 +1,7 @@
-import { NewOrderForm } from "@/components/forms/new-order-form";
+
 import PageTitle from "@/components/private/page-title";
 import PageAnimation from "@/components/public/page-animation";
+import { NewOrderForm } from "@/features/admin/orders/components";
 
 
 export const metadata = {

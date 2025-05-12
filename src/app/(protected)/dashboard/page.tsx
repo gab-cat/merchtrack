@@ -3,10 +3,7 @@ import { Search } from "lucide-react";
 import { auth } from "@clerk/nextjs/server";
 import { Category } from "@prisma/client";
 import { Suspense } from "react";
-import AnimatedHeroSection from "./AnimatedHeroSection";
-import AnimatedCategoryShowcase from "./AnimatedCategoryShowcase";
-import AnimatedBenefits from "./AnimatedBenefits";
-import AnimatedProductSection from "./AnimatedProductSection";
+import { DashboardHeroSection, DashboardCategory, DashboardBenefits, DashboardProductSection} from "@/features/customer/dashboard/components";
 import { getCategories } from "@/actions/category.actions";
 import { getProducts } from "@/actions/products.actions";
 import ProductSearchHandler from "@/components/protected/product-search-handler";
@@ -140,7 +137,7 @@ export default async function DashboardPage() {
       {/* Hero section */}
       <div className="mx-auto mt-6 px-4">
         <Suspense fallback={<Skeleton className="h-[400px] w-full rounded-lg" />}>
-          <AnimatedHeroSection />
+          <DashboardHeroSection />
         </Suspense>
       </div>
       
@@ -153,7 +150,7 @@ export default async function DashboardPage() {
             ))}
           </div>
         }>
-          <AnimatedCategoryShowcase 
+          <DashboardCategory 
             categories={categories as (Category & { products: { imageUrl: string[]; title: string; description: string; }[] })[]}
             title="Shop By Category"
           />
@@ -170,7 +167,7 @@ export default async function DashboardPage() {
               ))}
             </div>
           }>
-            <AnimatedProductSection 
+            <DashboardProductSection 
               products={featuredProducts ?? []} 
               title="New Arrivals"
             />
@@ -202,7 +199,7 @@ export default async function DashboardPage() {
               ))}
             </div>
           }>
-            <AnimatedBenefits />
+            <DashboardBenefits />
           </Suspense>
         </div>
         
@@ -214,7 +211,7 @@ export default async function DashboardPage() {
               ))}
             </div>
           }>
-            <AnimatedProductSection 
+            <DashboardProductSection 
               products={bestSellers ?? []} 
               title="Best Sellers"
               viewAllLink="/products?sort=rating"
@@ -230,7 +227,7 @@ export default async function DashboardPage() {
               ))}
             </div>
           }>
-            <AnimatedProductSection 
+            <DashboardProductSection 
               products={bestDeals ?? []} 
               title="Best Deals"
               viewAllLink="/products?bestDeals=true"

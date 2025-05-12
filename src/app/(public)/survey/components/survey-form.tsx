@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
-import { SubmitSurveyType } from "@/schema/survey.schema";
+import { SubmitSurveyType } from "@/features/admin/surveys/survey.schema";
 import { ExtendedOrder } from "@/types/orders";
 
 interface SurveyFormProps {

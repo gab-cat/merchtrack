@@ -1,6 +1,5 @@
 
-import { CheckoutForm } from './checkout-form';
-import { OrderSummary } from './order-summary';
+import { CheckoutForm , OrderSummary } from '@/features/customer/checkout/components';
 
 export const metadata = {
   title: 'Checkout | MerchTrack',

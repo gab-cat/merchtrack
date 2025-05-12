@@ -1,5 +1,5 @@
 import React from 'react';
-import { PaymentHistory } from '@/components/public/profile/payment-history';
+import { PaymentHistory } from '@/features/customer/my-payments/components';
 import PageAnimation from '@/components/public/page-animation';
 
 export const metadata = {

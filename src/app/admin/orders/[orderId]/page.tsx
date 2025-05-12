@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { RiArrowGoBackFill } from "react-icons/ri";
-import { OrderDetails } from "./order-details";
+import { OrderDetails } from "@/features/admin/orders/components";
 import { getUserId, getSessionData } from "@/lib/auth";
 import PageAnimation from "@/components/public/page-animation";
 import "@/components/ui/alert-dialog";

@@ -4,8 +4,7 @@ import { ShieldCheck } from "lucide-react";
 
 import { auth } from "@clerk/nextjs/server";
 import { Card, CardContent } from "@/components/ui/card";
-import OnboardingBackground from "@/app/onboarding/(components)/onboarding-background";
-import OnboardingForm from "@/app/onboarding/(components)/onboarding-form";
+import { OnboardingBackground, OnboardingForm } from "@/features/customer/onboarding/components";
 
 export default async function OnboardingPage() {
   const { userId, sessionClaims } = await auth();

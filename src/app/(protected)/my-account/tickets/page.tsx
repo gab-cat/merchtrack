@@ -1,8 +1,8 @@
 import React from 'react';
 import { Mail } from 'lucide-react';
 import PageAnimation from '@/components/public/page-animation';
-import MyTickets from '@/components/public/profile/my-tickets';
-import MyProfileSideBar from '@/components/public/profile/my-profile-sidebar';
+import { MyTickets } from '@/features/customer/my-tickets/components';
+import { MyProfileSidebar } from '@/features/customer/my-account/components';
 import { Card } from '@/components/ui/card';
 import FAQBody from '@/components/public/faq-body';
 
@@ -18,7 +18,7 @@ export default function PaymentHistoryPage() {
         <div className="flex flex-col gap-6 lg:flex-row lg:gap-10">
           {/* Left Sidebar - Hidden on mobile, shown as tabs */}
           <div className="hidden w-full lg:block lg:w-1/4">
-            <MyProfileSideBar />
+            <MyProfileSidebar />
           </div>
           {/* Main Content */}
           <div className="flex-1">

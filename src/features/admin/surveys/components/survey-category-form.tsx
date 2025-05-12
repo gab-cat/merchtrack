@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { createSurveyCategory, updateSurveyCategory } from "@/features/admin/surveys/actions";
-import { createSurveyCategorySchema, type CreateSurveyCategoryType } from "@/schema/survey.schema";
+import { createSurveyCategorySchema, type CreateSurveyCategoryType } from "@/features/admin/surveys/survey.schema";
 import { useUserStore } from "@/stores/user.store";
 import useToast from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";

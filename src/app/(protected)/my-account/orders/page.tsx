@@ -1,6 +1,6 @@
 import React from 'react';
-import { OrderHistory } from '@/components/public/profile/order-history';
 import PageAnimation from '@/components/public/page-animation';
+import { OrderHistory } from '@/features/customer/my-orders/components';
 
 export const metadata = {
   title: 'Order History | MerchTrack',

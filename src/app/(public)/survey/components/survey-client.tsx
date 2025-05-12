@@ -11,7 +11,7 @@ import { OrderDetails } from "./order-details";
 import { SurveyForm } from "./survey-form";
 import { ErrorState } from "./error-state";
 import { SuccessState } from "./success-state";
-import { submitSurveySchema, type SubmitSurveyType } from "@/schema/survey.schema";
+import { submitSurveySchema, type SubmitSurveyType } from "@/features/admin/surveys/survey.schema";
 import { submitSurveyResponse } from "@/actions/survey.actions";
 import { useSurveyQuery } from "@/hooks/survey.hooks";
 import useToast from "@/hooks/use-toast";

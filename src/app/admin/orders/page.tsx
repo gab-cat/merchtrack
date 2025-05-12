@@ -1,7 +1,6 @@
 import { type FC } from "react";
 import { BiDownload, BiTrash, BiUpload } from "react-icons/bi";
-import { AdminTopbar } from "@/components/private/admin-topbar";
-import { OrdersTable } from "@/components/private/orders-table";
+import { AdminTopbar , OrdersTable } from "@/features/admin/orders/components";
 import PageAnimation from "@/components/public/page-animation";
 import { Button } from "@/components/ui/button";
 

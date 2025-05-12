@@ -3,7 +3,7 @@
 import { Category } from "@prisma/client";
 import { verifyPermission } from "@/utils/permissions";
 import prisma from "@/lib/db";
-import { createNewCategorySchema } from "@/schema/category.schema";
+import { createNewCategorySchema } from "@/features/admin/inventory/category.schema";
 import { processActionReturnData } from "@/utils";
 import { createLog } from "@/actions/logs.actions";
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import MyAccountBody from '@/components/public/profile/my-account-body';
+import { MyAccountBody } from '@/features/customer/my-account/components';
 import PageAnimation from '@/components/public/page-animation';
 
 export const metadata = {

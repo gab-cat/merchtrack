@@ -30,7 +30,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { createNewCategorySchema, type CreateNewCategoryType } from '@/schema/category.schema';
+import { createNewCategorySchema, type CreateNewCategoryType } from '@/features/admin/inventory/category.schema';
 import { useUserStore } from '@/stores/user.store';
 import { useCategoriesQuery } from '@/hooks/categories.hooks';
 import useToast from '@/hooks/use-toast';
