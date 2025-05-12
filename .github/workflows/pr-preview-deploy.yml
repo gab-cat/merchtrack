@@ -181,7 +181,7 @@ jobs:
         if: steps.check_compose.outputs.compose_exists == 'true'
         run: |
           cd ~/preview/${{ needs.build.outputs.pr_number }}
-          docker compose down || true
+          sudo docker compose down || true
 
       - name: Delete old image if exists
         run: |
@@ -196,11 +196,11 @@ jobs:
             CONTAINERS=$(docker ps -a --filter ancestor=gabcat/merchtrack:preview-${{ needs.build.outputs.pr_number }} -q)
             if [ ! -z "$CONTAINERS" ]; then
               echo "Removing containers using the old image"
-              docker rm -f $CONTAINERS
+              sudo docker rm -f $CONTAINERS
             fi
             # Remove the old image
             echo "Removing old image"
-            docker rmi -f $OLD_IMAGE_ID
+            sudo docker rmi -f $OLD_IMAGE_ID
           else
             echo "No old image found to remove"
           fi
