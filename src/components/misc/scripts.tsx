@@ -2,8 +2,8 @@
 'use client';
 
 import Script from "next/script";
-import { memo, useEffect } from "react";
-import { CF_BEACON_TOKEN } from "@/config";
+import { memo } from "react";
+
 
 // Add TypeScript declaration for the Chatwoot SDK
 declare global {
@@ -61,7 +61,7 @@ const Scripts = memo(() => {
       <Script 
         defer
         src='https://static.cloudflareinsights.com/beacon.min.js' 
-        data-cf-beacon={`{"token": "${CF_BEACON_TOKEN}"}`} 
+        data-cf-beacon={`{"token": "${process.env.NEXT_PUBLIC_CF_BEACON_TOKEN}"}`} 
       />
 
       <Script

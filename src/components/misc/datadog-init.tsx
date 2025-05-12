@@ -3,7 +3,6 @@
 import { datadogRum } from '@datadog/browser-rum';
 import * as Sentry from '@sentry/nextjs';
 import packageJson from '../../../package.json';
-import { NODE_ENV } from '@/config';
 
 let isDatadogInitialized = false;
 
@@ -21,7 +20,7 @@ function initializeDatadog() {
         clientToken: DATADOG_CLIENT_TOKEN,
         site: DATADOG_SITE,
         service: DATADOG_SERVICE,
-        env: NODE_ENV,
+        env: process.env.NODE_ENV,
         version: packageJson.version,
         sessionSampleRate: 20,
         sessionReplaySampleRate: 20,
@@ -35,7 +34,7 @@ function initializeDatadog() {
       Sentry.captureException(new Error('Failed to initialize Datadog RUM'), {
         extra: {
           error,
-          env: NODE_ENV,
+          env: process.env.NODE_ENV,
           hasAppId: Boolean(DATADOG_APPLICATION_ID),
           hasClientToken: Boolean(DATADOG_CLIENT_TOKEN),
         },

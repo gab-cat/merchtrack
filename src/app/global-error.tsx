@@ -4,11 +4,11 @@ import * as Sentry from "@sentry/nextjs";
 import { useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { AlertTriangle, MailPlus, ArrowRight } from 'lucide-react';
-import { NODE_ENV } from "@/config";
+
 
 export default function GlobalError({ error }: Readonly<{ error: Error & { digest?: string } }>) {
   useEffect(() => {
-    if (NODE_ENV !== 'production') {
+    if (process.env.NODE_ENV !== 'production') {
       // no-dd-sa:typescript-best-practices/no-console
       console.error('Global error caught:', error);
     }

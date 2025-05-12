@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { refundPayment } from "./_actions";
+import { refundPayment , validatePayment, rejectPayment } from "@/features/admin/payments/actions";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { validatePayment, rejectPayment } from "@/actions/payments.actions";
 
 interface PaymentsTableProps {
   payments: Payment[];
@@ -51,7 +50,12 @@ export const PaymentsTable: FC<PaymentsTableProps> = ({ payments, orderId, userI
 
   const { mutate: processRefund, isPending: isRefunding } = useMutation({
     mutationFn: async ({ amount, reason, paymentId }: { amount: number; reason: string; paymentId?: string }) => {
-      const result = await refundPayment(orderId, amount, reason, userId, paymentId);
+      const result = await refundPayment({
+        amount,
+        reason,
+        userId,
+        paymentId: paymentId ?? ""
+      });
       if (!result.success) {
         throw new Error(result.message);
       }
@@ -76,18 +80,17 @@ export const PaymentsTable: FC<PaymentsTableProps> = ({ payments, orderId, userI
       if (!payment) throw new Error("Payment not found");
       
       // Import validatePayment function from actions
-      const result = await validatePayment(
+      const result = await validatePayment({
         userId,
         orderId,
-        Number(payment.amount),
-        {
+        transactionDetails: {
           transactionId: payment.transactionId ?? `manual-${Date.now()}`,
           referenceNo: payment.referenceNo ?? "",
           paymentMethod: payment.paymentMethod,
           paymentSite: payment.paymentSite || "OFFSITE",
         },
-        data.paymentId
-      );
+        paymentId: data.paymentId
+      });
       
       if (!result.success) {
         throw new Error(result.message ?? "Failed to verify payment");
@@ -111,12 +114,12 @@ export const PaymentsTable: FC<PaymentsTableProps> = ({ payments, orderId, userI
     mutationFn: async (data: { paymentId: string, note: string }) => {
       if (!userId) throw new Error("User not authenticated");
       
-      const result = await rejectPayment(
+      const result = await rejectPayment({
         userId,
         orderId,
-        data.paymentId,
-        data.note || "Payment rejected by administrator"
-      );
+        paymentId: data.paymentId,
+        rejectionReason: data.note || "Payment rejected by administrator"
+      });
       
       if (!result.success) {
         throw new Error(result.message ?? "Failed to reject payment");
