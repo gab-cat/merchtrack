@@ -8,10 +8,10 @@ const authEnvSchema = z.object({
   
   // Clerk
   CLERK_ENCRYPTION_KEY: z.string().min(32).optional(),
-  CLERK_SECRET_KEY: z.string().min(1),
+  CLERK_SECRET_KEY: z.string().min(1).optional(),
   CLERK_TEST_ADMIN_USER: z.string().optional(),
   CLERK_TEST_STAFF_USER: z.string().optional(),
-  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().min(1),
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().min(1).optional(),
   NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL: z.string().default('/dashboard'),
   NEXT_PUBLIC_CLERK_SIGN_IN_URL: z.string().default('/sign-in'),
   NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL: z.string().default('/onboarding'),
