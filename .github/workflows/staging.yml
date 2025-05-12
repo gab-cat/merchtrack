@@ -50,7 +50,7 @@ jobs:
           tags: |
             gabcat/merchtrack:staging
           cache-from: type=registry,ref=gabcat/merchtrack:staging
-          cache-to: type=registry,ref=gabcat/merchtrack:staging, mode=max
+          cache-to: type=inline,mode=min
           push: true
 
       - name: Remove env file
