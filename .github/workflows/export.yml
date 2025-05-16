@@ -15,7 +15,7 @@ on:
 jobs:
   export-to-doppler:
     environment: ${{ github.event.inputs.environment }}
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     name: export GitHub secrets to Doppler
     steps:
       - name: Install Doppler CLI

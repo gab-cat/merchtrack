@@ -14,7 +14,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-8vcpu-ubuntu-2404
     environment: Staging
     outputs:
       pr_number: ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
@@ -262,7 +262,7 @@ jobs:
             echo "New host created for domain $DOMAIN"
           fi
   failure-notification:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     needs: [build, deploy]
     if: failure()
     steps:
@@ -309,7 +309,7 @@ jobs:
               </p>
             </div>
   notify:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     needs: [build, deploy]
     if: success()
     steps:
