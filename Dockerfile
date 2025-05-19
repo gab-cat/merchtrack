@@ -1,5 +1,5 @@
 
-FROM --platform=linux/amd64 node:22.12.0-alpine3.21 AS base
+FROM --platform=linux/amd64 node:24.0.2-alpine3.21 AS base
 
 # STAGE 1: DEPS
 FROM base AS deps
